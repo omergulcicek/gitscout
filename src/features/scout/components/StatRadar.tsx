@@ -1,12 +1,18 @@
-import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from "recharts"
-
 import { Card, CardContent } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
-import type { ChartConfig } from "@/components/ui/chart"
-import { RADAR_ORDER, STAT_ORDER } from "@/features/scout/constants/scoring.constants"
+import { RadarSvg } from "@/features/scout/components/RadarSvg"
+import type { RadarGeometry } from "@/features/scout/components/RadarSvg"
+import { RADAR_ORDER } from "@/features/scout/constants/scoring.constants"
 import { partLabel, statLabel, statSummary } from "@/features/scout/helpers/player-text"
 import type { ScoredPlayer, Stat } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
+
+/** Same layout the Recharts version had: 220px tall, radius 70% inside 36/8px margins. */
+const GEOMETRY: RadarGeometry = {
+  height: 220,
+  outerRatio: 0.7,
+  margin: { x: 36, y: 8 },
+  fallbackWidth: 297
+}
 
 type StatRadarProps = {
   stats: ScoredPlayer["stats"]
@@ -14,54 +20,29 @@ type StatRadarProps = {
 
 /** Altı statın şekli: oyuncunun hangi yönde güçlü olduğunu tek bakışta gösterir. */
 export function StatRadar({ stats }: StatRadarProps) {
-  // Etiket ve yapılandırma render sırasında kurulur ki geçerli dilde olsun.
-  const chartConfig = {
-    value: { label: m.radar_score(), color: "var(--chart-home)" }
-  } satisfies ChartConfig
-  const data = RADAR_ORDER.map((key) => ({
-    key,
-    label: statLabel(key),
-    value: stats[key].value
-  }))
+  // Labels are read during render so they follow the current language.
+  const labels = RADAR_ORDER.map((key) => statLabel(key))
 
   return (
     <Card className="h-full justify-center py-4">
-      <CardContent className="px-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[220px] w-full"
-          aria-label={m.radar_label()}
-        >
-          <RadarChart
-            data={data}
-            outerRadius="70%"
-            margin={{ top: 8, right: 36, bottom: 8, left: 36 }}
-          >
-            <ChartTooltip
-              cursor={false}
-              content={({ active, payload }) => {
-                const key: unknown = payload[0]?.payload?.key
-                const stat = STAT_ORDER.map((item) => stats[item]).find((item) => item.key === key)
-                return active && stat ? <StatTooltip stat={stat} /> : null
-              }}
-            />
-            <PolarAngleAxis
-              dataKey="label"
-              tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-            />
-            <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-            <PolarGrid />
-            <Radar
-              dataKey="value"
-              isAnimationActive={false}
-              fill="var(--color-value)"
-              stroke="var(--color-value)"
-              strokeWidth={2}
-              fillOpacity={0.35}
-              dot={{ r: 4, fillOpacity: 1 }}
-            />
-          </RadarChart>
-        </ChartContainer>
+      <CardContent className="px-0" aria-label={m.radar_label()} role="img">
+        <RadarSvg
+          labels={labels}
+          series={[
+            {
+              values: RADAR_ORDER.map((key) => stats[key].value),
+              color: "var(--chart-home)",
+              fillOpacity: 0.35,
+              dotRadius: 4
+            }
+          ]}
+          geometry={GEOMETRY}
+          className="mx-auto w-full"
+          tooltip={(index) => {
+            const key = RADAR_ORDER[index]
+            return key ? <StatTooltip stat={stats[key]} /> : null
+          }}
+        />
       </CardContent>
     </Card>
   )
