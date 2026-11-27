@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { computeSeason } from "@/features/scout/helpers/season"
 import {
   frozenSeasonFacts,
+  isFreezeWindow,
   isSeasonClosed,
   seasonCounts
 } from "@/features/scout/helpers/season-freeze"
@@ -22,6 +23,15 @@ describe("isSeasonClosed", () => {
     expect(isSeasonClosed(2026, new Date("2026-12-31T23:59:59Z"))).toBe(false)
     expect(isSeasonClosed(2026, new Date("2027-01-01T23:59:59Z"))).toBe(false)
     expect(isSeasonClosed(2026, new Date("2027-01-02T00:00:00Z"))).toBe(true)
+  })
+})
+
+describe("isFreezeWindow", () => {
+  it("is open through January of the next year only", () => {
+    expect(isFreezeWindow(2026, new Date("2027-01-01T12:00:00Z"))).toBe(false)
+    expect(isFreezeWindow(2026, new Date("2027-01-02T00:00:00Z"))).toBe(true)
+    expect(isFreezeWindow(2026, new Date("2027-01-31T23:59:59Z"))).toBe(true)
+    expect(isFreezeWindow(2026, new Date("2027-02-01T00:00:00Z"))).toBe(false)
   })
 })
 
@@ -68,7 +78,7 @@ describe("frozenSeasonFacts", () => {
         rarity: "silver",
         position: "Frontend",
         title: { stat: "act", rarity: "silver", variant: 0 }
-      }
+      } as FrozenSeason["card"]
     }
     const facts = frozenSeasonFacts(row)
     expect(facts.calendar.at(-1)).toEqual({ date: "2025-12-31", count: counts.at(-1) })

@@ -741,5 +741,7 @@
   "season_report_record_held": "Your career record still stands from {year}: {count} contributions.",
   "season_final": "The season is over; the numbers are frozen.",
   "season_poster_landscape": "Download for desktop (16:9)",
-  "season_poster_portrait": "Download for mobile (9:16)"
+  "season_poster_portrait": "Download for mobile (9:16)",
+  "season_links_label": "Season reports",
+  "season_past": "Past seasons:"
 }

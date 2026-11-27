@@ -6,7 +6,7 @@ import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { number } from "@/features/scout/helpers/player-text"
 import { careerYearLabel } from "@/features/scout/helpers/season"
 import type { Season } from "@/features/scout/helpers/season"
-import type { ScoredPlayer } from "@/features/scout/types/player.types"
+import type { ListPlayer } from "@/features/scout/types/player.types"
 import type { SeasonReport } from "@/features/scout/types/season.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -15,7 +15,7 @@ type PosterFormat = "landscape" | "portrait"
 
 type SeasonPosterProps = {
   format: PosterFormat
-  player: ScoredPlayer
+  player: ListPlayer
   season: Season
   career: SeasonReport["career"]
   /** The standing line, already worded by the page; null hides it. */

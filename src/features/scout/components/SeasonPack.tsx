@@ -9,7 +9,7 @@ import { playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { SnowCap } from "@/features/scout/icons/SnowCap"
-import type { ScoredPlayer } from "@/features/scout/types/player.types"
+import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
 /** How long each clue (flag, position, tier) stays before the next one. */
@@ -20,7 +20,7 @@ type Stage = "sealed" | "flag" | "position" | "rarity" | "card"
 const SEQUENCE: Stage[] = ["flag", "position", "rarity", "card"]
 
 type SeasonPackProps = {
-  player: ScoredPlayer
+  player: ListPlayer
   year: number
   /** Called when the pack is opened; the page turns the snow up for the reveal. */
   onOpen?: () => void

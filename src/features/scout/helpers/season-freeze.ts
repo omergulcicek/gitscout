@@ -11,6 +11,14 @@ export function isSeasonClosed(year: number, now: Date): boolean {
 }
 
 /**
+ * A season is frozen only during January of the next year. The card in the row is the card on the day
+ * of freezing, so a season frozen in, say, June would carry a card from a different year.
+ */
+export function isFreezeWindow(year: number, now: Date): boolean {
+  return isSeasonClosed(year, now) && now.getTime() < Date.UTC(year + 1, 1, 1)
+}
+
+/**
  * The year's daily counts from 1 January, in order. Null when GitHub's calendar doesn't cover the
  * whole year without gaps, so a partial year is never frozen.
  */

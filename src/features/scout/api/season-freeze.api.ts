@@ -5,8 +5,8 @@ import {
   insertFrozenSeason
 } from "@/features/scout/api/player-store"
 import { SEASON_FREEZE } from "@/features/scout/constants/scoring.constants"
-import { playerCountry } from "@/features/scout/helpers/player-country"
-import { isSeasonClosed, seasonCounts } from "@/features/scout/helpers/season-freeze"
+import { toListPlayer } from "@/features/scout/helpers/list-player"
+import { isFreezeWindow, seasonCounts } from "@/features/scout/helpers/season-freeze"
 import type { FrozenSeason } from "@/features/scout/types/season.types"
 
 /**
@@ -18,23 +18,30 @@ const PERSIST_SEASONS = !import.meta.env.DEV
 type FreezeOptions = { now: Date; db: "app" | "refresh" }
 
 /**
- * Freezes one player's closed season from GitHub's calendar for that exact year. Null while the season
- * is still open, when the player isn't stored, or when GitHub's calendar doesn't cover the whole year.
+ * Freezes one player's closed season from GitHub's calendar for that exact year. Null outside the
+ * freezing window (January of the next year), when the player isn't stored, or when GitHub's calendar
+ * doesn't cover the whole year.
  */
 export async function freezeSeason(
   login: string,
   year: number,
   { now, db }: FreezeOptions
 ): Promise<FrozenSeason | null> {
-  if (!isSeasonClosed(year, now)) return null
+  if (!isFreezeWindow(year, now)) return null
   const inputs = await getFreezeInputs(login, db)
   if (!inputs) return null
   const calendar = await fetchSeasonCalendar(inputs.login, year)
   const counts = seasonCounts(calendar.days, year)
   if (!counts) return null
 
-  const { scored } = inputs
-  const country = playerCountry(scored)
+  // Read-time extras describe the day the card is viewed, not the season.
+  const {
+    verified: _verified,
+    birthdayToday: _birthday,
+    womensDayToday: _womensDay,
+    cardFace: _cardFace,
+    ...card
+  } = toListPlayer(inputs.scored)
   const row: FrozenSeason = {
     format: 1,
     login: inputs.login,
@@ -44,13 +51,7 @@ export async function freezeSeason(
     total: calendar.total,
     reviews: calendar.reviews,
     yearly: inputs.yearly,
-    card: {
-      ovr: scored.ovr,
-      rarity: scored.rarity,
-      position: scored.position,
-      title: scored.title,
-      ...(country ? { country } : {})
-    }
+    card
   }
   if (PERSIST_SEASONS) await insertFrozenSeason(row, db)
   return row
@@ -63,7 +64,7 @@ const isFatal = (error: unknown) =>
 
 /**
  * The hourly job's share: freezes a few players' closed season until the time or player cap runs out.
- * Does nothing while the season is open, so it costs a single date check for the rest of the year.
+ * Does nothing outside January, so it costs a single date check for the rest of the year.
  */
 export async function freezeClosedSeasons(
   year: number,
@@ -71,7 +72,7 @@ export async function freezeClosedSeasons(
 ): Promise<FreezeRunResult> {
   const result: FreezeRunResult = { frozen: [], failed: [], skipped: 0 }
   const startedAt = clock()
-  if (!isSeasonClosed(year, new Date(startedAt))) return result
+  if (!isFreezeWindow(year, new Date(startedAt))) return result
   const logins = await getUnfrozenLogins(year, SEASON_FREEZE.maxPerRun)
 
   for (const [index, login] of logins.entries()) {

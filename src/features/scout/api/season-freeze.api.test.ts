@@ -36,7 +36,12 @@ const scored = {
   rarity: "gold",
   position: "Frontend",
   title: { stat: "act", rarity: "gold", variant: 0 },
-  claimedCountry: "TR"
+  claimedCountry: "TR",
+  verified: true,
+  stats: { act: { key: "act", value: 87, raw: 87, summary: {}, parts: [] } },
+  positionBreakdown: {},
+  topRepos: [],
+  archetype: {}
 } as unknown as ScoredPlayer
 
 describe("freezeSeason", () => {
@@ -69,8 +74,17 @@ describe("freezeSeason", () => {
       year: 2026,
       total: 365,
       reviews: 2,
-      card: { ovr: 78, rarity: "gold", position: "Frontend", country: "TR" }
+      card: {
+        ovr: 78,
+        rarity: "gold",
+        position: "Frontend",
+        claimedCountry: "TR",
+        stats: { act: { key: "act", value: 87 } }
+      }
     })
+    // Read-time extras and the detail-only fields stay out of the frozen card.
+    expect(row?.card).not.toHaveProperty("verified")
+    expect(row?.card).not.toHaveProperty("topRepos")
     expect(row?.counts).toHaveLength(365)
   })
 

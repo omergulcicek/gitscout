@@ -30,6 +30,8 @@ const FLURRY_MS = 6000
 
 type SeasonPageProps = {
   username: string
+  /** A past season to show; the current one when missing. */
+  year?: number
 }
 
 const dayMonth = (date: string) =>
@@ -42,8 +44,8 @@ const monthName = (month: number, year: number) =>
     new Date(Date.UTC(year, month, 1))
   )
 
-export function SeasonPage({ username }: SeasonPageProps) {
-  const { data } = useSeason(username)
+export function SeasonPage({ username, year }: SeasonPageProps) {
+  const { data } = useSeason(username, year)
   const { player, season } = data
   const lang = getLangParam()
   const {
@@ -85,7 +87,7 @@ export function SeasonPage({ username }: SeasonPageProps) {
 
       <div className="grid gap-8 md:grid-cols-[20rem_1fr] md:items-start">
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
-          <SeasonPack player={player} year={season.year} onOpen={() => setFlurry(true)} />
+          <SeasonPack player={data.card} year={season.year} onOpen={() => setFlurry(true)} />
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6">
@@ -137,7 +139,7 @@ export function SeasonPage({ username }: SeasonPageProps) {
         <SeasonPoster
           ref={landscapeRef}
           format="landscape"
-          player={player}
+          player={data.card}
           season={season}
           career={data.career}
           standingText={standingText}
@@ -145,7 +147,7 @@ export function SeasonPage({ username }: SeasonPageProps) {
         <SeasonPoster
           ref={portraitRef}
           format="portrait"
-          player={player}
+          player={data.card}
           season={season}
           career={data.career}
           standingText={standingText}

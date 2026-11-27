@@ -77,9 +77,9 @@ export const specialCardsSampleQueryOptions = () =>
     staleTime: DAY_MS
   })
 
-export const seasonQueryOptions = (username: string) =>
+export const seasonQueryOptions = (username: string, year?: number) =>
   queryOptions({
-    queryKey: playerKeys.season(username),
-    queryFn: ({ signal }) => getSeason({ data: { username }, signal }),
+    queryKey: playerKeys.season(username, year),
+    queryFn: ({ signal }) => getSeason({ data: { username, year }, signal }),
     staleTime: DAY_MS
   })

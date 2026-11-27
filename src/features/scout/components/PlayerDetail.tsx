@@ -19,6 +19,7 @@ import { PlayerRank } from "@/features/scout/components/PlayerRank"
 import { PositionBreakdown } from "@/features/scout/components/PositionBreakdown"
 import { RevealConfetti } from "@/features/scout/components/RevealConfetti"
 import { ScoutNote } from "@/features/scout/components/ScoutNote"
+import { SeasonLinks } from "@/features/scout/components/SeasonLinks"
 import { ShareTextSection } from "@/features/scout/components/ShareTextSection"
 import { SimilarPlayers } from "@/features/scout/components/SimilarPlayers"
 import { StatRadar } from "@/features/scout/components/StatRadar"
@@ -31,7 +32,6 @@ import { playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { isProgrammersDay } from "@/features/scout/helpers/programmers-day"
 import { computeRarity } from "@/features/scout/helpers/score-player"
-import { SEASON_YEAR } from "@/features/scout/helpers/season"
 import { isHalloween, isNewYear, isRepublicDay } from "@/features/scout/helpers/special-days"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useCardReveal } from "@/features/scout/hooks/use-card-reveal"
@@ -147,13 +147,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
             isCopying={isCopying}
             shareTextsId={SHARE_TEXTS_ID}
           />
-          <Link
-            to="/{-$lang}/u/$username/season"
-            params={{ lang: getLangParam(), username: player.login }}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            {m.season_link({ year: SEASON_YEAR })}
-          </Link>
+          <SeasonLinks login={player.login} seasons={player.seasons} />
           <GithubStarCta />
           <div className="flex flex-col items-center gap-1">
             <span className="inline-flex items-center gap-1">

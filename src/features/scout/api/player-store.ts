@@ -598,13 +598,7 @@ const frozenSeasonSchema = z.object({
   yearly: z.array(
     z.object({ year: z.number(), total: z.number(), reviews: z.number().optional() })
   ),
-  card: z.object({
-    ovr: z.number(),
-    rarity: z.enum(["bronze", "silver", "gold", "icon"]),
-    position: z.custom<ScoredPlayer["position"]>((value) => typeof value === "string"),
-    title: z.custom<ScoredPlayer["title"]>((value) => typeof value === "object" && value !== null),
-    country: z.enum(COUNTRIES).optional()
-  })
+  card: listPlayerSchema
 }) satisfies z.ZodType<FrozenSeason>
 
 /**
@@ -697,4 +691,19 @@ export async function getUnfrozenLogins(year: number, limit: number): Promise<st
     `
   )
   return rows.map((row) => row.login)
+}
+
+/** Years with a frozen season for the player, newest first; the profile links each one. */
+export async function getFrozenSeasonYears(login: string): Promise<number[]> {
+  const sql = getDb()
+  const rows = z.array(z.object({ year: z.number() })).parse(
+    await sql`
+      select s.year
+      from players p
+      join seasons s on s.github_id = p.github_id or (p.github_id is null and s.login = p.login)
+      where p.login = ${keyOf(login)}
+      order by s.year desc
+    `
+  )
+  return rows.map((row) => row.year)
 }

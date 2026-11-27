@@ -405,4 +405,6 @@ export type PlayerDetail = ScoredPlayer & {
   dreamTeam: ListPlayer[]
   /** A few developers in the same position with the closest overall score. */
   similar: ListPlayer[]
+  /** Years with a frozen season report, newest first. */
+  seasons: number[]
 }

@@ -720,5 +720,7 @@
   "season_report_record_held": "Kariyer rekorun hâlâ {year}: {count} katkı.",
   "season_final": "Sezon kapandı; sayılar donduruldu.",
   "season_poster_landscape": "Masaüstü için indir (16:9)",
-  "season_poster_portrait": "Mobil için indir (9:16)"
+  "season_poster_portrait": "Mobil için indir (9:16)",
+  "season_links_label": "Sezon raporları",
+  "season_past": "Geçmiş sezonlar:"
 }
