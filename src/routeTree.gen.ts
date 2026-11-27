@@ -21,6 +21,7 @@ import { Route as Char123LangChar125IndexRouteImport } from './routes/{-$lang}/i
 import { Route as Char123LangChar125AboutRouteImport } from './routes/{-$lang}/about'
 import { Route as Char123LangChar125LeaderboardRouteImport } from './routes/{-$lang}/leaderboard'
 import { Route as Char123LangChar125LoginRouteImport } from './routes/{-$lang}/login'
+import { Route as Char123LangChar125SeasonRouteImport } from './routes/{-$lang}/season'
 import { Route as Char123LangChar125SettingsRouteImport } from './routes/{-$lang}/settings'
 import { Route as Char123LangChar125SpecialCardsRouteImport } from './routes/{-$lang}/special-cards'
 import { Route as ApiCronRefreshRouteImport } from './routes/api/cron/refresh'
@@ -94,6 +95,12 @@ const Char123LangChar125LoginRoute = Char123LangChar125LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => Char123LangChar125Route,
 } as any)
+const Char123LangChar125SeasonRoute =
+  Char123LangChar125SeasonRouteImport.update({
+    id: '/season',
+    path: '/season',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
 const Char123LangChar125SettingsRoute =
   Char123LangChar125SettingsRouteImport.update({
     id: '/settings',
@@ -160,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/{-$lang}/about': typeof Char123LangChar125AboutRoute
   '/{-$lang}/leaderboard': typeof Char123LangChar125LeaderboardRoute
   '/{-$lang}/login': typeof Char123LangChar125LoginRoute
+  '/{-$lang}/season': typeof Char123LangChar125SeasonRoute
   '/{-$lang}/settings': typeof Char123LangChar125SettingsRoute
   '/{-$lang}/special-cards': typeof Char123LangChar125SpecialCardsRoute
   '/{-$lang}/': typeof Char123LangChar125IndexRoute
@@ -182,6 +190,7 @@ export interface FileRoutesByTo {
   '/{-$lang}/about': typeof Char123LangChar125AboutRoute
   '/{-$lang}/leaderboard': typeof Char123LangChar125LeaderboardRoute
   '/{-$lang}/login': typeof Char123LangChar125LoginRoute
+  '/{-$lang}/season': typeof Char123LangChar125SeasonRoute
   '/{-$lang}/settings': typeof Char123LangChar125SettingsRoute
   '/{-$lang}/special-cards': typeof Char123LangChar125SpecialCardsRoute
   '/{-$lang}': typeof Char123LangChar125IndexRoute
@@ -206,6 +215,7 @@ export interface FileRoutesById {
   '/{-$lang}/about': typeof Char123LangChar125AboutRoute
   '/{-$lang}/leaderboard': typeof Char123LangChar125LeaderboardRoute
   '/{-$lang}/login': typeof Char123LangChar125LoginRoute
+  '/{-$lang}/season': typeof Char123LangChar125SeasonRoute
   '/{-$lang}/settings': typeof Char123LangChar125SettingsRoute
   '/{-$lang}/special-cards': typeof Char123LangChar125SpecialCardsRoute
   '/{-$lang}/': typeof Char123LangChar125IndexRoute
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/about'
     | '/{-$lang}/leaderboard'
     | '/{-$lang}/login'
+    | '/{-$lang}/season'
     | '/{-$lang}/settings'
     | '/{-$lang}/special-cards'
     | '/{-$lang}/'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/about'
     | '/{-$lang}/leaderboard'
     | '/{-$lang}/login'
+    | '/{-$lang}/season'
     | '/{-$lang}/settings'
     | '/{-$lang}/special-cards'
     | '/{-$lang}'
@@ -276,6 +288,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/about'
     | '/{-$lang}/leaderboard'
     | '/{-$lang}/login'
+    | '/{-$lang}/season'
     | '/{-$lang}/settings'
     | '/{-$lang}/special-cards'
     | '/{-$lang}/'
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LangChar125LoginRouteImport
       parentRoute: typeof Char123LangChar125Route
     }
+    '/{-$lang}/season': {
+      id: '/{-$lang}/season'
+      path: '/season'
+      fullPath: '/{-$lang}/season'
+      preLoaderRoute: typeof Char123LangChar125SeasonRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
     '/{-$lang}/settings': {
       id: '/{-$lang}/settings'
       path: '/settings'
@@ -456,6 +476,7 @@ interface Char123LangChar125RouteChildren {
   Char123LangChar125AboutRoute: typeof Char123LangChar125AboutRoute
   Char123LangChar125LeaderboardRoute: typeof Char123LangChar125LeaderboardRoute
   Char123LangChar125LoginRoute: typeof Char123LangChar125LoginRoute
+  Char123LangChar125SeasonRoute: typeof Char123LangChar125SeasonRoute
   Char123LangChar125SettingsRoute: typeof Char123LangChar125SettingsRoute
   Char123LangChar125SpecialCardsRoute: typeof Char123LangChar125SpecialCardsRoute
   Char123LangChar125IndexRoute: typeof Char123LangChar125IndexRoute
@@ -471,6 +492,7 @@ const Char123LangChar125RouteChildren: Char123LangChar125RouteChildren = {
   Char123LangChar125AboutRoute: Char123LangChar125AboutRoute,
   Char123LangChar125LeaderboardRoute: Char123LangChar125LeaderboardRoute,
   Char123LangChar125LoginRoute: Char123LangChar125LoginRoute,
+  Char123LangChar125SeasonRoute: Char123LangChar125SeasonRoute,
   Char123LangChar125SettingsRoute: Char123LangChar125SettingsRoute,
   Char123LangChar125SpecialCardsRoute: Char123LangChar125SpecialCardsRoute,
   Char123LangChar125IndexRoute: Char123LangChar125IndexRoute,

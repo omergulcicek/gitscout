@@ -12,6 +12,7 @@ import { RarityChip } from "@/features/scout/components/RarityChip"
 import { SeasonPack } from "@/features/scout/components/SeasonPack"
 import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
 import { SeasonSnow } from "@/features/scout/components/SeasonSnow"
+import { SeasonTimeline } from "@/features/scout/components/SeasonTimeline"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { archetypeNote, number, titleText } from "@/features/scout/helpers/player-text"
 import { careerRecord, careerYearLabel, seasonGrowth } from "@/features/scout/helpers/season"
@@ -133,6 +134,8 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
           <Rival report={data} />
         </div>
       </div>
+
+      {data.final ? null : <SeasonTimeline now={new Date(data.generatedAt)} />}
 
       {/* Off-screen copy that the download captures; the inner node has no position of its own. */}
       <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px]">

@@ -223,6 +223,7 @@ export const getSeason = createServerFn({ method: "GET" })
       card: frozen?.card ?? toListPlayer(player),
       season,
       final: frozen !== null,
+      generatedAt: now.toISOString(),
       career: source.yearly.filter((entry) => entry.year <= year).sort((a, b) => a.year - b.year),
       standing: seasonStanding(self ?? player, all),
       rival: similarPlayers(player, all, 1)[0] ?? null

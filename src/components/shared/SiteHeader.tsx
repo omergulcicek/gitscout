@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { Snowflake } from "lucide-react"
 import { cn } from "cn"
 
 import { getLangParam } from "@/helpers/localized-url"
@@ -35,6 +36,14 @@ export function SiteHeader() {
           </Link>
           <Link to="/{-$lang}/vs" params={{ lang }} className={navLinkClass}>
             {m.nav_duel()}
+          </Link>
+          <Link
+            to="/{-$lang}/season"
+            params={{ lang }}
+            className={cn(navLinkClass, "gap-1 max-sm:hidden")}
+          >
+            <Snowflake aria-hidden className="size-3.5" />
+            {m.nav_season()}
           </Link>
           {/* Dar ekranda ana linkler görünür kalır; ikincil öğeler tek menüde toplanır. */}
           <Link

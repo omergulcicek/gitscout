@@ -35,6 +35,8 @@ export type SeasonReport = {
   season: Season
   /** True once the season is frozen; until then the numbers move with every refresh. */
   final: boolean
+  /** When the server built the report (ISO); the calendar marks its step from this. */
+  generatedAt: string
   /** Totals for every year since the account opened, oldest first; the career chart's bars. */
   career: YearlyTotal[]
   standing: SeasonStanding
