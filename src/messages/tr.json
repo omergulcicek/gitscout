@@ -29,6 +29,7 @@
   "home_lead": "GitHub kullanıcı adını yaz, koleksiyon kartını çıkar ve liderlik tablosundaki yerini gör.",
   "home_try": "Dene:",
   "home_proof_total": "{count} kart oluşturuldu",
+  "home_proof_countries": "{count} ülkeden",
   "home_proof_day": "son 24 saatte {count}",
   "home_top": "İlk {count}",
   "home_top_world": "Dünya",

@@ -51,7 +51,7 @@ export function ScoutHome() {
           <AddPlayerForm variant="command" />
           <ExamplePlayers players={data.examples} />
           <HeroProof
-            recent={data.recent}
+            countries={data.countries}
             total={data.totals.world}
             lastDayCount={data.lastDayCount}
           />

@@ -39,7 +39,7 @@ import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
 import { featuredOrder } from "@/features/scout/helpers/featured-players"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { leaderboardFacets, queryLeaderboard } from "@/features/scout/helpers/leaderboard-query"
-import { playerCountry } from "@/features/scout/helpers/player-country"
+import { countPlayerCountries, playerCountry } from "@/features/scout/helpers/player-country"
 import { computeRanking } from "@/features/scout/helpers/score-player"
 import { matchesPlayer } from "@/features/scout/helpers/search-text"
 import { similarPlayers } from "@/features/scout/helpers/similar-players"
@@ -171,6 +171,8 @@ const HOME_TOP_LIMIT = 10
 const HOME_RECENT_LIMIT = 8
 /** Featured cards sent with the page; "Another card" cycles through them. */
 const HOME_FEATURED_LIMIT = 12
+/** Flags in the hero's proof line. */
+const HOME_COUNTRY_FLAGS = 5
 
 const ranked = (players: readonly ListPlayer[]) =>
   players.slice(0, HOME_TOP_LIMIT).map((player, index) => ({ ...player, rank: index + 1 }))
@@ -182,6 +184,7 @@ export const getHome = createServerFn({ method: "GET" }).handler(async (): Promi
   const turkish = players.filter((player) => playerCountry(player) === "TR")
   const seed = Math.floor(Date.now() / HOUR_MS)
   const recentSet = new Set(recentLogins)
+  const { countries } = countPlayerCountries(players)
   return {
     top: { world: ranked(players), tr: ranked(turkish) },
     totals: { world: players.length, tr: turkish.length },
@@ -196,6 +199,10 @@ export const getHome = createServerFn({ method: "GET" }).handler(async (): Promi
         return player ? [{ player, addedAt: entry.addedAt }] : []
       })
       .slice(0, HOME_RECENT_LIMIT),
+    countries: {
+      top: countries.slice(0, HOME_COUNTRY_FLAGS).map((entry) => entry.country),
+      total: countries.length
+    },
     lastDayCount,
     generatedAt: new Date(at).toISOString()
   }
