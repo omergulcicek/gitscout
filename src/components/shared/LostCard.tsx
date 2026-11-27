@@ -2,14 +2,13 @@ import { Ghost } from "lucide-react"
 
 import * as m from "@/paraglide/messages.js"
 
-/** "404" spelled across the six stat slots, in the card's stat order. */
-const LOST_STATS = [
-  { label: m.stat_short_act, value: 4 },
-  { label: m.stat_short_imp, value: 0 },
-  { label: m.stat_short_com, value: 4 },
-  { label: m.stat_short_rep, value: 4 },
-  { label: m.stat_short_con, value: 0 },
-  { label: m.stat_short_exp, value: 4 }
+const STAT_LABELS = [
+  m.stat_short_act,
+  m.stat_short_imp,
+  m.stat_short_com,
+  m.stat_short_rep,
+  m.stat_short_con,
+  m.stat_short_exp
 ] as const
 
 type LostCardProps = {
@@ -62,18 +61,24 @@ export function LostCard({ name, subtitle }: LostCardProps) {
 
           <div className="scout-card-rule relative mx-auto mt-4 w-full border-t" />
 
-          <dl className="relative mt-3 grid grid-cols-6 gap-1">
-            {LOST_STATS.map((stat, index) => (
-              <div key={index} className="flex flex-col items-center gap-0.5 py-1">
-                <dt className="scout-card-muted text-[10px] font-semibold tracking-wider">
-                  {stat.label()}
-                </dt>
-                <dd className="scout-card-accent font-mono text-xl leading-none font-bold tabular-nums">
-                  {stat.value}
-                </dd>
-              </div>
+          {/* Stat row reads "· · 404 · ·": the number spans the two middle slots so it stays legible. */}
+          <div className="relative mt-3 grid grid-cols-6 gap-x-1 gap-y-0.5 py-1">
+            {STAT_LABELS.map((label, index) => (
+              <span
+                key={index}
+                className="scout-card-muted text-center text-[10px] font-semibold tracking-wider"
+              >
+                {label()}
+              </span>
             ))}
-          </dl>
+            <Dot />
+            <Dot />
+            <span className="scout-card-accent col-span-2 flex h-6 items-center justify-center font-mono text-xl leading-none font-bold tracking-widest tabular-nums">
+              404
+            </span>
+            <Dot />
+            <Dot />
+          </div>
 
           <div className="relative mt-auto flex items-center pt-3 text-[11px]">
             <span lang="en" className="scout-card-muted font-semibold tracking-wide uppercase">
@@ -83,5 +88,13 @@ export function LostCard({ name, subtitle }: LostCardProps) {
         </div>
       </figure>
     </div>
+  )
+}
+
+function Dot() {
+  return (
+    <span className="scout-card-accent flex h-6 items-center justify-center text-2xl leading-none">
+      •
+    </span>
   )
 }
