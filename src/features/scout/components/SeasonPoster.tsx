@@ -37,7 +37,7 @@ export function SeasonPoster({
 }: SeasonPosterProps) {
   const landscape = format === "landscape"
   const stats = [
-    { label: m.season_matches(), value: `${season.matches}/${season.rounds.length}` },
+    { label: m.season_weeks(), value: `${season.activeWeeks}/${season.weeks.length}` },
     { label: m.season_days(), value: number(season.activeDays) },
     { label: m.season_contributions(), value: number(season.contributions) },
     { label: m.season_streak(), value: number(season.longestStreak) }
@@ -72,7 +72,8 @@ export function SeasonPoster({
       )}
     >
       <header className="flex items-baseline justify-between">
-        <span className="font-mono text-xs tracking-[0.35em] text-white/60 uppercase">
+        {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
+        <span lang="en" className="font-mono text-xs tracking-[0.35em] text-white/60 uppercase">
           Gitscout
         </span>
         <span className="font-mono text-xs tracking-[0.2em] text-white/60 uppercase">
@@ -113,19 +114,19 @@ export function SeasonPoster({
 }
 
 function FormBars({ season }: { season: Season }) {
-  const max = Math.max(1, ...season.rounds.map((round) => round.count))
+  const max = Math.max(1, ...season.weeks.map((week) => week.count))
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-xs text-white/60">{m.season_form_title()}</h2>
       <div className="flex h-14 items-end gap-[2px]">
-        {season.rounds.map((round) => (
+        {season.weeks.map((week) => (
           <span
-            key={round.start}
+            key={week.start}
             className={cn(
               "min-h-px flex-1 rounded-t-[2px]",
-              round.start === season.peakRound?.start ? "season-poster-accent" : "bg-white/30"
+              week.start === season.peakWeek?.start ? "season-poster-accent" : "bg-white/30"
             )}
-            style={{ height: `${(round.count / max) * 100}%` }}
+            style={{ height: `${(week.count / max) * 100}%` }}
           />
         ))}
       </div>

@@ -34,22 +34,22 @@ describe("computeSeason", () => {
     expect(season?.contributions).toBe(32)
     expect(season?.through).toBe("2026-02-01")
     expect(season?.activeDays).toBe(7)
-    expect(season?.daysPlayed).toBe(16)
+    expect(season?.daysCounted).toBe(16)
     expect(season?.previous).toBe(16)
     expect(season?.reviews).toBe(4)
   })
 
-  it("splits the season into seven-day rounds from 1 January", () => {
+  it("splits the season into seven-day weeks from 1 January", () => {
     const season = computeSeason({ calendar, yearly }, 2026)
-    expect(season?.rounds).toEqual([
+    expect(season?.weeks).toEqual([
       { start: "2026-01-01", count: 15 },
       { start: "2026-01-08", count: 0 },
       { start: "2026-01-15", count: 10 },
       { start: "2026-01-22", count: 0 },
       { start: "2026-01-29", count: 7 }
     ])
-    expect(season?.matches).toBe(3)
-    expect(season?.peakRound).toEqual({ start: "2026-01-01", count: 15 })
+    expect(season?.activeWeeks).toBe(3)
+    expect(season?.peakWeek).toEqual({ start: "2026-01-01", count: 15 })
   })
 
   it("finds the longest streak, the busiest month and monthly totals", () => {
@@ -61,6 +61,37 @@ describe("computeSeason", () => {
 
   it("returns null without any day in the year", () => {
     expect(computeSeason({ calendar: days("2025-01-01", [1]), yearly: [] }, 2026)).toBeNull()
+  })
+})
+
+describe("computeSeason weeks and habits", () => {
+  const fullYear = (year: number, count: (date: string) => number) => {
+    const start = Date.UTC(year, 0, 1)
+    const length = (Date.UTC(year + 1, 0, 1) - start) / 86_400_000
+    return Array.from({ length }, (_, index) => {
+      const date = new Date(start + index * 86_400_000).toISOString().slice(0, 10)
+      return { date, count: count(date) }
+    })
+  }
+
+  it("folds the year's spare days into week 52", () => {
+    const season = computeSeason({ calendar: fullYear(2026, () => 1), yearly: [] }, 2026)
+    expect(season?.weeks).toHaveLength(52)
+    expect(season?.weeks.at(-1)?.count).toBe(8)
+    const leap = computeSeason({ calendar: fullYear(2028, () => 1), yearly: [] }, 2028)
+    expect(leap?.weeks).toHaveLength(52)
+    expect(leap?.weeks.at(-1)?.count).toBe(9)
+  })
+
+  it("measures the longest break between active days", () => {
+    const calendar = days("2026-01-01", [0, 0, 3, 0, 0, 0, 1, 0, 2, 0, 0])
+    expect(computeSeason({ calendar, yearly: [] }, 2026)?.longestBreak).toBe(3)
+  })
+
+  it("measures the weekend share", () => {
+    // 2026-01-03 is a Saturday and 2026-01-04 a Sunday.
+    const calendar = days("2026-01-01", [2, 2, 3, 3])
+    expect(computeSeason({ calendar, yearly: [] }, 2026)?.weekendShare).toBe(0.6)
   })
 })
 

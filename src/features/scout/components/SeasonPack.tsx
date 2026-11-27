@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
 import { Download } from "lucide-react"
@@ -7,7 +7,7 @@ import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { SnowyCard } from "@/features/scout/components/SnowyCard"
 import { COUNTRY_FLAGS } from "@/features/scout/constants/country-flag.constants"
-import { playerCountry } from "@/features/scout/helpers/player-country"
+import { countryName, playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import type { ListPlayer } from "@/features/scout/types/player.types"
@@ -23,6 +23,8 @@ const SEQUENCE: Stage[] = ["flag", "position", "rarity", "card"]
 type SeasonPackProps = {
   player: ListPlayer
   year: number
+  /** The owner reads "your card", anyone else "their card". */
+  voice: "own" | "other"
   /** Called when the pack is opened; the page turns the snow up for the reveal. */
   onOpen?: () => void
   /** More downloads under the card's own, shown only once the pack is open so nothing spoils it. */
@@ -33,11 +35,18 @@ type SeasonPackProps = {
  * A sealed pack that opens like a collectible card pack: the flag, then the position, then the tier, then the
  * card itself. With reduced motion the card shows straight away.
  */
-export function SeasonPack({ player, year, onOpen, actions }: SeasonPackProps) {
+export function SeasonPack({ player, year, voice, onOpen, actions }: SeasonPackProps) {
   const [stage, setStage] = useState<Stage>("sealed")
   const { cardRef, download, isDownloading } = useCardDownload(`gitscout-${player.login}-${year}`)
   const country = playerCountry(player)
   const Flag = country ? COUNTRY_FLAGS[country] : undefined
+  const firstAction = useRef<HTMLButtonElement>(null)
+  // The open button leaves the page with the pack; keyboard focus moves to the card's first download.
+  const [focusOnReveal, setFocusOnReveal] = useState(false)
+
+  useEffect(() => {
+    if (stage === "card" && focusOnReveal) firstAction.current?.focus()
+  }, [stage, focusOnReveal])
 
   useEffect(() => {
     if (stage === "sealed" || stage === "card") return
@@ -50,6 +59,7 @@ export function SeasonPack({ player, year, onOpen, actions }: SeasonPackProps) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     // A player without a known country skips the flag clue.
     setStage(reduce ? "card" : Flag ? "flag" : "position")
+    setFocusOnReveal(true)
     onOpen?.()
   }
 
@@ -58,7 +68,13 @@ export function SeasonPack({ player, year, onOpen, actions }: SeasonPackProps) {
       <div className="flex flex-col items-center gap-4">
         <SnowyCard player={player} ref={cardRef} reveal />
         <div className="flex w-full max-w-80 flex-col gap-2">
-          <Button variant="outline" className="w-full" onClick={download} disabled={isDownloading}>
+          <Button
+            ref={firstAction}
+            variant="outline"
+            className="w-full"
+            onClick={download}
+            disabled={isDownloading}
+          >
             <Download aria-hidden />
             {isDownloading ? m.download_preparing() : m.season_card_download()}
           </Button>
@@ -80,13 +96,18 @@ export function SeasonPack({ player, year, onOpen, actions }: SeasonPackProps) {
           !sealed && "season-pack-shake"
         )}
       >
-        <span className="font-mono text-xs tracking-[0.4em] text-white/60 uppercase">Gitscout</span>
+        {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
+        <span lang="en" className="font-mono text-xs tracking-[0.4em] text-white/60 uppercase">
+          Gitscout
+        </span>
         {sealed ? (
           <>
             <span className="font-mono text-7xl font-bold tracking-tight text-white tabular-nums">
               {year}
             </span>
-            <span className="text-sm text-white/70">{m.season_pack_hint()}</span>
+            <span className="text-sm text-white/70">
+              {voice === "own" ? m.season_pack_hint_own() : m.season_pack_hint_other()}
+            </span>
           </>
         ) : (
           // Keyed by stage so each clue plays its entrance again.
@@ -113,6 +134,17 @@ export function SeasonPack({ player, year, onOpen, actions }: SeasonPackProps) {
       ) : (
         <p role="status" className="text-sm text-muted-foreground">
           {m.season_pack_opening()}
+          {/* The clue on the pack is visual; screen readers hear it here. */}
+          <span className="sr-only">
+            {" "}
+            {stage === "flag" && country
+              ? m.season_pack_clue_flag({ country: countryName(country) })
+              : stage === "position"
+                ? m.season_pack_clue_position({ position: player.position })
+                : stage === "rarity"
+                  ? m.season_pack_clue_rarity({ rarity: rarityLabel(player.rarity) })
+                  : null}
+          </span>
         </p>
       )}
     </div>

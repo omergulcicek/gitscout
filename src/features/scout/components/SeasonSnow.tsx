@@ -67,7 +67,8 @@ export function SeasonSnow({ count }: SeasonSnowProps) {
         className="fixed right-4 bottom-4 z-50 bg-background/80 backdrop-blur"
       >
         <Snowflake aria-hidden />
-        {enabled ? m.snow_stop() : m.snow_start()}
+        {/* Icon only on phones, where the button would cover the page's text. */}
+        <span className="max-sm:sr-only">{enabled ? m.snow_stop() : m.snow_start()}</span>
       </Button>
     </>
   )

@@ -59,7 +59,8 @@ export function SeasonLanding() {
         <div className="flex flex-col gap-5">
           <p className="inline-flex items-center gap-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
             <Snowflake aria-hidden className="size-4" />
-            {m.season_landing_eyebrow()}
+            {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
+            <span lang="en">Gitscout</span> {m.season_landing_eyebrow()}
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-balance md:text-6xl">
             {m.season_landing_title()}

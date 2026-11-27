@@ -11,12 +11,14 @@ export const CAREER_CHART_YEARS = 10
 /** A pool smaller than this gives a noisy percentile, so the comparison widens. */
 const MIN_POOL = 30
 
-const DAYS_PER_ROUND = 7
+const DAYS_PER_WEEK = 7
+/** A year has 52 weeks and a day or two over; the spare days join the last week instead of a 53rd. */
+const WEEKS_PER_YEAR = 52
 
 type Day = { date: string; count: number }
 
-export type SeasonRound = {
-  /** First day of the seven-day round (YYYY-MM-DD). */
+export type SeasonWeek = {
+  /** First day of the seven-day week (YYYY-MM-DD). */
   start: string
   count: number
 }
@@ -34,16 +36,50 @@ export type Season = {
   previous: number | null
   reviews: number | null
   activeDays: number
-  daysPlayed: number
-  /** Seven-day rounds from 1 January; a round with any contribution is a match played. */
-  rounds: SeasonRound[]
-  matches: number
+  daysCounted: number
+  /** Seven-day weeks from 1 January, at most 52; the year's spare day or two belong to the last. */
+  weeks: SeasonWeek[]
+  /** Weeks with at least one contribution. */
+  activeWeeks: number
   longestStreak: number
-  peakRound: SeasonRound | null
+  /** Most days in a row without a contribution, between the first and the last active day. */
+  longestBreak: number
+  /** Share of contributions made on Saturday or Sunday (0-1), or null without contributions. */
+  weekendShare: number | null
+  peakWeek: SeasonWeek | null
   /** Contributions per month, January first; months not reached yet are 0. */
   monthly: number[]
   /** Index of the busiest month (0 = January), or null without contributions. */
   bestMonth: number | null
+}
+
+/** Longest gap between active days; quiet days before the first or after the last don't count. */
+function longestGap(days: readonly Day[]): number {
+  let best = 0
+  let run = 0
+  let started = false
+  for (const day of days) {
+    if (day.count > 0) {
+      if (started) best = Math.max(best, run)
+      started = true
+      run = 0
+    } else {
+      run += 1
+    }
+  }
+  return best
+}
+
+function weekendShare(days: readonly Day[]): number | null {
+  const total = days.reduce((sum, day) => sum + day.count, 0)
+  if (total === 0) return null
+  const weekend = days
+    .filter((day) => {
+      const weekday = new Date(`${day.date}T00:00:00Z`).getUTCDay()
+      return weekday === 0 || weekday === 6
+    })
+    .reduce((sum, day) => sum + day.count, 0)
+  return weekend / total
 }
 
 function longestRun(days: readonly Day[]): number {
@@ -70,15 +106,18 @@ export function computeSeason(
 
   // Rounds come from the date, not the position, so a gap in the calendar can't shift them.
   const yearStart = Date.UTC(year, 0, 1)
-  const roundOf = (date: string) =>
-    Math.floor((Date.parse(`${date}T00:00:00Z`) - yearStart) / (DAYS_PER_ROUND * 86_400_000))
-  const rounds: SeasonRound[] = Array.from({ length: roundOf(last.date) + 1 }, (_, index) => ({
-    start: new Date(yearStart + index * DAYS_PER_ROUND * 86_400_000).toISOString().slice(0, 10),
+  const weekOf = (date: string) =>
+    Math.min(
+      WEEKS_PER_YEAR - 1,
+      Math.floor((Date.parse(`${date}T00:00:00Z`) - yearStart) / (DAYS_PER_WEEK * 86_400_000))
+    )
+  const weeks: SeasonWeek[] = Array.from({ length: weekOf(last.date) + 1 }, (_, index) => ({
+    start: new Date(yearStart + index * DAYS_PER_WEEK * 86_400_000).toISOString().slice(0, 10),
     count: 0
   }))
   for (const day of days) {
-    const round = rounds[roundOf(day.date)]
-    if (round) round.count += day.count
+    const week = weeks[weekOf(day.date)]
+    if (week) week.count += day.count
   }
 
   const monthly = Array.from({ length: 12 }, () => 0)
@@ -88,8 +127,8 @@ export function computeSeason(
   }
   const busiest = Math.max(...monthly)
 
-  const peakRound = rounds.reduce<SeasonRound | null>(
-    (best, round) => (round.count > (best?.count ?? 0) ? round : best),
+  const peakWeek = weeks.reduce<SeasonWeek | null>(
+    (best, week) => (week.count > (best?.count ?? 0) ? week : best),
     null
   )
   const thisYear = facts.yearly.find((entry) => entry.year === year)
@@ -102,11 +141,13 @@ export function computeSeason(
     previous: lastYear?.total ?? null,
     reviews: thisYear?.reviews ?? null,
     activeDays: days.filter((day) => day.count > 0).length,
-    daysPlayed: days.length,
-    rounds,
-    matches: rounds.filter((round) => round.count > 0).length,
+    daysCounted: days.length,
+    weeks,
+    activeWeeks: weeks.filter((week) => week.count > 0).length,
     longestStreak: longestRun(days),
-    peakRound,
+    longestBreak: longestGap(days),
+    weekendShare: weekendShare(days),
+    peakWeek,
     monthly,
     bestMonth: busiest > 0 ? monthly.indexOf(busiest) : null
   }

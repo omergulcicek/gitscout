@@ -86,6 +86,6 @@ describe("frozenSeasonFacts", () => {
     expect(season?.contributions).toBe(row.total)
     expect(season?.previous).toBe(100)
     expect(season?.reviews).toBe(3)
-    expect(season?.rounds).toHaveLength(53)
+    expect(season?.weeks).toHaveLength(52)
   })
 })

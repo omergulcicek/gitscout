@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 
 import { Link } from "@tanstack/react-router"
-import { ArrowLeft, ArrowUpRight, Check, Monitor, Smartphone, Swords } from "lucide-react"
+import { ArrowLeft, Check, Monitor, Smartphone, Swords } from "lucide-react"
 import { cn } from "cn"
 
 import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
+
+import { useViewer } from "@/hooks/use-viewer"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { RarityChip } from "@/features/scout/components/RarityChip"
@@ -13,7 +15,7 @@ import { SeasonPack } from "@/features/scout/components/SeasonPack"
 import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
 import { SeasonSnow } from "@/features/scout/components/SeasonSnow"
 import { countryName } from "@/features/scout/helpers/player-country"
-import { archetypeNote, number, titleText } from "@/features/scout/helpers/player-text"
+import { number, titleText } from "@/features/scout/helpers/player-text"
 import {
   CAREER_CHART_YEARS,
   careerRecord,
@@ -23,10 +25,12 @@ import {
 import type { Season, SeasonStanding } from "@/features/scout/helpers/season"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useSeason } from "@/features/scout/hooks/use-season"
-import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import type { SeasonReport } from "@/features/scout/types/season.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
+
+/** Below this many quiet days in a row, a break isn't worth a line in the report. */
+const MIN_BREAK_DAYS = 3
 
 /** Flakes on screen normally and during the pack's reveal, and how long the flurry lasts. */
 const LIGHT_FLAKES = 160
@@ -44,6 +48,14 @@ const dayMonth = (date: string) =>
     new Date(`${date}T00:00:00Z`)
   )
 
+/** Whose report it is: the person's own reads "you", anyone else's reads "they". */
+type Voice = "own" | "other"
+
+const shortMonth = (date: string) =>
+  new Intl.DateTimeFormat(getLocale(), { month: "short", timeZone: "UTC" }).format(
+    new Date(`${date}T00:00:00Z`)
+  )
+
 const monthName = (month: number, year: number) =>
   new Intl.DateTimeFormat(getLocale(), { month: "long", timeZone: "UTC" }).format(
     new Date(Date.UTC(year, month, 1))
@@ -53,6 +65,9 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
   const { data } = useSeason(username, year)
   const { player, season } = data
   const lang = getLangParam()
+  const { data: viewer } = useViewer()
+  // The viewer arrives after the first paint; until then the report reads in the third person.
+  const voice: Voice = viewer?.login.toLowerCase() === player.login.toLowerCase() ? "own" : "other"
   const {
     cardRef: landscapeRef,
     download: downloadLandscape,
@@ -95,6 +110,7 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
           <SeasonPack
             player={data.card}
             year={season.year}
+            voice={voice}
             onOpen={() => setFlurry(true)}
             actions={
               <>
@@ -129,6 +145,14 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
             <h1 className="text-3xl font-bold tracking-tight text-balance md:text-4xl">
               {player.name} · {m.season_heading({ year: season.year })}
             </h1>
+            {top === null ? null : (
+              <p className="mt-1 text-sm">
+                <span className="font-semibold">
+                  {m.season_standing_value({ pct: top })} · {poolName(data.standing)}
+                </span>{" "}
+                <span className="text-muted-foreground">({m.season_standing_basis()})</span>
+              </p>
+            )}
             <p className="text-sm text-muted-foreground">
               {data.final ? m.season_final() : m.season_through({ date: dayMonth(season.through) })}
             </p>
@@ -136,14 +160,14 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
 
           <SeasonStats season={season} />
           <FormChart season={season} />
-          <CareerChart season={season} career={data.career} />
-          <ScoutReport player={player} season={season} career={data.career} />
-          <Rival report={data} />
+          <CareerChart season={season} career={data.career} final={data.final} />
+          <ScoutReport season={season} career={data.career} voice={voice} />
+          <Rival report={data} voice={voice} />
         </div>
       </div>
 
       {/* Off-screen copy that the download captures; the inner node has no position of its own. */}
-      <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px]">
+      <div aria-hidden inert className="pointer-events-none fixed top-0 -left-[10000px]">
         <SeasonPoster
           ref={landscapeRef}
           format="landscape"
@@ -168,9 +192,9 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
 function SeasonStats({ season }: { season: Season }) {
   const items = [
     {
-      label: m.season_matches(),
-      value: `${season.matches}/${season.rounds.length}`,
-      hint: m.season_matches_hint()
+      label: m.season_weeks(),
+      value: `${season.activeWeeks}/${season.weeks.length}`,
+      hint: m.season_weeks_hint()
     },
     { label: m.season_days(), value: number(season.activeDays), hint: m.season_days_hint() },
     {
@@ -212,8 +236,8 @@ function SeasonStats({ season }: { season: Season }) {
 }
 
 function FormChart({ season }: { season: Season }) {
-  const max = Math.max(0, ...season.rounds.map((round) => round.count))
-  const peak = season.peakRound
+  const max = Math.max(0, ...season.weeks.map((week) => week.count))
+  const peak = season.peakWeek
 
   return (
     <section aria-labelledby="season-form-heading" className="surface flex flex-col gap-4 p-4">
@@ -226,19 +250,37 @@ function FormChart({ season }: { season: Season }) {
       {max > 0 ? (
         <div
           role="img"
-          aria-label={m.season_form_label({ weeks: season.rounds.length, max })}
+          aria-label={m.season_form_label({ weeks: season.weeks.length, max })}
           className="flex h-28 items-end gap-px sm:gap-0.5"
         >
-          {season.rounds.map((round) => (
+          {season.weeks.map((week) => (
             <span
-              key={round.start}
+              key={week.start}
               className={cn(
                 "min-h-px flex-1 rounded-t-[2px]",
-                round.start === peak?.start ? "bg-chart-home" : "bg-muted-foreground/35"
+                week.start === peak?.start ? "bg-chart-home" : "bg-muted-foreground/35"
               )}
-              style={{ height: `${(round.count / max) * 100}%` }}
+              style={{ height: `${(week.count / max) * 100}%` }}
             />
           ))}
+        </div>
+      ) : null}
+      {max > 0 ? (
+        // One label under the first week of each month; the row mirrors the bars' spacing.
+        <div aria-hidden className="-mt-2 flex gap-px sm:gap-0.5">
+          {season.weeks.map((week, index) => {
+            const month = week.start.slice(5, 7)
+            const starts = index === 0 || season.weeks[index - 1]?.start.slice(5, 7) !== month
+            return (
+              <span key={week.start} className="relative h-3.5 flex-1">
+                {starts ? (
+                  <span className="absolute start-0 font-mono text-[10px] whitespace-nowrap text-muted-foreground capitalize">
+                    {shortMonth(week.start)}
+                  </span>
+                ) : null}
+              </span>
+            )
+          })}
         </div>
       ) : null}
       <dl className="grid gap-4 sm:grid-cols-2">
@@ -265,33 +307,20 @@ function FormChart({ season }: { season: Season }) {
 }
 
 function ScoutReport({
-  player,
   season,
-  career
+  career,
+  voice
 }: {
-  player: ScoredPlayer
   season: Season
   career: SeasonReport["career"]
+  voice: Voice
 }) {
-  const growth = seasonGrowth(season)
+  const own = voice === "own"
   const record = careerRecord(career, season.year)
-  const advice = archetypeNote(player.archetype, player.stats).growth[0]
+  // Weekend share in tenths reads better than a percentage, which needs a suffix that changes in Turkish.
+  const weekendTenths = season.weekendShare === null ? null : Math.round(season.weekendShare * 10)
+  // Only what the panels above don't already say.
   const lines = [
-    m.season_report_matches({ played: season.matches, total: season.rounds.length }),
-    season.peakRound
-      ? m.season_report_peak({
-          date: dayMonth(season.peakRound.start),
-          count: number(season.peakRound.count)
-        })
-      : null,
-    season.bestMonth === null
-      ? null
-      : m.season_report_month({ month: monthName(season.bestMonth, season.year) }),
-    growth === null || growth === 0
-      ? null
-      : growth > 0
-        ? m.season_report_growth_up({ pct: growth })
-        : m.season_report_growth_down({ pct: -growth }),
     record === null
       ? null
       : record.beaten
@@ -299,11 +328,24 @@ function ScoutReport({
             year: record.previous.year,
             count: number(record.previous.total)
           })
-        : m.season_report_record_held({
+        : (own ? m.season_report_record_held_own : m.season_report_record_held_other)({
             year: record.previous.year,
             count: number(record.previous.total)
+          }),
+    season.longestBreak >= MIN_BREAK_DAYS
+      ? (own ? m.season_report_break_own : m.season_report_break_other)({
+          days: season.longestBreak
+        })
+      : null,
+    weekendTenths === null
+      ? null
+      : weekendTenths === 0
+        ? (own ? m.season_report_weekend_none_own : m.season_report_weekend_none_other)()
+        : (own ? m.season_report_weekend_own : m.season_report_weekend_other)({
+            count: weekendTenths
           })
   ].filter((line) => line !== null)
+  if (lines.length === 0) return null
 
   return (
     <section aria-labelledby="season-report-heading" className="surface flex flex-col gap-3 p-4">
@@ -317,28 +359,32 @@ function ScoutReport({
             {line}
           </li>
         ))}
-        {advice ? (
-          <li className="flex items-start gap-2 text-muted-foreground">
-            <ArrowUpRight aria-hidden className="mt-0.5 size-4 shrink-0" />
-            {advice}
-          </li>
-        ) : null}
       </ul>
     </section>
   )
 }
 
-function CareerChart({ season, career }: { season: Season; career: SeasonReport["career"] }) {
+function CareerChart({
+  season,
+  career,
+  final
+}: {
+  season: Season
+  career: SeasonReport["career"]
+  final: boolean
+}) {
   const years = career.slice(-CAREER_CHART_YEARS)
   if (years.length < 2) return null
-  const growth = seasonGrowth(season)
+  const change = seasonGrowth(season)
+  // An unfinished year against a whole one only ever looks short, so a fall shows once the season closes.
+  const growth = change !== null && (final || change > 0) ? change : null
   const max = Math.max(1, ...years.map((entry) => entry.total))
   const first = years[0]
   const last = years.at(-1)
 
   return (
     <section aria-labelledby="season-career-heading" className="surface flex flex-col gap-3 p-4">
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
         <div className="flex flex-col gap-0.5">
           <h2 id="season-career-heading" className="text-sm font-medium">
             {m.season_career_title()}
@@ -422,7 +468,7 @@ function standingTop(standing: SeasonStanding): number | null {
   return Math.max(1, Math.round((1 - standing.aheadShare) * 100))
 }
 
-function Rival({ report }: { report: SeasonReport }) {
+function Rival({ report, voice }: { report: SeasonReport; voice: Voice }) {
   const { rival, player } = report
   if (!rival) return null
   const lang = getLangParam()
@@ -454,8 +500,9 @@ function Rival({ report }: { report: SeasonReport }) {
             </Link>
             <RarityChip ovr={rival.ovr} rarity={rival.rarity} size="sm" />
           </span>
-          <span className="truncate text-xs text-muted-foreground">
-            {titleText(rival.title)} · {m.season_rival_caption()}
+          <span className="text-xs text-muted-foreground">
+            {titleText(rival.title)} ·{" "}
+            {voice === "own" ? m.season_rival_caption_own() : m.season_rival_caption_other()}
           </span>
         </div>
       </div>
