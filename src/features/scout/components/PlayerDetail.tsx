@@ -30,6 +30,7 @@ import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { isProgrammersDay } from "@/features/scout/helpers/programmers-day"
+import { computeRarity } from "@/features/scout/helpers/score-player"
 import { isHalloween, isNewYear, isRepublicDay } from "@/features/scout/helpers/special-days"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useCardReveal } from "@/features/scout/hooks/use-card-reveal"
@@ -80,6 +81,12 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
   const revealOvr = useEasedCount(revealing ? cardPlayer.ovr : 0, { delay: REVEAL_COUNT_DELAY_MS })
   // Confetti waits for the real score to land, after the flip and the count.
   const revealDone = revealing && revealOvr === cardPlayer.ovr
+  // While counting, the card climbs the tiers with its number (bronze → silver → gold → icon), so its
+  // colour doesn't give the score away. A birthday card keeps its own look.
+  const shownCard =
+    revealing && !birthday
+      ? { ...cardPlayer, ovr: revealOvr, rarity: computeRarity(revealOvr) }
+      : cardPlayer
   const { cardRef, download, isDownloading, copy, isCopying } = useCardDownload(
     shownOccasion ? `gitscout-${username}-${shownOccasion}` : `gitscout-${username}`
   )
@@ -107,14 +114,16 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
           {birthday ? <BirthdayConfetti /> : null}
           <div
-            data-rarity={cardPlayer.rarity}
+            data-rarity={shownCard.rarity}
             className="relative flex w-full max-w-80 justify-center"
           >
             {/* Inside the rarity scope so the pieces pick up the card's own frame colours. */}
             {revealDone && !birthday && CELEBRATED_RARITIES.has(cardPlayer.rarity) ? (
               <RevealConfetti />
             ) : null}
+            {/* Keyed by tier so the glow flares again each time the counting card levels up. */}
             <div
+              key={revealing ? shownCard.rarity : undefined}
               aria-hidden
               className={cn(
                 "scout-card-glow pointer-events-none absolute -inset-8",
@@ -123,11 +132,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
             />
             <div className="card-lift relative">
               <div className={revealing ? "card-reveal" : undefined}>
-                <PlayerCard
-                  player={revealing ? { ...cardPlayer, ovr: revealOvr } : cardPlayer}
-                  ref={cardRef}
-                  occasion={shownOccasion}
-                />
+                <PlayerCard player={shownCard} ref={cardRef} occasion={shownOccasion} />
               </div>
             </div>
           </div>
