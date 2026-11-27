@@ -12,6 +12,7 @@ import { createLookupGuard } from "@/features/scout/api/lookup-guard"
 import type { LookupFailure } from "@/features/scout/api/lookup-guard"
 import {
   countRecentPlayers,
+  getDreamTeamLogins,
   getLatestAdditions,
   getListPlayers,
   getRecentLogins,
@@ -147,13 +148,18 @@ export const getPlayer = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<PlayerDetail> => {
     const username = usernameSchema.safeParse(data.username)
     if (!username.success) throw notFound()
-    const player = await getScoredPlayer(username.data)
+    const [player, dreamTeamLogins] = await Promise.all([
+      getScoredPlayer(username.data),
+      getDreamTeamLogins(username.data)
+    ])
     if (!player) throw notFound()
     const all = await cachedPlayers()
+    const byLogin = new Map(all.map((entry) => [entry.login.toLowerCase(), entry]))
     return {
       ...player,
       ranking: computeRanking(player, all),
-      benchmarks: computeBenchmarks(player, all)
+      benchmarks: computeBenchmarks(player, all),
+      dreamTeam: dreamTeamLogins.flatMap((login) => byLogin.get(login.toLowerCase()) ?? [])
     }
   })
 

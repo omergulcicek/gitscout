@@ -394,4 +394,9 @@ export type Benchmark = {
   aheadShare: number | null
 }
 
-export type PlayerDetail = ScoredPlayer & { ranking: PlayerRanking; benchmarks: Benchmark[] }
+export type PlayerDetail = ScoredPlayer & {
+  ranking: PlayerRanking
+  benchmarks: Benchmark[]
+  /** The owner's dream team in pick order; empty unless a verified account picked one. */
+  dreamTeam: ListPlayer[]
+}

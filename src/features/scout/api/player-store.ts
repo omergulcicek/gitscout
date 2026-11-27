@@ -534,3 +534,21 @@ export async function insertSnapshot(takenAt: Date): Promise<number> {
   `
   return result.count
 }
+
+/**
+ * The dream team a verified account picked, in slot order. Only verified accounts count, the same rule as
+ * every other profile field; an unclaimed card or an unverified account has none.
+ */
+export async function getDreamTeamLogins(login: string): Promise<string[]> {
+  const sql = getDb()
+  const rows = z.array(z.object({ player_login: z.string() })).parse(
+    await sql`
+        select d.player_login
+        from dream_team_picks d
+        join accounts a on a.github_id = d.github_id
+        where a.login = ${keyOf(login)} and a.eligible
+        order by d.slot
+      `
+  )
+  return rows.map((row) => row.player_login)
+}
