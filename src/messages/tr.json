@@ -741,5 +741,7 @@
   "season_step_whistle": "Son düdük",
   "season_step_whistle_text": "Yılın son günü. 31 Aralık'taki katkılar da sezona sayılır.",
   "season_step_frozen": "Sezon donar",
-  "season_step_frozen_text": "Sayıların ve kartın 2026 hatırası olarak saklanır; profilinden her zaman açabilirsin."
+  "season_step_frozen_text": "Sayıların ve kartın 2026 hatırası olarak saklanır; profilinden her zaman açabilirsin.",
+  "snow_stop": "Karı durdur",
+  "snow_start": "Kar yağsın"
 }

@@ -762,5 +762,7 @@
   "season_step_whistle": "Final whistle",
   "season_step_whistle_text": "The last day of the year. Contributions on 31 December still count.",
   "season_step_frozen": "The season freezes",
-  "season_step_frozen_text": "Your numbers and card are kept as your 2026 season; open them from your profile any time."
+  "season_step_frozen_text": "Your numbers and card are kept as your 2026 season; open them from your profile any time.",
+  "snow_stop": "Stop the snow",
+  "snow_start": "Let it snow"
 }
