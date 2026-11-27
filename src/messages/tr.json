@@ -706,5 +706,6 @@
   "top_podium": "İlk üç",
   "top_locked_title": "{country} · En iyi GitHub geliştiricileri",
   "top_locked_lead": "Bu sayfa, bu ülkeden {min} geliştirici Gitscout'a katılınca açılır. Şu an {count} kişi var.",
-  "top_locked_members": "Şimdiye kadar katılanlar"
+  "top_locked_members": "Şimdiye kadar katılanlar",
+  "top_you": "Sen"
 }

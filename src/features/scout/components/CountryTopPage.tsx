@@ -5,6 +5,8 @@ import { cn } from "cn"
 import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
+import { useViewer } from "@/hooks/use-viewer"
+
 import { buttonVariants } from "@/components/ui/button"
 import { CountryProgressBar } from "@/features/scout/components/CountryProgressBar"
 import { InviteButton } from "@/features/scout/components/InviteButton"
@@ -85,6 +87,9 @@ function CountryIntro({ data }: { data: CountryTop }) {
 
 function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
   const lang = getLangParam()
+  const { data: viewer } = useViewer()
+  // The podium already shows the top three big, so only rows from #4 on are marked.
+  const isViewer = (login: string) => viewer?.login.toLowerCase() === login.toLowerCase()
   const podium = data.players.slice(0, PODIUM_SIZE)
   const rest = data.players.slice(PODIUM_SIZE)
 
@@ -110,35 +115,48 @@ function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
 
       {rest.length > 0 ? (
         <ol start={PODIUM_SIZE + 1} className="surface flex flex-col divide-y overflow-hidden p-0">
-          {rest.map((player) => (
-            <li key={player.login}>
-              <Link
-                to="/{-$lang}/u/$username"
-                params={{ lang, username: player.login }}
-                className="flex items-center gap-3 px-4 py-2.5 outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
-              >
-                <span className="w-8 shrink-0 text-right font-mono text-sm text-muted-foreground tabular-nums">
-                  {player.rank}
-                </span>
-                <img
-                  src={avatarSrc(player.avatarUrl, 32)}
-                  alt=""
-                  width={32}
-                  height={32}
-                  loading="lazy"
-                  className="size-8 shrink-0 rounded-full bg-muted"
-                />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-sm font-medium">{player.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">@{player.login}</span>
-                </span>
-                <span className="hidden text-xs text-muted-foreground sm:inline">
-                  {player.position}
-                </span>
-                <RarityChip ovr={player.ovr} rarity={player.rarity} />
-              </Link>
-            </li>
-          ))}
+          {rest.map((player) => {
+            const mine = isViewer(player.login)
+            return (
+              <li key={player.login}>
+                <Link
+                  to="/{-$lang}/u/$username"
+                  params={{ lang, username: player.login }}
+                  aria-current={mine ? "true" : undefined}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2.5 outline-none hover:bg-muted/50 focus-visible:bg-muted/50",
+                    mine &&
+                      "bg-primary/10 shadow-[inset_3px_0_0_var(--color-primary)] hover:bg-primary/15"
+                  )}
+                >
+                  <span className="w-8 shrink-0 text-right font-mono text-sm text-muted-foreground tabular-nums">
+                    {player.rank}
+                  </span>
+                  <img
+                    src={avatarSrc(player.avatarUrl, 32)}
+                    alt=""
+                    width={32}
+                    height={32}
+                    loading="lazy"
+                    className="size-8 shrink-0 rounded-full bg-muted"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-medium">{player.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">@{player.login}</span>
+                  </span>
+                  {mine ? (
+                    <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
+                      {m.top_you()}
+                    </span>
+                  ) : null}
+                  <span className="hidden text-xs text-muted-foreground sm:inline">
+                    {player.position}
+                  </span>
+                  <RarityChip ovr={player.ovr} rarity={player.rarity} />
+                </Link>
+              </li>
+            )
+          })}
         </ol>
       ) : null}
 
