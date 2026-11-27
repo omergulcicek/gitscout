@@ -43,7 +43,7 @@ export function ScoutHome() {
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
-        <section className="flex max-w-2xl flex-col gap-5 pt-4 sm:pt-8">
+        <section className="flex max-w-2xl min-w-0 flex-col gap-5 pt-4 sm:pt-8">
           <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
             {m.home_title()}
           </h1>
