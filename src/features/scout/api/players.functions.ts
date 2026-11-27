@@ -34,6 +34,7 @@ import {
 } from "@/features/scout/constants/scoring.constants"
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
+import { dailyBest } from "@/features/scout/helpers/daily-best"
 import { popularPresets } from "@/features/scout/helpers/duel-presets"
 import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
 import { featuredOrder } from "@/features/scout/helpers/featured-players"
@@ -225,13 +226,22 @@ const leaderboardSliceSchema = leaderboardSearchSchema
 /** One page of the leaderboard plus its filter options; the table never receives the whole list. */
 export const getLeaderboardSlice = createServerFn({ method: "GET" })
   .validator(leaderboardSliceSchema)
-  .handler(async ({ data }): Promise<{ slice: LeaderboardSlice; facets: LeaderboardFacets }> => {
-    const players = await cachedPlayers()
-    return {
-      slice: queryLeaderboard(players, data, data.locale),
-      facets: leaderboardFacets(players)
+  .handler(
+    async ({
+      data
+    }): Promise<{
+      slice: LeaderboardSlice
+      facets: LeaderboardFacets
+      dailyBest: ListPlayer[]
+    }> => {
+      const { players, recentLogins } = await cachedList()
+      return {
+        slice: queryLeaderboard(players, data, data.locale),
+        facets: leaderboardFacets(players),
+        dailyBest: dailyBest(players, recentLogins)
+      }
     }
-  })
+  )
 
 /** Rows a player search returns; the picker shows a short list and narrows as you type. */
 const SEARCH_LIMIT = 20

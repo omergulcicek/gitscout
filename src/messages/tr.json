@@ -39,6 +39,8 @@
   "home_full_table_tr": "Türk geliştiriciler ({count} kişi)",
   "recent_title": "Son eklenenler",
   "recent_last_day": "Son 24 saatte {count} geliştirici katıldı",
+  "daily_best_title": "Günün en iyileri",
+  "daily_best_hint": "Son 24 saatte eklenen kartlarda her rolün en iyisi",
   "just_now": "az önce",
   "featured_label": "Saatin kartı",
   "featured_label_next": "{name} kartı",
