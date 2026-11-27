@@ -735,5 +735,5 @@
   "top_locked_title": "Top GitHub developers in {country}",
   "top_locked_lead": "This page opens once {min} developers from here join Gitscout. {count} so far.",
   "top_locked_members": "Here so far",
-  "top_you": "You"
+  "top_missing_short": "{missing} to go"
 }

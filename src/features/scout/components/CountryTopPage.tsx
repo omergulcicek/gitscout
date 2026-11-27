@@ -144,11 +144,6 @@ function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
                     <span className="truncate text-sm font-medium">{player.name}</span>
                     <span className="truncate text-xs text-muted-foreground">@{player.login}</span>
                   </span>
-                  {mine ? (
-                    <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground">
-                      {m.top_you()}
-                    </span>
-                  ) : null}
                   <span className="hidden text-xs text-muted-foreground sm:inline">
                     {player.position}
                   </span>

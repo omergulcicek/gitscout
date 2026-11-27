@@ -13,6 +13,9 @@ import { countryName } from "@/features/scout/helpers/player-country"
 import { useTopCountries } from "@/features/scout/hooks/use-top-countries"
 import * as m from "@/paraglide/messages.js"
 
+/** Countries this close to a page get a highlighted "N to go". */
+const CLOSE_MISSING = 3
+
 /** The "top developers" hub: countries with their own page, then the ones a few developers away. */
 export function TopCountriesPage() {
   const { data } = useTopCountries()
@@ -78,30 +81,34 @@ export function TopCountriesPage() {
               {m.top_upcoming_lead()}
             </p>
           </div>
-          <ul className="surface flex flex-col divide-y p-0">
+          {/* Short cards keep each bar short enough to read at a glance; closest to opening first. */}
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {data.upcoming.map(({ country, slug, total, missing }) => {
               const Flag = COUNTRY_FLAGS[country]
-              const name = countryName(country)
               return (
-                <li
-                  key={country}
-                  className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-6"
-                >
-                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <li key={country} className="surface flex flex-col gap-3 p-4">
+                  <div className="flex items-center gap-2">
                     <Link
                       to="/{-$lang}/top/$country"
                       params={{ lang, country: slug }}
-                      className="flex items-center gap-2 self-start rounded-sm font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                      className="flex min-w-0 items-center gap-2 rounded-sm font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
                     >
-                      <Flag aria-hidden className={FLAG_CLASS} />
-                      {name}
+                      <Flag aria-hidden className={cn(FLAG_CLASS, "h-3.5")} />
+                      <span className="truncate">{countryName(country)}</span>
                     </Link>
-                    <CountryProgressBar total={total} min={data.min} />
-                    <p className="text-xs text-muted-foreground">
-                      {m.top_missing({ missing, country: name })}
-                    </p>
+                    <span
+                      className={cn(
+                        "ms-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
+                        missing <= CLOSE_MISSING
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {m.top_missing_short({ missing })}
+                    </span>
                   </div>
-                  <InviteButton country={country} slug={slug} />
+                  <CountryProgressBar total={total} min={data.min} />
+                  <InviteButton country={country} slug={slug} className="w-full" />
                 </li>
               )
             })}
