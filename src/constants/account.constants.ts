@@ -22,6 +22,20 @@ export const LOGIN_LOCALE_COOKIE = {
   maxAgeSeconds: 10 * 60
 } as const
 
+/**
+ * Pages a sign-in can return to, by key. Only these fixed paths are ever used, so the return address
+ * can't be turned into a redirect to somewhere else. Without one, sign-in lands on the player's profile.
+ */
+export const LOGIN_RETURNS = { season: "/season" } as const
+
+export type LoginReturn = keyof typeof LOGIN_RETURNS
+
+/** The page to return to after sign-in, carried through the GitHub round trip like the locale. */
+export const LOGIN_RETURN_COOKIE = {
+  name: "gs_login_return",
+  maxAgeSeconds: 10 * 60
+} as const
+
 /** Ayarlarda seçilebilen cinsiyetler; boş bırakmak da mümkün. Herkese açık oyuncu verisine eklenmez. */
 export const GENDERS = ["female", "male"] as const
 

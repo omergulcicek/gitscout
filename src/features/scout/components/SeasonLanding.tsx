@@ -36,7 +36,7 @@ type FormValues = z.infer<typeof formSchema>
 export function SeasonLanding() {
   const lang = getLangParam()
   const { data: viewer } = useViewer()
-  const signIn = useStartGithubLogin()
+  const signIn = useStartGithubLogin("season")
   const { data: sample } = useSuspenseQuery(specialCardsSampleQueryOptions())
   const { data: own } = useQuery({
     ...playersByLoginQueryOptions(viewer ? [viewer.login] : []),

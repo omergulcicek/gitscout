@@ -8,7 +8,12 @@ import {
 } from "@tanstack/react-start/server"
 import { z } from "zod"
 
-import { LOGIN_LOCALE_COOKIE } from "@/constants/account.constants"
+import {
+  LOGIN_LOCALE_COOKIE,
+  LOGIN_RETURN_COOKIE,
+  LOGIN_RETURNS
+} from "@/constants/account.constants"
+import type { LoginReturn } from "@/constants/account.constants"
 import { siteConfig } from "@/config/site.config"
 
 import { deleteSession, findViewer, sessionCookie } from "@/lib/session"
@@ -45,9 +50,26 @@ export const getViewer = createServerFn({ method: "GET" }).handler(
  * Geri dönüş adresi istekten değil sitenin kendi ayarından kurulur (Host başlığıyla yönlendirme yapılamasın).
  */
 export const startGithubLogin = createServerFn({ method: "POST" })
-  .validator(z.object({ locale: z.enum(locales) }))
+  .validator(
+    z.object({
+      locale: z.enum(locales),
+      returnTo: z.enum(Object.keys(LOGIN_RETURNS) as [LoginReturn]).optional()
+    })
+  )
   .handler(async ({ data }): Promise<{ url: string }> => {
     if (!isGithubLoginConfigured()) throw new Error("auth:not-configured")
+    // A page to come back to rides along in its own short-lived cookie; a stale one is cleared.
+    if (data.returnTo) {
+      setCookie(LOGIN_RETURN_COOKIE.name, data.returnTo, {
+        path: "/",
+        httpOnly: true,
+        secure: !import.meta.env.DEV,
+        sameSite: "lax",
+        maxAge: LOGIN_RETURN_COOKIE.maxAgeSeconds
+      })
+    } else {
+      deleteCookie(LOGIN_RETURN_COOKIE.name, { path: "/" })
+    }
     // Sunucu fonksiyonunun adresi dilsizdir; dil, girişi başlatan sayfadan gelir.
     setCookie(LOGIN_LOCALE_COOKIE.name, data.locale, {
       path: "/",
