@@ -10,7 +10,7 @@ import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
 /**
- * Link preview for a duel (1200×630): two tilted cards and, between them, the swords badge, the score and
+ * Link preview for a duel (1200×630): two cards leaning towards each other and, between them, the swords badge, the score and
  * who won. The stats are readable on the cards, so they aren't listed again.
  * Drawn with Satori: flex layout, absolute positions and inline styles only.
  */
@@ -47,13 +47,13 @@ export function OgDuelImage({ left, right, leftAvatar, rightAvatar }: OgDuelImag
       <Absolute left={72} top={56}>
         <Brand />
       </Absolute>
-      <Absolute left={100} top={110} rotate={-9} scale={CARD_SCALE}>
+      <Absolute left={96} top={100} rotate={8} scale={CARD_SCALE}>
         <OgPlayerCard player={left} avatar={leftAvatar} />
       </Absolute>
-      <Absolute left={800} top={96} rotate={7} scale={CARD_SCALE}>
+      <Absolute left={804} top={100} rotate={-8} scale={CARD_SCALE}>
         <OgPlayerCard player={right} avatar={rightAvatar} />
       </Absolute>
-      <Absolute left={420} top={150} width={360} center>
+      <Absolute left={400} top={150} width={400} center>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <SwordsBadge />
           <div style={{ display: "flex", marginTop: 30 }}>
@@ -63,7 +63,7 @@ export function OgDuelImage({ left, right, leftAvatar, rightAvatar }: OgDuelImag
             style={{
               display: "flex",
               marginTop: 18,
-              maxWidth: 340,
+              maxWidth: 380,
               textAlign: "center",
               justifyContent: "center",
               fontSize: 22,
