@@ -747,6 +747,11 @@
   [data-badge="regular"] {
     --badge-h: 160;
   }
+  /* Gitscout's own badges share one gold hue so they read apart from the GitHub ones. */
+  [data-badge="first-verified"],
+  [data-badge="milestone-card"] {
+    --badge-h: 85;
+  }
 }
 
 @keyframes duel-fade {

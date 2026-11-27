@@ -11,6 +11,7 @@ import { COUNTRIES, HIDDEN_COUNTRY } from "@/features/scout/constants/player-cou
 import { REFRESH, SCORE_VERSION } from "@/features/scout/constants/scoring.constants"
 import { isBirthdayToday } from "@/features/scout/helpers/birthday"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
+import { gitscoutBadges } from "@/features/scout/helpers/gitscout-badges"
 import { toListPlayer } from "@/features/scout/helpers/list-player"
 import { scorePlayer } from "@/features/scout/helpers/score-player"
 import { isWomensDay } from "@/features/scout/helpers/special-days"
@@ -113,6 +114,8 @@ function withAccount<T extends ListPlayer | ScoredPlayer>(player: T, account: Ac
     ...player,
     ...(hidesLocationCountry ? { country: undefined } : {}),
     ...(account.verified ? { verified: true } : {}),
+    // Gitscout's own badges lead so they also make the card's four badge slots.
+    badges: [...gitscoutBadges(player.login), ...player.badges],
     ...(claimedCountry ? { claimedCountry } : {})
   }
 }

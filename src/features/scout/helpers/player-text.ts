@@ -127,7 +127,9 @@ const BADGE_NAMES = {
   "team-player": m.badge_team_player,
   documenter: m.badge_documenter,
   veteran: m.badge_veteran,
-  regular: m.badge_regular
+  regular: m.badge_regular,
+  "first-verified": m.badge_first_verified,
+  "milestone-card": m.badge_milestone_card
 } as const satisfies Record<BadgeId, LocalizedMessage>
 
 export function badgeName(id: BadgeId, locale?: Locale): string {
@@ -207,6 +209,14 @@ export function badgeDetail(badge: Badge): string {
     case "regular": {
       const v = badge.values
       return m.badge_regular_detail({ weeks: number(v.weeks) })
+    }
+    case "first-verified": {
+      const v = badge.values
+      return m.badge_first_verified_detail({ order: number(v.order), total: number(v.total) })
+    }
+    case "milestone-card": {
+      const v = badge.values
+      return m.badge_milestone_card_detail({ order: number(v.order) })
     }
   }
 }
