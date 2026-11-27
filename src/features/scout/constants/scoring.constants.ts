@@ -16,6 +16,13 @@ export const SCORE_VERSION = 7
 export const NEW_PLAYERS_PER_HOUR = 300
 
 /**
+ * Tek bir IP'nin (IPv6'da /64 bloğunun) GitHub'a gidebilecek yeni kart sorgusu. Kayıtlı kartı açmak sayılmaz.
+ * Kart başına ~9 puanla saatte 20 sorgu ~180 puan eder; tek kişi saatlik ortak sınırı tek başına dolduramaz.
+ * Vercel Firewall ayrıca IP başına 10 dakikada 8 kart ekleme isteğine izin verir.
+ */
+export const NEW_LOOKUPS_PER_IP = { hour: 20, day: 50 } as const
+
+/**
  * Bulunamayan kullanıcı adı bu süre boyunca GitHub'a yeniden sorulmaz. Kısa tutulur: az önce açılan ya da
  * adı değişen bir hesap en geç bu süre sonra eklenebilir.
  */

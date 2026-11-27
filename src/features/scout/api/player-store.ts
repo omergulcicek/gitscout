@@ -372,6 +372,21 @@ export async function getLatestAdditions(
   return rows.map((row) => ({ login: row.login, addedAt: row.created_at.toISOString() }))
 }
 
+/**
+ * IP kovası için bir yeni kart sorgusu hakkı harcar. Sınır doluysa hak harcanmaz ve `false` döner.
+ * Sayım veritabanında tutulur; sunucu örnekleri arasında ortaktır ve eşzamanlı isteklerde aşılamaz.
+ */
+export async function takeLookup(
+  bucket: string,
+  limits: { hour: number; day: number }
+): Promise<boolean> {
+  const sql = getDb()
+  const [row] = z
+    .array(z.object({ ok: z.boolean() }))
+    .parse(await sql`select gitscout.take_lookup(${bucket}, ${limits.hour}, ${limits.day}) as ok`)
+  return row?.ok ?? false
+}
+
 /** Son `hours` saatte eklenen oyuncu sayısı. Saatlik sayım kişisel veri tutmadan toplu eklemeyi sınırlar; günlük sayım ana sayfada gösterilir. */
 export async function countRecentPlayers(hours = 1): Promise<number> {
   const sql = getDb()

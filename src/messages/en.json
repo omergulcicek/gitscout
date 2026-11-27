@@ -20,6 +20,7 @@
   "error_github_token": "GitHub token is missing or invalid.",
   "error_github_request": "Couldn't reach GitHub. Try again.",
   "error_too_many_requests": "You've added a lot of cards in a short time. Try again in 10 minutes.",
+  "error_ip_lookups": "You've added a lot of new cards today. You've hit the hourly or daily limit, so try again later.",
   "error_generic": "Something went wrong. Try again.",
   "username_required": "Enter a username",
   "username_too_long": "A username can be at most 39 characters",
