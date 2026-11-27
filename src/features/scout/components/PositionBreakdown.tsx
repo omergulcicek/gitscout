@@ -1,5 +1,10 @@
+import { Link } from "@tanstack/react-router"
+
+import { getLangParam } from "@/helpers/localized-url"
+
 import { LanguageIcon } from "@/features/scout/components/LanguageIcon"
 import { percent } from "@/features/scout/helpers/player-text"
+import { POSITION_SLUGS } from "@/features/scout/schemas/leaderboard-search.schema"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -24,13 +29,17 @@ export function PositionBreakdown({ position, breakdown }: PositionBreakdownProp
       <div className="flex items-baseline justify-between gap-2">
         <h2 id="position-heading" className="flex items-center gap-2 text-sm font-medium">
           {m.col_position()}
-          <span
+          <Link
+            to="/{-$lang}/leaderboard"
+            params={{ lang: getLangParam() }}
+            search={{ pos: POSITION_SLUGS[position] }}
             lang="en"
             data-role={position}
-            className="role-tint rounded-full px-2 py-0.5 text-xs"
+            aria-label={m.rank_open_position({ position })}
+            className="role-tint rounded-full px-2 py-0.5 text-xs outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             {position}
-          </span>
+          </Link>
         </h2>
         <p className="text-xs text-muted-foreground">
           {m.repo_count({ count: breakdown.repoCount })}

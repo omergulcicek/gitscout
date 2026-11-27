@@ -42,6 +42,7 @@ import { leaderboardFacets, queryLeaderboard } from "@/features/scout/helpers/le
 import { playerCountry } from "@/features/scout/helpers/player-country"
 import { computeRanking } from "@/features/scout/helpers/score-player"
 import { matchesPlayer } from "@/features/scout/helpers/search-text"
+import { similarPlayers } from "@/features/scout/helpers/similar-players"
 import { leaderboardSearchSchema } from "@/features/scout/schemas/leaderboard-search.schema"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
@@ -159,7 +160,8 @@ export const getPlayer = createServerFn({ method: "GET" })
       ...player,
       ranking: computeRanking(player, all),
       benchmarks: computeBenchmarks(player, all),
-      dreamTeam: dreamTeamLogins.flatMap((login) => byLogin.get(login.toLowerCase()) ?? [])
+      dreamTeam: dreamTeamLogins.flatMap((login) => byLogin.get(login.toLowerCase()) ?? []),
+      similar: similarPlayers(player, all)
     }
   })
 

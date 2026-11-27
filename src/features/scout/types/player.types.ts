@@ -399,4 +399,6 @@ export type PlayerDetail = ScoredPlayer & {
   benchmarks: Benchmark[]
   /** The owner's dream team in pick order; empty unless a verified account picked one. */
   dreamTeam: ListPlayer[]
+  /** A few developers in the same position with the closest overall score. */
+  similar: ListPlayer[]
 }

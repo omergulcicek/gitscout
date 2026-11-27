@@ -9,6 +9,7 @@ import { BadgeList } from "@/features/scout/components/BadgeList"
 import { Benchmarks } from "@/features/scout/components/Benchmarks"
 import { BirthdayConfetti } from "@/features/scout/components/BirthdayConfetti"
 import { CardActions } from "@/features/scout/components/CardActions"
+import { CountryLink } from "@/features/scout/components/CountryLink"
 import { DreamTeamSection } from "@/features/scout/components/DreamTeamSection"
 import { GetYourCard } from "@/features/scout/components/GetYourCard"
 import { GithubStarBadge } from "@/features/scout/components/GithubStarBadge"
@@ -17,6 +18,7 @@ import { PlayerRank } from "@/features/scout/components/PlayerRank"
 import { PositionBreakdown } from "@/features/scout/components/PositionBreakdown"
 import { ScoutNote } from "@/features/scout/components/ScoutNote"
 import { ShareTextSection } from "@/features/scout/components/ShareTextSection"
+import { SimilarPlayers } from "@/features/scout/components/SimilarPlayers"
 import { StatRadar } from "@/features/scout/components/StatRadar"
 import { TopRepos } from "@/features/scout/components/TopRepos"
 import { VerifiedIcon } from "@/features/scout/components/VerifiedIcon"
@@ -124,6 +126,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
               </a>
               {player.verified ? <VerifiedIcon /> : null}
             </span>
+            <CountryLink player={player} />
             <span className="text-xs text-muted-foreground">
               {m.last_updated({
                 date: new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium" }).format(
@@ -168,6 +171,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-6">
+        <SimilarPlayers login={player.login} players={player.similar} />
         <DreamTeamSection owner={player} players={player.dreamTeam} />
         <ShareTextSection id={SHARE_TEXTS_ID} player={player} />
         <GetYourCard />
