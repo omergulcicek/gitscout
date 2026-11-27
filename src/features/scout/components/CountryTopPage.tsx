@@ -39,7 +39,11 @@ export function CountryTopPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-4 pt-6 pb-20 outline-none sm:px-6"
+      className={cn(
+        "mx-auto flex w-full flex-1 flex-col gap-10 px-4 pt-6 pb-20 outline-none sm:px-6",
+        // A ranked list of four short fields reads best at the podium's width, not the full page.
+        data.unlocked ? "max-w-3xl" : "max-w-5xl"
+      )}
     >
       <Link
         to="/{-$lang}/top"
@@ -50,6 +54,7 @@ export function CountryTopPage() {
         {m.top_back()}
       </Link>
       <PageHeader
+        align={data.unlocked ? "center" : "start"}
         eyebrow={
           <span className="inline-flex items-center gap-2">
             <Flag aria-hidden className={cn(FLAG_CLASS, "h-3.5")} />
