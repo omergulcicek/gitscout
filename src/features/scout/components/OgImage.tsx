@@ -1,5 +1,6 @@
 import { OG_FONT_FAMILY } from "@/lib/og-image"
 
+import { OgLink } from "@/features/scout/components/OgLink"
 import { OgPlayerCard, RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { rarityLabel, statLabel } from "@/features/scout/helpers/player-text"
@@ -87,11 +88,9 @@ export function OgImage({ player, avatar }: OgImageProps) {
             </div>
           ))}
         </div>
-        <div
-          style={{ display: "flex", alignItems: "baseline", gap: 12, fontSize: 22, marginTop: 6 }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22, marginTop: 6 }}>
           <span>{m.cta_title()}</span>
-          <span style={{ color: "#60a5fa", textDecoration: "underline" }}>gitscout.io</span>
+          <OgLink />
         </div>
       </div>
     </div>
