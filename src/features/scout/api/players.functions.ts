@@ -22,6 +22,7 @@ import {
   updateAccountCountry,
   updateAccountProfileDetails
 } from "@/features/scout/api/player-store"
+import { EXAMPLE_LOGINS } from "@/features/scout/constants/example-players.constants"
 import { COUNTRIES } from "@/features/scout/constants/player-country.constants"
 import {
   NEW_LOOKUPS_PER_IP,
@@ -30,13 +31,25 @@ import {
 } from "@/features/scout/constants/scoring.constants"
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
+import { featuredOrder } from "@/features/scout/helpers/featured-players"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { ipBucket, UNKNOWN_IP_BUCKET } from "@/features/scout/helpers/ip-bucket"
+import { leaderboardFacets, queryLeaderboard } from "@/features/scout/helpers/leaderboard-query"
+import { playerCountry } from "@/features/scout/helpers/player-country"
 import { computeRanking } from "@/features/scout/helpers/score-player"
+import { leaderboardSearchSchema } from "@/features/scout/schemas/leaderboard-search.schema"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
 import type { AddPlayerEvent, ScoutingStage } from "@/features/scout/types/add-player.types"
-import type { ListPlayer, PlayerDetail, ScoredPlayer } from "@/features/scout/types/player.types"
+import type {
+  HomeData,
+  LeaderboardFacets,
+  LeaderboardSlice,
+  ListPlayer,
+  PlayerDetail,
+  ScoredPlayer
+} from "@/features/scout/types/player.types"
+import { locales } from "@/paraglide/runtime.js"
 
 type Leaderboard = {
   players: ListPlayer[]
@@ -175,6 +188,63 @@ export const getPlayer = createServerFn({ method: "GET" })
       ...player,
       ranking: computeRanking(player, all),
       benchmarks: computeBenchmarks(player, all)
+    }
+  })
+
+/** Rows in each home page top list. */
+const HOME_TOP_LIMIT = 10
+/** Cards in the "recently added" strip; the wide grid fits eight in one row. */
+const HOME_RECENT_LIMIT = 8
+/** Featured cards sent with the page; "Another card" cycles through them. */
+const HOME_FEATURED_LIMIT = 12
+
+const ranked = (players: readonly ListPlayer[]) =>
+  players.slice(0, HOME_TOP_LIMIT).map((player, index) => ({ ...player, rank: index + 1 }))
+
+/** The home page's data: a few dozen players instead of the whole list. */
+export const getHome = createServerFn({ method: "GET" }).handler(async (): Promise<HomeData> => {
+  const { at, players, recentLogins, latest, lastDayCount } = await cachedList()
+  const byLogin = new Map(players.map((player) => [player.login.toLowerCase(), player]))
+  const turkish = players.filter((player) => playerCountry(player) === "TR")
+  const seed = Math.floor(Date.now() / HOUR_MS)
+  return {
+    top: { world: ranked(players), tr: ranked(turkish) },
+    totals: { world: players.length, tr: turkish.length },
+    examples: EXAMPLE_LOGINS.flatMap((login) => byLogin.get(login) ?? []),
+    featured: featuredOrder(players, new Set(recentLogins), seed).slice(0, HOME_FEATURED_LIMIT),
+    recent: latest
+      .flatMap((entry) => {
+        const player = byLogin.get(entry.login.toLowerCase())
+        return player ? [{ player, addedAt: entry.addedAt }] : []
+      })
+      .slice(0, HOME_RECENT_LIMIT),
+    lastDayCount,
+    generatedAt: new Date(at).toISOString()
+  }
+})
+
+const leaderboardSliceSchema = leaderboardSearchSchema
+  .pick({
+    q: true,
+    pos: true,
+    rarity: true,
+    country: true,
+    program: true,
+    verified: true,
+    sort: true,
+    dir: true,
+    limit: true
+  })
+  .extend({ locale: z.enum(locales) })
+
+/** One page of the leaderboard plus its filter options; the table never receives the whole list. */
+export const getLeaderboardSlice = createServerFn({ method: "GET" })
+  .validator(leaderboardSliceSchema)
+  .handler(async ({ data }): Promise<{ slice: LeaderboardSlice; facets: LeaderboardFacets }> => {
+    const players = await cachedPlayers()
+    return {
+      slice: queryLeaderboard(players, data, data.locale),
+      facets: leaderboardFacets(players)
     }
   })
 

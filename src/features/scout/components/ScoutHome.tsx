@@ -15,28 +15,24 @@ import { RarityLegend } from "@/features/scout/components/RarityLegend"
 import { RecentlyAdded } from "@/features/scout/components/RecentlyAdded"
 import { TopViewSwitch } from "@/features/scout/components/TopViewSwitch"
 import type { TopView } from "@/features/scout/components/TopViewSwitch"
-import { playerCountry } from "@/features/scout/helpers/player-country"
-import { useLeaderboard } from "@/features/scout/hooks/use-leaderboard"
+import { useHome } from "@/features/scout/hooks/use-home"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
-/** Ana sayfada yalnızca ilk oyuncular; tamamı liderlik sayfasında. */
+/** Rows in the top list; must match the server's home top limit. */
 const HOME_LIMIT = 10
 
 const routeApi = getRouteApi("/{-$lang}/")
 
 export function ScoutHome() {
-  const { data } = useLeaderboard()
+  const { data } = useHome()
   const { top } = routeApi.useSearch()
-  const { players: allPlayers } = data
 
-  // Yalnızca Türkçe sayfada Türkiye listesi var ve varsayılan odur; İngilizcede hep genel sıralama.
-  const turkishPlayers = allPlayers.filter((player) => playerCountry(player) === "TR")
-  const canSwitch = getLocale() === "tr" && turkishPlayers.length > 0
+  // Only the Turkish page has the Türkiye list, and it's the default there; English always shows everyone.
+  const canSwitch = getLocale() === "tr" && data.totals.tr > 0
   const view: TopView = canSwitch && top !== "world" ? "tr" : "world"
-  // Sunucu listeyi genel puana göre sıralı döner; sıra numaraları seçili listenin içinde sayılır.
-  const pool = view === "tr" ? turkishPlayers : allPlayers
-  const players = pool.slice(0, HOME_LIMIT)
+  const players = data.top[view]
+  const poolSize = data.totals[view]
 
   return (
     <main
@@ -53,21 +49,20 @@ export function ScoutHome() {
             {m.home_lead()}
           </p>
           <AddPlayerForm variant="command" />
-          <ExamplePlayers players={allPlayers} />
-          <HeroProof players={allPlayers} latest={data.latest} lastDayCount={data.lastDayCount} />
+          <ExamplePlayers players={data.examples} />
+          <HeroProof
+            recent={data.recent}
+            total={data.totals.world}
+            lastDayCount={data.lastDayCount}
+          />
           <GithubStarLink placement="hero" className="self-start" />
         </section>
         {/* Ödül önden görünsün: geniş ekranda vitrin kartı başlığın yanında. */}
-        <FeaturedCard
-          players={allPlayers}
-          recentLogins={data.recentLogins}
-          seed={data.featuredSeed}
-        />
+        <FeaturedCard players={data.featured} />
       </div>
 
       <RecentlyAdded
-        players={allPlayers}
-        latest={data.latest}
+        entries={data.recent}
         lastDayCount={data.lastDayCount}
         generatedAt={data.generatedAt}
       />
@@ -80,7 +75,7 @@ export function ScoutHome() {
             </h2>
             {canSwitch ? <TopViewSwitch view={view} /> : null}
           </div>
-          {pool.length > HOME_LIMIT ? (
+          {poolSize > HOME_LIMIT ? (
             <Link
               to="/{-$lang}/leaderboard"
               params={{ lang: getLangParam() }}
@@ -88,18 +83,18 @@ export function ScoutHome() {
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               {view === "tr"
-                ? m.home_full_table_tr({ count: pool.length })
-                : m.home_full_table({ count: pool.length })}
+                ? m.home_full_table_tr({ count: poolSize })
+                : m.home_full_table({ count: poolSize })}
               <ArrowRight aria-hidden />
             </Link>
           ) : null}
         </div>
 
-        {allPlayers.length === 0 ? (
+        {data.totals.world === 0 ? (
           <EmptyLeaderboard />
         ) : (
           <>
-            <LeaderboardTable players={players} rankPool={pool} />
+            <LeaderboardTable players={players} />
             <RarityLegend className="justify-center" />
           </>
         )}

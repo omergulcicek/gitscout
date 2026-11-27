@@ -6,34 +6,24 @@ import { CountryFilterMenu } from "@/features/scout/components/CountryFilterMenu
 import { EmptyLeaderboard } from "@/features/scout/components/EmptyLeaderboard"
 import { LeaderboardFilters } from "@/features/scout/components/LeaderboardFilters"
 import { LeaderboardLead } from "@/features/scout/components/LeaderboardLead"
+import { LeaderboardSkeleton } from "@/features/scout/components/LeaderboardSkeleton"
 import { LeaderboardTable } from "@/features/scout/components/LeaderboardTable"
 import { PageHeader } from "@/features/scout/components/PageHeader"
 import { RarityFilterChips } from "@/features/scout/components/RarityFilterChips"
-import { isGithubStar } from "@/features/scout/helpers/github-star"
-import { playerCountryFilter } from "@/features/scout/helpers/player-country"
-import { matchesPlayer } from "@/features/scout/helpers/search-text"
-import { useLeaderboard } from "@/features/scout/hooks/use-leaderboard"
 import { useLeaderboardSearch } from "@/features/scout/hooks/use-leaderboard-search"
+import { useLeaderboardSlice } from "@/features/scout/hooks/use-leaderboard-slice"
 import { LEADERBOARD_PAGE_SIZE } from "@/features/scout/schemas/leaderboard-search.schema"
 import * as m from "@/paraglide/messages.js"
 
 export function LeaderboardPage() {
-  const { data } = useLeaderboard()
-  const { players: allPlayers } = data
+  const { data, isPlaceholderData } = useLeaderboardSlice()
   const { search, filters, update, setFilters } = useLeaderboardSearch()
+  // The route loader fills the cache before the first render, so this only shows on an unexpected miss.
+  if (!data) return <LeaderboardSkeleton />
+
+  const { slice, facets } = data
   const query = search.q ?? ""
-  // Sıra numarası seçili mevki, kart türü, ülke ve onay filtresi içinde sayılır; isim araması sırayı değiştirmez,
-  // yoksa aranan herkes 1. görünür.
-  const rankPool = allPlayers.filter(
-    (player) =>
-      (filters.positions.length === 0 || filters.positions.includes(player.position)) &&
-      (filters.rarities.length === 0 || filters.rarities.includes(player.rarity)) &&
-      (filters.country === undefined || playerCountryFilter(player) === filters.country) &&
-      (!filters.star || isGithubStar(player.login)) &&
-      (!filters.verified || player.verified === true)
-  )
-  const players = rankPool.filter((player) => matchesPlayer(player, query))
-  const remaining = players.length - search.limit
+  const remaining = slice.matched - slice.players.length
   const hasFilters =
     filters.positions.length > 0 ||
     filters.rarities.length > 0 ||
@@ -48,10 +38,12 @@ export function LeaderboardPage() {
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       <PageHeader title={m.leaderboard_title()}>
-        {allPlayers.length > 0 ? <LeaderboardLead players={allPlayers} /> : null}
+        {facets.total > 0 ? (
+          <LeaderboardLead total={facets.total} rarityCounts={facets.rarityCounts} />
+        ) : null}
       </PageHeader>
 
-      {allPlayers.length > 0 ? (
+      {facets.total > 0 ? (
         <div className="flex flex-col gap-3">
           {/* Dar ekranda arama tek satırı kaplar; ülke ve filtre butonları alt satırda yan yana durur. */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -70,8 +62,8 @@ export function LeaderboardPage() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <CountryFilterMenu players={allPlayers} />
-              <LeaderboardFilters players={allPlayers} />
+              <CountryFilterMenu facets={facets} />
+              <LeaderboardFilters facets={facets} />
               {hasFilters ? (
                 <Button
                   variant="link"
@@ -93,25 +85,31 @@ export function LeaderboardPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <RarityFilterChips players={allPlayers} />
+            <RarityFilterChips counts={facets.rarityCounts} />
             <span className="text-sm text-muted-foreground">
-              {players.length === allPlayers.length
-                ? m.players_count({ count: players.length })
-                : m.players_count_filtered({ shown: players.length, total: allPlayers.length })}
+              {slice.matched === facets.total
+                ? m.players_count({ count: slice.matched })
+                : m.players_count_filtered({ shown: slice.matched, total: facets.total })}
             </span>
           </div>
         </div>
       ) : null}
 
-      {allPlayers.length === 0 ? (
+      {facets.total === 0 ? (
         <EmptyLeaderboard />
-      ) : players.length === 0 ? (
+      ) : slice.matched === 0 ? (
         <p className="surface px-4 py-8 text-center text-sm text-muted-foreground">
           {m.filter_empty()}
         </p>
       ) : (
         <>
-          <LeaderboardTable players={players} rankPool={rankPool} limit={search.limit} />
+          {/* Dimmed while the next page loads; the previous rows stay so the table doesn't jump. */}
+          <div
+            aria-busy={isPlaceholderData}
+            className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}
+          >
+            <LeaderboardTable players={slice.players} manualSorting />
+          </div>
           {remaining > 0 ? (
             <div className="flex flex-col items-center gap-2">
               <Button
@@ -121,7 +119,7 @@ export function LeaderboardPage() {
                 {m.leaderboard_show_more({ count: Math.min(remaining, LEADERBOARD_PAGE_SIZE) })}
               </Button>
               <p className="text-xs text-muted-foreground">
-                {m.leaderboard_shown({ shown: search.limit, total: players.length })}
+                {m.leaderboard_shown({ shown: slice.players.length, total: slice.matched })}
               </p>
             </div>
           ) : null}

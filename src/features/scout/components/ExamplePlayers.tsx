@@ -5,23 +5,15 @@ import { getLangParam } from "@/helpers/localized-url"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
-/** Herkesin tanıdığı, kartı hazır profiller; tıklayınca bekleme olmadan kart açılır. */
-const EXAMPLE_LOGINS = ["shadcn", "f", "gaearon", "antfu", "wesbos"] as const
-
-/** Hero'daki "Dene:" satırı. Listede olmayan bir örnek sessizce düşer. */
+/** The hero's "Try:" row; the server picks the example players that already have cards. */
 export function ExamplePlayers({ players }: { players: ListPlayer[] }) {
-  const byLogin = new Map(players.map((player) => [player.login.toLowerCase(), player]))
-  const examples = EXAMPLE_LOGINS.flatMap((login) => {
-    const player = byLogin.get(login)
-    return player ? [player] : []
-  })
-  if (examples.length === 0) return null
+  if (players.length === 0) return null
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
       <span>{m.home_try()}</span>
       <ul className="contents">
-        {examples.map((player) => (
+        {players.map((player) => (
           <li key={player.login}>
             <Link
               to="/{-$lang}/u/$username"
