@@ -9,7 +9,7 @@ import * as m from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/{-$lang}/about")({
   head: () => ({
-    meta: pageMeta(m.meta_about(), m.meta_about_description()),
+    meta: pageMeta(m.meta_about(), m.meta_about_description(), "about"),
     links: hreflangLinks("/about")
   }),
   component: AboutPage

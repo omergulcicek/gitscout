@@ -29,7 +29,7 @@ export const Route = createFileRoute("/{-$lang}/leaderboard")({
       })
     ),
   head: () => ({
-    meta: pageMeta(m.meta_leaderboard(), m.meta_leaderboard_description()),
+    meta: pageMeta(m.meta_leaderboard(), m.meta_leaderboard_description(), "leaderboard"),
     links: hreflangLinks("/leaderboard")
   }),
   pendingComponent: LeaderboardSkeleton,

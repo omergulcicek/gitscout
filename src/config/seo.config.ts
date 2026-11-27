@@ -30,8 +30,20 @@ const defaultSeo = {
   }
 } as const
 
-/** A page's own title and description, also used for its social previews. */
-export function pageMeta(title: string, description?: string) {
+/** Pages with their own static preview image in `public/og-pages/`, one file per locale. */
+export type PageOgImage = "about" | "leaderboard" | "login" | "settings" | "special-cards" | "vs"
+
+function pageOgImage(page: PageOgImage): string {
+  const suffix = getLocale() === "tr" ? "-tr" : ""
+  return `${siteConfig.url}/og-pages/${page}${suffix}.jpg`
+}
+
+/**
+ * A page's own title and description, also used for its social previews. With `image`, the page's
+ * own preview replaces the site-wide one from the root route.
+ */
+export function pageMeta(title: string, description?: string, image?: PageOgImage) {
+  const imageUrl = image ? pageOgImage(image) : undefined
   return [
     { title },
     { property: "og:title", content: title },
@@ -41,6 +53,14 @@ export function pageMeta(title: string, description?: string) {
           { name: "description", content: description },
           { property: "og:description", content: description },
           { name: "twitter:description", content: description }
+        ]
+      : []),
+    ...(imageUrl
+      ? [
+          { property: "og:image", content: imageUrl },
+          { property: "og:image:width", content: "1200" },
+          { property: "og:image:height", content: "630" },
+          { name: "twitter:image", content: imageUrl }
         ]
       : [])
   ]
