@@ -499,7 +499,7 @@
   "gender_female": "Kadın",
   "gender_male": "Erkek",
   "gender_unset": "Belirtmek istemiyorum",
-  "gender_hint": "Profilinde gösterilmez. Yeterli veri toplandığında kadın ve erkek liglerini ayrı ayrı açmayı planlıyoruz.",
+  "gender_hint": "Profilinde yazmaz; yalnızca 8 Mart'ta kartın Kadınlar Günü kartına dönüşür. Yeterli veri toplandığında kadın ve erkek liglerini ayrı ayrı açmayı planlıyoruz.",
   "dream_team_label": "Rüya takımın",
   "dream_team_hint": "İlham aldığın geliştiricilerle kadronu kur; en fazla {size} kişi seçebilirsin.",
   "dream_team_add": "Geliştirici ara ve ekle",

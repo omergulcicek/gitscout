@@ -513,7 +513,7 @@
   "gender_female": "Woman",
   "gender_male": "Man",
   "gender_unset": "Prefer not to say",
-  "gender_hint": "Not shown on your profile. Once there's enough data, we plan to split the rankings into separate women's and men's leagues.",
+  "gender_hint": "Not shown on your profile, except that your card turns into the Women's Day card on March 8. Once there's enough data, we plan to split the rankings into separate women's and men's leagues.",
   "dream_team_label": "Your dream team",
   "dream_team_hint": "Build your squad from the developers who inspire you, up to {size} of them.",
   "dream_team_add": "Search and add a developer",
