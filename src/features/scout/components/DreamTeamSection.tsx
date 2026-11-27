@@ -28,7 +28,7 @@ export function DreamTeamSection({ owner, players }: DreamTeamSectionProps) {
   if (players.length === 0 && !isOwner) return null
 
   return (
-    <section aria-labelledby="dream-team-heading" className="flex flex-col gap-4">
+    <section aria-labelledby="dream-team-heading" className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 id="dream-team-heading" className="text-lg font-semibold">
           {m.dream_team_title()}
@@ -41,9 +41,11 @@ export function DreamTeamSection({ owner, players }: DreamTeamSectionProps) {
       </div>
 
       {players.length > 0 ? (
-        <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        // Phones: one row that scrolls sideways and snaps per card, like "Recently added"; the next card
+        // peeks in so the swipe is obvious. Wide screens: all five side by side.
+        <ol className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0 lg:pb-0">
           {players.map((player) => (
-            <li key={player.login}>
+            <li key={player.login} className="w-40 shrink-0 snap-start lg:w-auto">
               <Link
                 to="/{-$lang}/u/$username"
                 params={{ lang: getLangParam(), username: player.login }}
