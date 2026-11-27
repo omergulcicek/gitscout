@@ -4,7 +4,6 @@ import { cn } from "cn"
 
 import { getLangParam } from "@/helpers/localized-url"
 
-import { GithubStarCta } from "@/components/shared/GithubStarCta"
 import { buttonVariants } from "@/components/ui/button"
 import { BadgeList } from "@/features/scout/components/BadgeList"
 import { Benchmarks } from "@/features/scout/components/Benchmarks"
@@ -148,7 +147,6 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
             shareTextsId={SHARE_TEXTS_ID}
           />
           <SeasonLinks login={player.login} seasons={player.seasons} />
-          <GithubStarCta />
           <div className="flex flex-col items-center gap-1">
             <span className="inline-flex items-center gap-1">
               <a
