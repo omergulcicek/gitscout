@@ -38,6 +38,12 @@ export const NOT_FOUND_TTL_MS = 10 * 60_000
  */
 export const REFRESH = { maxAgeDays: 7, maxPerRun: 30, timeBudgetMs: 50_000 }
 
+/**
+ * Puan ve sıra geçmişi: saatlik yenileme işi son kayıttan bu kadar gün geçince bütün oyuncuların puanını ve
+ * sırasını kaydeder. `SCORE_VERSION` değişince süre beklenmeden yeni bir kayıt alınır.
+ */
+export const SNAPSHOT_INTERVAL_DAYS = 14
+
 export const STAT_WEIGHTS: Record<StatKey, number> = {
   act: 0.2,
   imp: 0.2,

@@ -483,3 +483,43 @@ export async function postponePlayer(login: string): Promise<void> {
   const sql = getRefreshDb()
   await sql`update players set fetched_at = now() where login = ${keyOf(login)}`
 }
+
+/* ---------- Puan ve sıra geçmişi (yalnızca gitscout_refresher rolüyle) ---------- */
+
+/** Son turun anı ve formül sürümü; tablo boşsa `null`. */
+export async function getLatestSnapshot(): Promise<{ takenAt: Date; scoreVersion: number } | null> {
+  const sql = getRefreshDb()
+  const [row] = z
+    .array(z.object({ taken_at: z.date(), score_version: z.number() }))
+    .parse(
+      await sql`select taken_at, score_version from player_snapshots order by taken_at desc limit 1`
+    )
+  return row ? { takenAt: row.taken_at, scoreVersion: row.score_version } : null
+}
+
+/** Puanı bu kodun formül sürümünden farklı bir sürümle yazılmış oyuncu sayısı. */
+export async function countUnsettledScores(): Promise<number> {
+  const sql = getRefreshDb()
+  const [row] = z
+    .array(z.object({ count: z.coerce.number() }))
+    .parse(await sql`select count(*) as count from players where score_version <> ${SCORE_VERSION}`)
+  return row?.count ?? 0
+}
+
+/**
+ * Bütün oyuncuların puanını ve sırasını tek turda, aynı anla yazar; yazılan satır sayısını döner.
+ * Sıra liderlik tablosuyla aynı: yuvarlanmamış puana, eşitlikte kullanıcı adına göre. Sayımdan sonra
+ * puanı başka bir sürümle yazılan oyuncu çıkarsa tur yazılmaz (0 döner).
+ */
+export async function insertSnapshot(takenAt: Date): Promise<number> {
+  const sql = getRefreshDb()
+  const result = await sql`
+    insert into player_snapshots (login, taken_at, ovr, rank, score_version)
+    select login, ${takenAt}, ovr,
+      row_number() over (order by coalesce((scored ->> 'ovrExact')::float8, ovr) desc, login),
+      score_version
+    from players
+    where not exists (select 1 from players where score_version <> ${SCORE_VERSION})
+  `
+  return result.count
+}
