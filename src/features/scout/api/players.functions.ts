@@ -34,6 +34,7 @@ import {
 } from "@/features/scout/constants/scoring.constants"
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
+import { countrySummary } from "@/features/scout/helpers/country-summary"
 import { dailyBest } from "@/features/scout/helpers/daily-best"
 import type { DailyBestSlot } from "@/features/scout/helpers/daily-best"
 import { popularPresets } from "@/features/scout/helpers/duel-presets"
@@ -50,6 +51,7 @@ import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
 import type { AddPlayerEvent, ScoutingStage } from "@/features/scout/types/add-player.types"
 import type {
+  CountryTop,
   HomeData,
   LeaderboardFacets,
   LeaderboardSlice,
@@ -209,6 +211,22 @@ export const getHome = createServerFn({ method: "GET" }).handler(async (): Promi
     generatedAt: new Date(at).toISOString()
   }
 })
+
+/** Rows on the country page; the full table is a link away. */
+const COUNTRY_TOP_LIMIT = 100
+
+/** Türkiye's top 100 with counts for the page intro, from the cached list. */
+export const getTurkeyTop = createServerFn({ method: "GET" }).handler(
+  async (): Promise<CountryTop> => {
+    const players = (await cachedPlayers()).filter((player) => playerCountry(player) === "TR")
+    return {
+      ...countrySummary(players),
+      players: players
+        .slice(0, COUNTRY_TOP_LIMIT)
+        .map((player, index) => ({ ...player, rank: index + 1 }))
+    }
+  }
+)
 
 const leaderboardSliceSchema = leaderboardSearchSchema
   .pick({

@@ -381,6 +381,14 @@ export type HomeData = {
   generatedAt: string
 }
 
+/** The country page: the top players of one country and a few counts for its intro. */
+export type CountryTop = {
+  players: RankedPlayer[]
+  total: number
+  rarityCounts: Record<Rarity, number>
+  topPosition: Position | null
+}
+
 /** Filter options and summary counts for the leaderboard, computed from the whole list. */
 export type LeaderboardFacets = {
   total: number

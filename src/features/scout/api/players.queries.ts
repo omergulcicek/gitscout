@@ -7,6 +7,7 @@ import {
   getPlayer,
   getPlayersByLogin,
   getSpecialCardsSample,
+  getTurkeyTop,
   searchPlayers
 } from "@/features/scout/api/players.functions"
 import { playerKeys } from "@/features/scout/api/query-keys"
@@ -29,6 +30,13 @@ export const homeQueryOptions = () =>
     queryFn: ({ signal }) => getHome({ signal }),
     // The featured card turns over every hour; shorter than the list's day so it isn't stuck.
     staleTime: 5 * 60 * 1000
+  })
+
+export const turkeyTopQueryOptions = () =>
+  queryOptions({
+    queryKey: playerKeys.turkeyTop(),
+    queryFn: ({ signal }) => getTurkeyTop({ signal }),
+    staleTime: DAY_MS
   })
 
 export type LeaderboardSliceParams = Pick<

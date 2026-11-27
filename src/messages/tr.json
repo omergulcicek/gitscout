@@ -678,5 +678,12 @@
   "lost_card_chip": "Kayıp",
   "lost_card_player_subtitle": "Henüz keşfedilmedi",
   "lost_card_page_name": "Kayıp sayfa",
-  "lost_card_page_subtitle": "Burada kimse yok"
+  "lost_card_page_subtitle": "Burada kimse yok",
+  "meta_top_turkey": "Türkiye'nin en iyi 100 GitHub geliştiricisi · Gitscout",
+  "meta_top_turkey_description": "Herkese açık GitHub verisinden puanlanan {count} Türk geliştirici arasından en yüksek puanlı 100 kişi: rolleri, kartları ve sıraları.",
+  "top_turkey_title": "Türkiye'nin en iyi 100 GitHub geliştiricisi",
+  "top_turkey_intro": "Gitscout'ta Türkiye'den {count} geliştirici puanlandı: {icon} İkon, {gold} Altın, {silver} Gümüş ve {bronze} Bronz kart.",
+  "top_turkey_intro_role": "En kalabalık rol {role}.",
+  "top_turkey_podium": "İlk üç",
+  "footer_top_turkey": "Türkiye'nin en iyileri"
 }

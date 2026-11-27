@@ -699,5 +699,12 @@
   "lost_card_chip": "Lost",
   "lost_card_player_subtitle": "Yet to be scouted",
   "lost_card_page_name": "Missing page",
-  "lost_card_page_subtitle": "Nobody here"
+  "lost_card_page_subtitle": "Nobody here",
+  "meta_top_turkey": "Top 100 GitHub developers in Turkey · Gitscout",
+  "meta_top_turkey_description": "The 100 highest-rated of {count} developers from Turkey, scored from public GitHub data: their roles, cards and ranks.",
+  "top_turkey_title": "Top 100 GitHub developers in Turkey",
+  "top_turkey_intro": "Gitscout has scored {count} developers from Turkey: {icon} Icon, {gold} Gold, {silver} Silver and {bronze} Bronze cards.",
+  "top_turkey_intro_role": "The most common role is {role}.",
+  "top_turkey_podium": "Top three",
+  "footer_top_turkey": "Top in Turkey"
 }
