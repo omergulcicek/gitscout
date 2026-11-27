@@ -1,5 +1,6 @@
 import { notFound } from "@tanstack/react-router"
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start"
+import { getRequestIP } from "@tanstack/react-start/server"
 import { z } from "zod"
 
 import { getCurrentViewer } from "@/lib/auth.functions"
@@ -16,18 +17,21 @@ import {
   getRecentProfileViews,
   getScoredPlayer,
   insertPlayer,
+  takeLookup,
   updateAccountBirthDate,
   updateAccountCountry,
   updateAccountProfileDetails
 } from "@/features/scout/api/player-store"
 import { COUNTRIES } from "@/features/scout/constants/player-country.constants"
 import {
+  NEW_LOOKUPS_PER_IP,
   NEW_PLAYERS_PER_HOUR,
   NOT_FOUND_TTL_MS
 } from "@/features/scout/constants/scoring.constants"
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
+import { ipBucket } from "@/features/scout/helpers/ip-bucket"
 import { computeRanking } from "@/features/scout/helpers/score-player"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
@@ -193,8 +197,9 @@ async function fetchFacts(login: string, onStage?: (stage: ScoutingStage) => voi
  */
 function classifyLookupFailure(error: unknown): LookupFailure {
   if (!(error instanceof Error)) return "costly"
-  // Saatlik sınırın kendi hatası: nedeni yok, GitHub'a gidilmedi.
+  // Saatlik sınırın ve IP sınırının kendi hataları: nedeni yok, GitHub'a gidilmedi.
   if (error.message === "github:rate-limit" && error.cause === undefined) return "free"
+  if (error.message === "limit:ip-lookups") return "free"
   const { cause } = error
   if (!(cause instanceof GithubError)) return "costly"
   if (cause.kind === "not-found") return "not-found"
@@ -209,12 +214,21 @@ const lookups = createLookupGuard({
 })
 
 /**
+ * İsteği yapanın IP kovası. Vercel X-Forwarded-For başlığını kendisi yazar; istemcinin gönderdiği değer
+ * kullanılmaz. Akışlı yanıtta istek bağlamı sonradan kaybolabileceği için işleyicinin başında okunur.
+ */
+function requestIpBucket(): string {
+  return ipBucket(getRequestIP({ xForwardedFor: true }))
+}
+
+/**
  * Oyuncu kayıtlıysa GitHub'a gitmeden döner. Değilse bir kez çekilip kaydedilir;
  * kayıtlı veri sonradan değiştirilemez. Saatlik sınıra başarısız sorgular da sayılır: yoksa var olmayan
  * adlarla GitHub kotası sınırsızca harcanabilir ve yeni kartlar da yenileme de durur.
  */
 async function createPlayer(
   username: string,
+  lookupBucket: string,
   onStage?: (stage: ScoutingStage) => void
 ): Promise<ScoredPlayer> {
   const existing = await getScoredPlayer(username)
@@ -225,6 +239,9 @@ async function createPlayer(
     if ((await countRecentPlayers()) + lookups.recentFailures() >= NEW_PLAYERS_PER_HOUR) {
       throw new Error("github:rate-limit")
     }
+    // Hak yalnızca GitHub'a gerçekten gidilecekken harcanır: kayıtlı kart, süren sorgu ve az önce
+    // bulunamayan ad buraya hiç ulaşmaz.
+    if (!(await takeLookup(lookupBucket, NEW_LOOKUPS_PER_IP))) throw new Error("limit:ip-lookups")
 
     const facts = await fetchFacts(username, onStage)
     const player = await insertPlayer({
@@ -239,7 +256,9 @@ async function createPlayer(
 
 export const addPlayer = createServerFn({ method: "POST" })
   .validator(addPlayerSchema)
-  .handler(async ({ data }): Promise<ScoredPlayer> => await createPlayer(data.username))
+  .handler(
+    async ({ data }): Promise<ScoredPlayer> => await createPlayer(data.username, requestIpBucket())
+  )
 
 /**
  * `addPlayer` ile aynı işi yapar; GitHub'dan veri toplanırken biten her aşamayı akışla bildirir.
@@ -257,7 +276,9 @@ export const addPlayerStream = createServerFn({ method: "POST" })
       signal.wake?.()
     }
 
-    const task = createPlayer(data.username, (stage) => push({ type: "stage", ...stage }))
+    const task = createPlayer(data.username, requestIpBucket(), (stage) =>
+      push({ type: "stage", ...stage })
+    )
       .then((player) => push({ type: "done", player }))
       .finally(() => {
         signal.finished = true
