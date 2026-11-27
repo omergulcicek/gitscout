@@ -9,7 +9,6 @@ import { AddPlayerForm } from "@/features/scout/components/AddPlayerForm"
 import { EmptyLeaderboard } from "@/features/scout/components/EmptyLeaderboard"
 import { ExamplePlayers } from "@/features/scout/components/ExamplePlayers"
 import { FeaturedCard } from "@/features/scout/components/FeaturedCard"
-import { FeaturedStrip } from "@/features/scout/components/FeaturedStrip"
 import { HeroProof } from "@/features/scout/components/HeroProof"
 import { LeaderboardTable } from "@/features/scout/components/LeaderboardTable"
 import { RarityLegend } from "@/features/scout/components/RarityLegend"
@@ -34,7 +33,6 @@ export function ScoutHome() {
   const view: TopView = canSwitch && top !== "world" ? "tr" : "world"
   const players = data.top[view]
   const poolSize = data.totals[view]
-  const featured = data.featured[getLocale() === "tr" ? "tr" : "world"]
 
   return (
     <main
@@ -43,7 +41,7 @@ export function ScoutHome() {
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
-        <section className="flex max-w-2xl min-w-0 flex-col gap-5 pt-4 sm:pt-8">
+        <section className="flex max-w-2xl flex-col gap-5 pt-4 sm:pt-8">
           <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
             {m.home_title()}
           </h1>
@@ -51,7 +49,6 @@ export function ScoutHome() {
             {m.home_lead()}
           </p>
           <AddPlayerForm variant="command" />
-          <FeaturedStrip players={featured} />
           <ExamplePlayers players={data.examples} />
           <HeroProof
             recent={data.recent}
@@ -60,9 +57,9 @@ export function ScoutHome() {
           />
           <GithubStarLink placement="hero" className="self-start" />
         </section>
-        {/* Ödül önden görünsün: geniş ekranda vitrin kartı başlığın yanında. */}
+        {/* The prize up front: beside the title on wide screens, right under the hero on phones. */}
         {/* The showcase follows the page language, not the top-list switch. */}
-        <FeaturedCard players={featured} />
+        <FeaturedCard players={data.featured[getLocale() === "tr" ? "tr" : "world"]} />
       </div>
 
       <RecentlyAdded
