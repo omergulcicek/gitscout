@@ -5,8 +5,8 @@ import { siteConfig } from "@/config/site.config"
 import { hreflangLinks } from "@/helpers/localized-url"
 
 import { seasonQueryOptions } from "@/features/scout/api/players.queries"
-import { PlayerDetailSkeleton } from "@/features/scout/components/PlayerDetailSkeleton"
 import { SeasonPage } from "@/features/scout/components/SeasonPage"
+import { SeasonPageSkeleton } from "@/features/scout/components/SeasonPageSkeleton"
 import { SEASON_YEAR } from "@/features/scout/helpers/season"
 import { seasonSearchSchema } from "@/features/scout/schemas/season-search.schema"
 import * as m from "@/paraglide/messages.js"
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/{-$lang}/u/$username_/season")({
       links: hreflangLinks(`/u/${params.username}/season`)
     }
   },
-  pendingComponent: PlayerDetailSkeleton,
+  pendingComponent: SeasonPageSkeleton,
   component: SeasonRoute
 })
 
