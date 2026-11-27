@@ -39,11 +39,7 @@ export function CountryTopPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className={cn(
-        "mx-auto flex w-full flex-1 flex-col gap-10 px-4 pt-6 pb-20 outline-none sm:px-6",
-        // A ranked list of four short fields reads best at the podium's width, not the full page.
-        data.unlocked ? "max-w-3xl" : "max-w-5xl"
-      )}
+      className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       <Link
         to="/{-$lang}/top"
@@ -53,23 +49,30 @@ export function CountryTopPage() {
         <ArrowLeft aria-hidden className="size-4" />
         {m.top_back()}
       </Link>
-      <PageHeader
-        align={data.unlocked ? "center" : "start"}
-        eyebrow={
-          <span className="inline-flex items-center gap-2">
-            <Flag aria-hidden className={cn(FLAG_CLASS, "h-3.5")} />
-            {name}
-          </span>
-        }
-        title={
-          data.unlocked
-            ? m.top_country_title({ country: name, count: data.players.length })
-            : m.top_locked_title({ country: name })
-        }
-      >
-        {data.unlocked ? <CountryIntro data={data} /> : null}
-      </PageHeader>
-      {data.unlocked ? <UnlockedCountry data={data} name={name} /> : <LockedCountry data={data} />}
+      {/* The back link stays on the page edge; a ranked list of four short fields reads best at the podium's width. */}
+      <div className={cn("flex flex-col gap-10", data.unlocked && "mx-auto w-full max-w-3xl")}>
+        <PageHeader
+          align={data.unlocked ? "center" : "start"}
+          eyebrow={
+            <span className="inline-flex items-center gap-2">
+              <Flag aria-hidden className={cn(FLAG_CLASS, "h-3.5")} />
+              {name}
+            </span>
+          }
+          title={
+            data.unlocked
+              ? m.top_country_title({ country: name, count: data.players.length })
+              : m.top_locked_title({ country: name })
+          }
+        >
+          {data.unlocked ? <CountryIntro data={data} /> : null}
+        </PageHeader>
+        {data.unlocked ? (
+          <UnlockedCountry data={data} name={name} />
+        ) : (
+          <LockedCountry data={data} />
+        )}
+      </div>
     </main>
   )
 }
