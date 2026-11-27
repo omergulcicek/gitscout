@@ -5,6 +5,9 @@ import type { ListPlayer, PlayerFacts, Position } from "@/features/scout/types/p
 /** The season the year-in-review page shows. */
 export const SEASON_YEAR = 2026
 
+/** Years on the career chart, the season included; older years still count for the career record. */
+export const CAREER_CHART_YEARS = 10
+
 /** A pool smaller than this gives a noisy percentile, so the comparison widens. */
 const MIN_POOL = 30
 

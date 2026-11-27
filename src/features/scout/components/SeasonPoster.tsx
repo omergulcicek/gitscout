@@ -4,7 +4,7 @@ import { cn } from "cn"
 
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { number } from "@/features/scout/helpers/player-text"
-import { careerYearLabel } from "@/features/scout/helpers/season"
+import { CAREER_CHART_YEARS, careerYearLabel } from "@/features/scout/helpers/season"
 import type { Season } from "@/features/scout/helpers/season"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import type { SeasonReport } from "@/features/scout/types/season.types"
@@ -134,14 +134,15 @@ function FormBars({ season }: { season: Season }) {
 }
 
 function CareerBars({ season, career }: { season: Season; career: SeasonReport["career"] }) {
-  if (career.length < 2) return null
-  const max = Math.max(1, ...career.map((entry) => entry.total))
-  const latest = career.at(-1)?.year ?? season.year
+  const years = career.slice(-CAREER_CHART_YEARS)
+  if (years.length < 2) return null
+  const max = Math.max(1, ...years.map((entry) => entry.total))
+  const latest = years.at(-1)?.year ?? season.year
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-xs text-white/60">{m.season_career_title()}</h2>
       <div className="flex h-14 items-end gap-1">
-        {career.map((entry) => (
+        {years.map((entry) => (
           <span key={entry.year} className="flex h-full flex-1 flex-col items-center gap-1">
             <span className="flex w-full flex-1 flex-col justify-end">
               <span

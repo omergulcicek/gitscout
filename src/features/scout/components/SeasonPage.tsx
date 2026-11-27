@@ -12,10 +12,14 @@ import { RarityChip } from "@/features/scout/components/RarityChip"
 import { SeasonPack } from "@/features/scout/components/SeasonPack"
 import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
 import { SeasonSnow } from "@/features/scout/components/SeasonSnow"
-import { SeasonTimeline } from "@/features/scout/components/SeasonTimeline"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { archetypeNote, number, titleText } from "@/features/scout/helpers/player-text"
-import { careerRecord, careerYearLabel, seasonGrowth } from "@/features/scout/helpers/season"
+import {
+  CAREER_CHART_YEARS,
+  careerRecord,
+  careerYearLabel,
+  seasonGrowth
+} from "@/features/scout/helpers/season"
 import type { Season, SeasonStanding } from "@/features/scout/helpers/season"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useSeason } from "@/features/scout/hooks/use-season"
@@ -127,15 +131,10 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
           <SeasonStats season={season} />
           <FormChart season={season} />
           <CareerChart season={season} career={data.career} />
-          <div className="grid gap-6 lg:grid-cols-2">
-            <ScoutReport player={player} season={season} career={data.career} />
-            <Standing standing={data.standing} />
-          </div>
+          <ScoutReport player={player} season={season} career={data.career} />
           <Rival report={data} />
         </div>
       </div>
-
-      {data.final ? null : <SeasonTimeline now={new Date(data.generatedAt)} />}
 
       {/* Off-screen copy that the download captures; the inner node has no position of its own. */}
       <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px]">
@@ -324,11 +323,12 @@ function ScoutReport({
 }
 
 function CareerChart({ season, career }: { season: Season; career: SeasonReport["career"] }) {
-  if (career.length < 2) return null
+  const years = career.slice(-CAREER_CHART_YEARS)
+  if (years.length < 2) return null
   const growth = seasonGrowth(season)
-  const max = Math.max(1, ...career.map((entry) => entry.total))
-  const first = career[0]
-  const last = career.at(-1)
+  const max = Math.max(1, ...years.map((entry) => entry.total))
+  const first = years[0]
+  const last = years.at(-1)
 
   return (
     <section aria-labelledby="season-career-heading" className="surface flex flex-col gap-3 p-4">
@@ -337,7 +337,9 @@ function CareerChart({ season, career }: { season: Season; career: SeasonReport[
           <h2 id="season-career-heading" className="text-sm font-medium">
             {m.season_career_title()}
           </h2>
-          <p className="text-xs text-muted-foreground">{m.season_career_caption()}</p>
+          <p className="text-xs text-muted-foreground">
+            {m.season_career_caption({ years: years.length })}
+          </p>
         </div>
         {growth === null ? null : (
           <span
@@ -362,7 +364,7 @@ function CareerChart({ season, career }: { season: Season; career: SeasonReport[
         })}
         className="flex h-36 items-end gap-1"
       >
-        {career.map((entry) => {
+        {years.map((entry) => {
           const current = entry.year === season.year
           return (
             <li key={entry.year} className="flex h-full min-w-0 flex-1 flex-col items-center gap-1">
@@ -381,7 +383,7 @@ function CareerChart({ season, career }: { season: Season; career: SeasonReport[
                   current ? "font-semibold text-foreground" : "text-muted-foreground"
                 )}
               >
-                {careerYearLabel(entry.year, career.at(-1)?.year ?? season.year)}
+                {careerYearLabel(entry.year, last?.year ?? season.year)}
               </span>
               <span className="sr-only">
                 {entry.year}: {number(entry.total)}
@@ -412,25 +414,6 @@ function poolName(standing: SeasonStanding): string {
 function standingTop(standing: SeasonStanding): number | null {
   if (standing.size === 0) return null
   return Math.max(1, Math.round((1 - standing.aheadShare) * 100))
-}
-
-function Standing({ standing }: { standing: SeasonStanding }) {
-  const top = standingTop(standing)
-  if (top === null) return null
-
-  return (
-    <section aria-labelledby="season-standing-heading" className="surface flex flex-col gap-1 p-4">
-      <h2 id="season-standing-heading" className="text-sm font-medium">
-        {m.season_standing_title()}
-      </h2>
-      <p className="font-mono text-3xl font-semibold tabular-nums">
-        {m.season_standing_value({ pct: top })}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {m.season_standing_caption({ pool: poolName(standing), size: number(standing.size) })}
-      </p>
-    </section>
-  )
 }
 
 function Rival({ report }: { report: SeasonReport }) {
