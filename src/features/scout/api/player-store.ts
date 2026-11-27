@@ -97,7 +97,7 @@ async function rescore(logins: string[]): Promise<ScoredPlayer[]> {
   return scored.map(({ player }) => player)
 }
 
-/** Hesap tablosundan gelen, kişinin kendi verdiği bilgiler. Puan özetine yazılmaz, her okumada eklenir. */
+/** Onay hesap tablosundan, ülke `players.country` sütunundan gelir. Puan özetine yazılmaz, her okumada eklenir. */
 const accountColumnsSchema = z.object({
   verified: z.boolean(),
   claimed_country: z.string().nullable()
@@ -105,7 +105,7 @@ const accountColumnsSchema = z.object({
 
 type AccountColumns = z.infer<typeof accountColumnsSchema>
 
-/** Onay ve sahibin seçtiği ülke oyuncuya eklenir; yalnızca doluysa alan yazılır ki liste yükü büyümesin. */
+/** Onay ve veritabanındaki ülke oyuncuya eklenir; yalnızca doluysa alan yazılır ki liste yükü büyümesin. */
 function withAccount<T extends ListPlayer | ScoredPlayer>(player: T, account: AccountColumns): T {
   const claimedCountry = COUNTRIES.find((country) => country === account.claimed_country)
   return {
@@ -138,7 +138,7 @@ export async function getListPlayers(): Promise<{ players: ListPlayer[]; pending
             from jsonb_each(p.scored -> 'stats') as s(k, v)
           )) as summary,
         coalesce(a.eligible, false) as verified,
-        case when a.eligible then a.country end as claimed_country
+        p.country as claimed_country
       from players p
       left join accounts a on a.login = p.login
       order by p.ovr desc, p.login
@@ -190,7 +190,7 @@ export async function getScoredPlayer(login: string): Promise<ScoredPlayer | nul
       await sql`
       select p.login, p.scored, p.score_version,
         coalesce(a.eligible, false) as verified,
-        case when a.eligible then a.country end as claimed_country,
+        p.country as claimed_country,
         case when a.eligible then to_char(a.birth_date, 'MM-DD') end as birth_month_day,
         coalesce(a.eligible and a.gender = 'female', false) as female,
         case when a.eligible then a.card_face end as card_face,
@@ -243,7 +243,10 @@ export async function updateAccountBirthDate(
   return rows.length > 0
 }
 
-/** Onaylı hesabın ülkesini yazar. Sıklık sınırı SQL'de: son değişiklikten bu kadar saniye geçmeden yazılmaz. */
+/**
+ * Writes the verified owner's country to `players.country`, the single source the cards read; `null` falls back to
+ * the GitHub location. The rate limit lives in SQL: nothing is written until this many seconds pass since the last change.
+ */
 export async function updateAccountCountry(
   githubId: number,
   country: string | null,
@@ -251,13 +254,21 @@ export async function updateAccountCountry(
 ): Promise<boolean> {
   const sql = getDb()
   const rows = await sql`
-    update accounts
-    set country = ${country}, country_updated_at = now(), updated_at = now()
-    where github_id = ${githubId}
-      and eligible
-      and (country_updated_at is null
-        or country_updated_at < now() - make_interval(secs => ${minIntervalSeconds}))
-    returning github_id
+    with account as (
+      update accounts
+      set country_updated_at = now(), updated_at = now()
+      where github_id = ${githubId}
+        and eligible
+        and login is not null
+        and (country_updated_at is null
+          or country_updated_at < now() - make_interval(secs => ${minIntervalSeconds}))
+      returning login
+    )
+    update players as p
+    set country = ${country}
+    from account
+    where p.login = account.login
+    returning p.login
   `
   return rows.length > 0
 }
