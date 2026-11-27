@@ -28,8 +28,8 @@ export function SeasonSnow({ count }: SeasonSnowProps) {
     <Snowfall
       snowflakeCount={count}
       radius={[0.6, 2.6]}
-      speed={[0.4, 1.6]}
-      wind={[-0.4, 1]}
+      speed={[0.8, 2.4]}
+      wind={[0.6, 3]}
       // Pale blue reads on both the light and the dark theme; pure white vanishes on light.
       color="#cfe4f8"
       style={{

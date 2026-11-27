@@ -25,8 +25,8 @@ import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
 /** Flakes on screen normally and during the pack's reveal, and how long the flurry lasts. */
-const LIGHT_FLAKES = 60
-const FLURRY_FLAKES = 320
+const LIGHT_FLAKES = 160
+const FLURRY_FLAKES = 650
 const FLURRY_MS = 6000
 
 type SeasonPageProps = {

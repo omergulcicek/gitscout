@@ -46,7 +46,7 @@ export function SeasonLanding() {
       tabIndex={-1}
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-4 pt-6 pb-20 outline-none sm:px-6"
     >
-      <SeasonSnow count={70} />
+      <SeasonSnow count={160} />
       <header className="flex max-w-2xl flex-col gap-4">
         <p className="inline-flex items-center gap-2 text-xs font-medium tracking-widest text-muted-foreground uppercase">
           <Snowflake aria-hidden className="size-4" />
