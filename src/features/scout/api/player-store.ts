@@ -557,3 +557,29 @@ export async function getDreamTeamLogins(login: string): Promise<string[]> {
   )
   return rows.map((row) => row.player_login)
 }
+
+const seasonFactsSchema = z.object({
+  calendar: z.array(z.object({ date: z.string(), count: z.number() })),
+  yearly: z.array(z.object({ year: z.number(), total: z.number(), reviews: z.number().optional() }))
+})
+
+/**
+ * The two raw fields the season page needs, read without the rest of the ~70 KB facts. Null when the
+ * player isn't stored or the stored record has another shape.
+ */
+export async function getSeasonFacts(
+  login: string
+): Promise<z.infer<typeof seasonFactsSchema> | null> {
+  const sql = getDb()
+  const rows = z.array(z.object({ calendar: z.unknown(), yearly: z.unknown() })).parse(
+    await sql`
+      select facts -> 'calendar' as calendar, facts -> 'yearly' as yearly
+      from players
+      where login = ${keyOf(login)}
+    `
+  )
+  const row = rows[0]
+  if (!row) return null
+  const parsed = seasonFactsSchema.safeParse(row)
+  return parsed.success ? parsed.data : null
+}

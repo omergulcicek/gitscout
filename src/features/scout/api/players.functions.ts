@@ -18,6 +18,7 @@ import {
   getRecentLogins,
   getRecentProfileViews,
   getScoredPlayer,
+  getSeasonFacts,
   insertPlayer,
   takeLookup,
   updateAccountBirthDate,
@@ -42,6 +43,7 @@ import { leaderboardFacets, queryLeaderboard } from "@/features/scout/helpers/le
 import { countPlayerCountries, playerCountry } from "@/features/scout/helpers/player-country"
 import { computeRanking } from "@/features/scout/helpers/score-player"
 import { matchesPlayer } from "@/features/scout/helpers/search-text"
+import { computeSeason, seasonStanding } from "@/features/scout/helpers/season"
 import { similarPlayers } from "@/features/scout/helpers/similar-players"
 import { leaderboardSearchSchema } from "@/features/scout/schemas/leaderboard-search.schema"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
@@ -55,6 +57,7 @@ import type {
   PlayerDetail,
   ScoredPlayer
 } from "@/features/scout/types/player.types"
+import type { SeasonReport } from "@/features/scout/types/season.types"
 import { locales } from "@/paraglide/runtime.js"
 
 type LatestAddition = { login: string; addedAt: string }
@@ -162,6 +165,28 @@ export const getPlayer = createServerFn({ method: "GET" })
       benchmarks: computeBenchmarks(player, all),
       dreamTeam: dreamTeamLogins.flatMap((login) => byLogin.get(login.toLowerCase()) ?? []),
       similar: similarPlayers(player, all)
+    }
+  })
+
+/** The season page: the year's numbers from the raw calendar, the player's standing and a suggested rival. */
+export const getSeason = createServerFn({ method: "GET" })
+  .validator(z.object({ username: z.string() }))
+  .handler(async ({ data }): Promise<SeasonReport> => {
+    const username = usernameSchema.safeParse(data.username)
+    if (!username.success) throw notFound()
+    const [player, facts] = await Promise.all([
+      getScoredPlayer(username.data),
+      getSeasonFacts(username.data)
+    ])
+    const season = facts ? computeSeason(facts) : null
+    if (!player || !season) throw notFound()
+    const all = await cachedPlayers()
+    const self = all.find((entry) => entry.login.toLowerCase() === player.login.toLowerCase())
+    return {
+      player,
+      season,
+      standing: seasonStanding(self ?? player, all),
+      rival: similarPlayers(player, all, 1)[0] ?? null
     }
   })
 

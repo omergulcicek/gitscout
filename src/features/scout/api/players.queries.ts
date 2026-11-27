@@ -6,6 +6,7 @@ import {
   getLeaderboardSlice,
   getPlayer,
   getPlayersByLogin,
+  getSeason,
   getSpecialCardsSample,
   searchPlayers
 } from "@/features/scout/api/players.functions"
@@ -73,5 +74,12 @@ export const specialCardsSampleQueryOptions = () =>
   queryOptions({
     queryKey: playerKeys.specialSample(),
     queryFn: ({ signal }) => getSpecialCardsSample({ signal }),
+    staleTime: DAY_MS
+  })
+
+export const seasonQueryOptions = (username: string) =>
+  queryOptions({
+    queryKey: playerKeys.season(username),
+    queryFn: ({ signal }) => getSeason({ data: { username }, signal }),
     staleTime: DAY_MS
   })

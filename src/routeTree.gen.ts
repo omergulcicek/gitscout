@@ -27,6 +27,7 @@ import { Route as ApiCronRefreshRouteImport } from './routes/api/cron/refresh'
 import { Route as Char123LangChar125OgUsernameRouteImport } from './routes/{-$lang}/og/$username'
 import { Route as Char123LangChar125UUsernameRouteImport } from './routes/{-$lang}/u/$username'
 import { Route as Char123LangChar125VsIndexRouteImport } from './routes/{-$lang}/vs/index'
+import { Route as Char123LangChar125UUsernameSeasonRouteImport } from './routes/{-$lang}/u/$username_.season'
 import { Route as Char123LangChar125VsLeftRightRouteImport } from './routes/{-$lang}/vs/$left.$right'
 import { Route as Char123LangChar125OgVsLeftRightRouteImport } from './routes/{-$lang}/og/vs/$left.$right'
 
@@ -128,6 +129,12 @@ const Char123LangChar125VsIndexRoute =
     path: '/vs/',
     getParentRoute: () => Char123LangChar125Route,
   } as any)
+const Char123LangChar125UUsernameSeasonRoute =
+  Char123LangChar125UUsernameSeasonRouteImport.update({
+    id: '/u/$username_/season',
+    path: '/u/$username/season',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
 const Char123LangChar125VsLeftRightRoute =
   Char123LangChar125VsLeftRightRouteImport.update({
     id: '/vs/$left/$right',
@@ -160,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/{-$lang}/og/$username': typeof Char123LangChar125OgUsernameRoute
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
+  '/{-$lang}/u/$username/season': typeof Char123LangChar125UUsernameSeasonRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -181,6 +189,7 @@ export interface FileRoutesByTo {
   '/{-$lang}/og/$username': typeof Char123LangChar125OgUsernameRoute
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
   '/{-$lang}/vs': typeof Char123LangChar125VsIndexRoute
+  '/{-$lang}/u/$username/season': typeof Char123LangChar125UUsernameSeasonRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -204,6 +213,7 @@ export interface FileRoutesById {
   '/{-$lang}/og/$username': typeof Char123LangChar125OgUsernameRoute
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
+  '/{-$lang}/u/$username_/season': typeof Char123LangChar125UUsernameSeasonRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/og/$username'
     | '/{-$lang}/u/$username'
     | '/{-$lang}/vs/'
+    | '/{-$lang}/u/$username/season'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   fileRoutesByTo: FileRoutesByTo
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/og/$username'
     | '/{-$lang}/u/$username'
     | '/{-$lang}/vs'
+    | '/{-$lang}/u/$username/season'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   id:
@@ -271,6 +283,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/og/$username'
     | '/{-$lang}/u/$username'
     | '/{-$lang}/vs/'
+    | '/{-$lang}/u/$username_/season'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   fileRoutesById: FileRoutesById
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LangChar125VsIndexRouteImport
       parentRoute: typeof Char123LangChar125Route
     }
+    '/{-$lang}/u/$username_/season': {
+      id: '/{-$lang}/u/$username_/season'
+      path: '/u/$username/season'
+      fullPath: '/{-$lang}/u/$username/season'
+      preLoaderRoute: typeof Char123LangChar125UUsernameSeasonRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
     '/{-$lang}/vs/$left/$right': {
       id: '/{-$lang}/vs/$left/$right'
       path: '/vs/$left/$right'
@@ -442,6 +462,7 @@ interface Char123LangChar125RouteChildren {
   Char123LangChar125OgUsernameRoute: typeof Char123LangChar125OgUsernameRoute
   Char123LangChar125UUsernameRoute: typeof Char123LangChar125UUsernameRoute
   Char123LangChar125VsIndexRoute: typeof Char123LangChar125VsIndexRoute
+  Char123LangChar125UUsernameSeasonRoute: typeof Char123LangChar125UUsernameSeasonRoute
   Char123LangChar125VsLeftRightRoute: typeof Char123LangChar125VsLeftRightRoute
   Char123LangChar125OgVsLeftRightRoute: typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -456,6 +477,8 @@ const Char123LangChar125RouteChildren: Char123LangChar125RouteChildren = {
   Char123LangChar125OgUsernameRoute: Char123LangChar125OgUsernameRoute,
   Char123LangChar125UUsernameRoute: Char123LangChar125UUsernameRoute,
   Char123LangChar125VsIndexRoute: Char123LangChar125VsIndexRoute,
+  Char123LangChar125UUsernameSeasonRoute:
+    Char123LangChar125UUsernameSeasonRoute,
   Char123LangChar125VsLeftRightRoute: Char123LangChar125VsLeftRightRoute,
   Char123LangChar125OgVsLeftRightRoute: Char123LangChar125OgVsLeftRightRoute,
 }
