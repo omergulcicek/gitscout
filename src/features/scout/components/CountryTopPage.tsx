@@ -2,7 +2,6 @@ import { getRouteApi, Link } from "@tanstack/react-router"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { cn } from "cn"
 
-import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { useViewer } from "@/hooks/use-viewer"
@@ -13,7 +12,6 @@ import { InviteButton } from "@/features/scout/components/InviteButton"
 import { MiniPlayerCard } from "@/features/scout/components/MiniPlayerCard"
 import { PageHeader } from "@/features/scout/components/PageHeader"
 import { PlayerCardMedium } from "@/features/scout/components/PlayerCardMedium"
-import { RarityChip } from "@/features/scout/components/RarityChip"
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
 import { serializeCountry } from "@/features/scout/helpers/filter-params"
 import { countryName } from "@/features/scout/helpers/player-country"
@@ -24,7 +22,7 @@ import * as m from "@/paraglide/messages.js"
 
 const routeApi = getRouteApi("/{-$lang}/top/$country")
 
-/** Cards shown open at the top; the rest is a plain ranked list. */
+/** Cards shown big at the top; the rest are small cards with their rank. */
 const PODIUM_SIZE = 3
 
 /** One country's page: its top 100 once it has enough developers, otherwise how close it is and an invite. */
@@ -49,7 +47,7 @@ export function CountryTopPage() {
         <ArrowLeft aria-hidden className="size-4" />
         {m.top_back()}
       </Link>
-      {/* The back link stays on the page edge; a ranked list of four short fields reads best at the podium's width. */}
+      {/* The back link stays on the page edge; the ranking itself sits in a column as wide as the podium. */}
       <div className={cn("flex flex-col gap-10", data.unlocked && "mx-auto w-full max-w-3xl")}>
         <PageHeader
           align={data.unlocked ? "center" : "start"}
@@ -96,7 +94,7 @@ function CountryIntro({ data }: { data: CountryTop }) {
 function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
   const lang = getLangParam()
   const { data: viewer } = useViewer()
-  // The podium already shows the top three big, so only rows from #4 on are marked.
+  // The podium already shows the top three big, so only cards from #4 on are marked.
   const isViewer = (login: string) => viewer?.login.toLowerCase() === login.toLowerCase()
   const podium = data.players.slice(0, PODIUM_SIZE)
   const rest = data.players.slice(PODIUM_SIZE)
@@ -122,41 +120,34 @@ function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
       </ol>
 
       {rest.length > 0 ? (
-        <ol start={PODIUM_SIZE + 1} className="surface flex flex-col divide-y overflow-hidden p-0">
+        <ol
+          start={PODIUM_SIZE + 1}
+          className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6"
+        >
           {rest.map((player) => {
             const mine = isViewer(player.login)
             return (
-              <li key={player.login}>
-                <Link
-                  to="/{-$lang}/u/$username"
-                  params={{ lang, username: player.login }}
-                  aria-current={mine ? "true" : undefined}
+              <li
+                key={player.login}
+                aria-current={mine ? "true" : undefined}
+                className="flex flex-col gap-1.5"
+              >
+                <span
                   className={cn(
-                    "flex items-center gap-3 px-4 py-2.5 outline-none hover:bg-muted/50 focus-visible:bg-muted/50",
-                    mine &&
-                      "bg-primary/10 shadow-[inset_3px_0_0_var(--color-primary)] hover:bg-primary/15"
+                    "text-center font-mono text-[11px] font-bold tabular-nums",
+                    mine ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
-                  <span className="w-8 shrink-0 text-right font-mono text-sm text-muted-foreground tabular-nums">
-                    {player.rank}
-                  </span>
-                  <img
-                    src={avatarSrc(player.avatarUrl, 32)}
-                    alt=""
-                    width={32}
-                    height={32}
-                    loading="lazy"
-                    className="size-8 shrink-0 rounded-full bg-muted"
-                  />
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm font-medium">{player.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">@{player.login}</span>
-                  </span>
-                  <span className="hidden text-xs text-muted-foreground sm:inline">
-                    {player.position}
-                  </span>
-                  <RarityChip ovr={player.ovr} rarity={player.rarity} />
-                </Link>
+                  #{player.rank}
+                </span>
+                <div
+                  className={cn(
+                    "rounded-xl",
+                    mine && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+                  )}
+                >
+                  <MiniPlayerCard player={player} />
+                </div>
               </li>
             )
           })}
