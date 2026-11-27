@@ -188,6 +188,7 @@ export function buildFacts(input: BuildFactsInput): PlayerFacts {
 
   return {
     login: user.login,
+    githubId: user.databaseId,
     name: user.name,
     avatarUrl: user.avatarUrl,
     bio: user.bio,

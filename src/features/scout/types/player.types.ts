@@ -102,6 +102,8 @@ type LastYearTotals = {
 
 export type PlayerFacts = {
   login: string
+  /** GitHub's numeric account id; missing on cards fetched before it was stored. */
+  githubId?: number
   name: string | null
   avatarUrl: string
   bio: string | null

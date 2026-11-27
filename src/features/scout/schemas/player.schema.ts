@@ -22,6 +22,11 @@ const checkState = z.enum(["SUCCESS", "FAILURE", "ERROR", "PENDING", "EXPECTED"]
 
 const playerFactsSchema = z.object({
   login: z.string(),
+  /**
+   * GitHub's numeric account id. Accounts are linked to cards by it, so a login that changes hands can't
+   * inherit the old owner's account. Missing on cards fetched before it was stored.
+   */
+  githubId: z.number().optional(),
   name: z.string().nullable(),
   avatarUrl: z.string(),
   bio: z.string().nullable(),

@@ -107,6 +107,7 @@ const PROFILE_QUERY = /* GraphQL */ `
   query Profile($login: String!, $prQuery: String!) {
     user(login: $login) {
       id
+      databaseId
       login
       name
       bio
