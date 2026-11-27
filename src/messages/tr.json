@@ -717,5 +717,7 @@
   "season_career_caption": "Hesabın açıldığından bu yana yıllık katkılar",
   "season_career_label": "{from}–{to} arası yıllık katkılar; en yüksek {max}",
   "season_report_record": "Kariyerinin en iyi sezonu: önceki rekor {year} yılında {count} katkıydı.",
-  "season_report_record_held": "Kariyer rekorun hâlâ {year}: {count} katkı."
+  "season_report_record_held": "Kariyer rekorun hâlâ {year}: {count} katkı.",
+  "season_poster_download": "Sezon posterini indir",
+  "season_final": "Sezon kapandı; sayılar donduruldu."
 }

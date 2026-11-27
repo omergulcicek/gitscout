@@ -192,3 +192,11 @@ export function careerRecord(
   if (!current || !previous) return null
   return { previous, beaten: current.total > previous.total }
 }
+
+/**
+ * Year label under a career bar: the latest year in full so the axis reads as years, the rest as two
+ * digits so a long career still fits.
+ */
+export function careerYearLabel(year: number, latest: number): string {
+  return year === latest ? String(year) : `'${String(year).slice(2)}`
+}

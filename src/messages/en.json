@@ -738,5 +738,7 @@
   "season_career_caption": "Contributions per year since the account opened",
   "season_career_label": "Contributions per year, {from}–{to}; highest {max}",
   "season_report_record": "Your best season yet: the old record was {count} contributions in {year}.",
-  "season_report_record_held": "Your career record still stands from {year}: {count} contributions."
+  "season_report_record_held": "Your career record still stands from {year}: {count} contributions.",
+  "season_poster_download": "Download the season poster",
+  "season_final": "The season is over; the numbers are frozen."
 }

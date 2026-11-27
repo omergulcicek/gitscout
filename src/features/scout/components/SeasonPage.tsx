@@ -1,17 +1,19 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowLeft, ArrowUpRight, Check, Swords } from "lucide-react"
+import { ArrowLeft, ArrowUpRight, Check, Download, Swords } from "lucide-react"
 import { cn } from "cn"
 
 import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { RarityChip } from "@/features/scout/components/RarityChip"
 import { SeasonPack } from "@/features/scout/components/SeasonPack"
+import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { archetypeNote, number, titleText } from "@/features/scout/helpers/player-text"
-import { careerRecord, seasonGrowth } from "@/features/scout/helpers/season"
+import { careerRecord, careerYearLabel, seasonGrowth } from "@/features/scout/helpers/season"
 import type { Season, SeasonStanding } from "@/features/scout/helpers/season"
+import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useSeason } from "@/features/scout/hooks/use-season"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import type { SeasonReport } from "@/features/scout/types/season.types"
@@ -36,6 +38,12 @@ export function SeasonPage({ username }: SeasonPageProps) {
   const { data } = useSeason(username)
   const { player, season } = data
   const lang = getLangParam()
+  const {
+    cardRef: posterRef,
+    download: downloadPoster,
+    isDownloading: posterDownloading
+  } = useCardDownload(`gitscout-${player.login}-${season.year}-season`)
+  const top = standingTop(data.standing)
 
   return (
     <main
@@ -66,8 +74,18 @@ export function SeasonPage({ username }: SeasonPageProps) {
               {player.name} · {m.season_heading({ year: season.year })}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {m.season_through({ date: dayMonth(season.through) })}
+              {data.final ? m.season_final() : m.season_through({ date: dayMonth(season.through) })}
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 w-fit"
+              onClick={downloadPoster}
+              disabled={posterDownloading}
+            >
+              <Download aria-hidden />
+              {posterDownloading ? m.download_preparing() : m.season_poster_download()}
+            </Button>
           </header>
 
           <SeasonStats season={season} />
@@ -79,6 +97,21 @@ export function SeasonPage({ username }: SeasonPageProps) {
           </div>
           <Rival report={data} />
         </div>
+      </div>
+
+      {/* Off-screen copy that the download captures; the inner node has no position of its own. */}
+      <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px]">
+        <SeasonPoster
+          ref={posterRef}
+          player={player}
+          season={season}
+          career={data.career}
+          standingText={
+            top === null
+              ? null
+              : `${m.season_standing_value({ pct: top })} · ${poolName(data.standing)}`
+          }
+        />
       </div>
     </main>
   )
@@ -301,11 +334,11 @@ function CareerChart({ season, career }: { season: Season; career: SeasonReport[
               </span>
               <span
                 className={cn(
-                  "font-mono text-[10px] tabular-nums",
+                  "font-mono text-[10px] whitespace-nowrap tabular-nums",
                   current ? "font-semibold text-foreground" : "text-muted-foreground"
                 )}
               >
-                {String(entry.year).slice(2)}
+                {careerYearLabel(entry.year, career.at(-1)?.year ?? season.year)}
               </span>
               <span className="sr-only">
                 {entry.year}: {number(entry.total)}
@@ -332,10 +365,15 @@ function poolName(standing: SeasonStanding): string {
   }
 }
 
-function Standing({ standing }: { standing: SeasonStanding }) {
+/** "Top N%": the share of the pool at or above the player, never shown as 0. Null for an empty pool. */
+function standingTop(standing: SeasonStanding): number | null {
   if (standing.size === 0) return null
-  // "Top N%": the share of the pool at or above the player, never shown as 0.
-  const top = Math.max(1, Math.round((1 - standing.aheadShare) * 100))
+  return Math.max(1, Math.round((1 - standing.aheadShare) * 100))
+}
+
+function Standing({ standing }: { standing: SeasonStanding }) {
+  const top = standingTop(standing)
+  if (top === null) return null
 
   return (
     <section aria-labelledby="season-standing-heading" className="surface flex flex-col gap-1 p-4">

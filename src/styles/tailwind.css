@@ -1301,3 +1301,14 @@
     filter: none;
   }
 }
+
+/* Season poster: fixed colours so a shared poster looks the same in either site theme. */
+.season-poster {
+  background:
+    radial-gradient(90% 55% at 15% 0%, oklch(0.42 0.12 280 / 0.85), transparent 70%),
+    linear-gradient(165deg, oklch(0.2 0.05 275), oklch(0.12 0.03 260));
+}
+
+.season-poster-accent {
+  background: #3f8fd8;
+}

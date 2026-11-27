@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   careerRecord,
+  careerYearLabel,
   computeSeason,
   seasonGrowth,
   seasonStanding
@@ -144,5 +145,12 @@ describe("careerRecord", () => {
         2026
       )
     ).toBeNull()
+  })
+})
+
+describe("careerYearLabel", () => {
+  it("writes the latest year in full and the rest short", () => {
+    expect(careerYearLabel(2026, 2026)).toBe("2026")
+    expect(careerYearLabel(2015, 2026)).toBe("'15")
   })
 })
