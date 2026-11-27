@@ -3,6 +3,7 @@ import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CountryFilterMenu } from "@/features/scout/components/CountryFilterMenu"
+import { DailyBest } from "@/features/scout/components/DailyBest"
 import { EmptyLeaderboard } from "@/features/scout/components/EmptyLeaderboard"
 import { LeaderboardFilters } from "@/features/scout/components/LeaderboardFilters"
 import { LeaderboardLead } from "@/features/scout/components/LeaderboardLead"
@@ -21,7 +22,7 @@ export function LeaderboardPage() {
   // The route loader fills the cache before the first render, so this only shows on an unexpected miss.
   if (!data) return <LeaderboardSkeleton />
 
-  const { slice, facets } = data
+  const { slice, facets, dailyBest } = data
   const query = search.q ?? ""
   const remaining = slice.matched - slice.players.length
   const hasFilters =
@@ -42,6 +43,8 @@ export function LeaderboardPage() {
           <LeaderboardLead total={facets.total} rarityCounts={facets.rarityCounts} />
         ) : null}
       </PageHeader>
+
+      <DailyBest slots={dailyBest} />
 
       {facets.total > 0 ? (
         <div className="flex flex-col gap-3">

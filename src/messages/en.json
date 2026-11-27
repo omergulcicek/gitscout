@@ -60,6 +60,12 @@
       "countPlural=other": "{count} developers joined in the last 24 hours"
     }
   },
+  "daily_best_title": "Today's best",
+  "daily_best_hint": "The top card in each role among those added in the last 24 hours",
+  "daily_best_switch_label": "Today's best list",
+  "daily_best_empty": "None today",
+  "daily_best_empty_cta": "Be the one",
+  "daily_best_empty_label": "No {position} card today. Make your card",
   "just_now": "just now",
   "featured_label": "Card of the hour",
   "featured_label_next": "{name}'s card",
