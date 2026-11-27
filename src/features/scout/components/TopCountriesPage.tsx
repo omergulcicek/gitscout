@@ -5,16 +5,12 @@ import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { CountryProgressBar } from "@/features/scout/components/CountryProgressBar"
-import { InviteButton } from "@/features/scout/components/InviteButton"
 import { PageHeader } from "@/features/scout/components/PageHeader"
 import { RarityChip } from "@/features/scout/components/RarityChip"
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { useTopCountries } from "@/features/scout/hooks/use-top-countries"
 import * as m from "@/paraglide/messages.js"
-
-/** Countries this close to a page get a highlighted "N to go". */
-const CLOSE_MISSING = 3
 
 /** The "top developers" hub: countries with their own page, then the ones a few developers away. */
 export function TopCountriesPage() {
@@ -81,34 +77,27 @@ export function TopCountriesPage() {
               {m.top_upcoming_lead()}
             </p>
           </div>
-          {/* Short cards keep each bar short enough to read at a glance; closest to opening first. */}
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {data.upcoming.map(({ country, slug, total, missing }) => {
+          {/* The whole card opens the country page, where the invite button lives. */}
+          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {data.upcoming.map(({ country, slug, total }) => {
               const Flag = COUNTRY_FLAGS[country]
               return (
-                <li key={country} className="surface flex flex-col gap-3 p-4">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to="/{-$lang}/top/$country"
-                      params={{ lang, country: slug }}
-                      className="flex min-w-0 items-center gap-2 rounded-sm font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                    >
-                      <Flag aria-hidden className={cn(FLAG_CLASS, "h-3.5")} />
-                      <span className="truncate">{countryName(country)}</span>
-                    </Link>
-                    <span
-                      className={cn(
-                        "ms-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
-                        missing <= CLOSE_MISSING
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {m.top_missing_short({ missing })}
+                <li key={country}>
+                  <Link
+                    to="/{-$lang}/top/$country"
+                    params={{ lang, country: slug }}
+                    className="surface card-lift flex h-full flex-col gap-3 p-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-4"
+                  >
+                    {/* Long names wrap instead of being cut off in the two-column phone layout. */}
+                    <span className="flex min-w-0 items-start gap-2 leading-snug font-medium">
+                      <Flag aria-hidden className={cn(FLAG_CLASS, "mt-1 h-3.5")} />
+                      <span className="min-w-0 text-pretty">{countryName(country)}</span>
                     </span>
-                  </div>
-                  <CountryProgressBar total={total} min={data.min} />
-                  <InviteButton country={country} slug={slug} className="w-full" />
+                    {/* Pinned to the bottom so bars line up when a long name wraps to two lines. */}
+                    <span className="mt-auto">
+                      <CountryProgressBar total={total} min={data.min} />
+                    </span>
+                  </Link>
                 </li>
               )
             })}

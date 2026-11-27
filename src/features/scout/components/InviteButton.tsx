@@ -14,11 +14,10 @@ type InviteButtonProps = {
   /** The country page the invite links to; it shows how close the page is to opening. */
   slug: string
   variant?: "default" | "outline"
-  className?: string
 }
 
 /** Shares an invite to the country's page: the system share sheet on phones, the clipboard elsewhere. */
-export function InviteButton({ country, slug, variant = "outline", className }: InviteButtonProps) {
+export function InviteButton({ country, slug, variant = "outline" }: InviteButtonProps) {
   const invite = () => {
     const url = localizedUrl(`/top/${slug}`, getLocale())
     const text = m.top_invite_text({ country: countryName(country) })
@@ -38,7 +37,7 @@ export function InviteButton({ country, slug, variant = "outline", className }: 
   }
 
   return (
-    <Button variant={variant} size="sm" className={className} onClick={invite}>
+    <Button variant={variant} size="sm" onClick={invite}>
       <UserPlus aria-hidden />
       {m.top_invite()}
     </Button>

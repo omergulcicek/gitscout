@@ -384,8 +384,8 @@ export type HomeData = {
 /** A country with its own top page, on the "top developers" hub. */
 export type CountryEntry = { country: CountryCode; slug: string; total: number; leader: ListPlayer }
 
-/** A country still short of its own page, and how many more developers it needs. */
-export type CountryProgress = { country: CountryCode; slug: string; total: number; missing: number }
+/** A country still short of its own page, with how many developers it has so far. */
+export type CountryProgress = { country: CountryCode; slug: string; total: number }
 
 /** The hub: countries with a page, then the ones closest to getting one. */
 export type TopCountries = { unlocked: CountryEntry[]; upcoming: CountryProgress[]; min: number }

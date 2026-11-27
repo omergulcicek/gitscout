@@ -243,8 +243,7 @@ export const getTopCountries = createServerFn({ method: "GET" }).handler(
       .map(([country, players]) => ({
         country,
         slug: countrySlug(country),
-        total: players.length,
-        missing: COUNTRY_PAGE_MIN - players.length
+        total: players.length
       }))
     return { unlocked, upcoming, min: COUNTRY_PAGE_MIN }
   }
