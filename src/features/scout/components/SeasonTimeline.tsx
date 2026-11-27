@@ -29,7 +29,7 @@ export function SeasonTimeline({ now }: SeasonTimelineProps) {
       <h2 id="season-timeline-heading" className="text-lg font-semibold">
         {m.season_timeline_title()}
       </h2>
-      <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="grid gap-3 sm:grid-cols-3">
         {SEASON_TIMELINE.map((step, index) => (
           <li
             key={step.from}
