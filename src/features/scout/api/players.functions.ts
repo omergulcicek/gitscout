@@ -59,7 +59,8 @@ type Leaderboard = {
 type LatestAddition = { login: string; addedAt: string }
 
 const HOUR_MS = 60 * 60_000
-const LATEST_LIMIT = 8
+/** Şeridin 8 kartı, listede karşılığı bulunmayan (silinmiş, henüz listeye girmemiş) kayıtlar düşse de dolsun diye fazladan çekilir. */
+const LATEST_LIMIT = 12
 
 /**
  * Aynı sunucu örneği bu süre içinde gelen istekleri veritabanına gitmeden karşılar. Veri haftada bir yenilenir;
@@ -91,9 +92,10 @@ let listLoading: Promise<ListSnapshot> | null = null
  */
 function loadList(): Promise<ListSnapshot> {
   listLoading ??= (async () => {
+    // Son eklenenler listeden önce okunur: arada eklenen kişi şeritte olup listede eksik kalmasın.
+    const latest = await getLatestAdditions(LATEST_LIMIT)
     const { players, pending } = await getListPlayers()
     const recentLogins = await getRecentLogins()
-    const latest = await getLatestAdditions(LATEST_LIMIT)
     const lastDayCount = await countRecentPlayers(24)
     const profileViews = await getRecentProfileViews(7)
     const ttl = pending > 0 ? PENDING_LIST_CACHE_MS : LIST_CACHE_MS
