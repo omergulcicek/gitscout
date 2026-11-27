@@ -10,7 +10,7 @@ import * as m from "@/paraglide/messages.js"
 export const Route = createFileRoute("/{-$lang}/settings")({
   head: () => ({
     meta: [
-      ...pageMeta(m.meta_settings(), m.meta_settings_description()),
+      ...pageMeta(m.meta_settings(), m.meta_settings_description(), "settings"),
       { name: "robots", content: "noindex" }
     ],
     links: hreflangLinks("/settings")

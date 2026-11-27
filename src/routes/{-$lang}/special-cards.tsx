@@ -15,7 +15,7 @@ export const Route = createFileRoute("/{-$lang}/special-cards")({
   validateSearch: specialCardsSearchSchema,
   loader: ({ context }) => context.queryClient.ensureQueryData(specialCardsSampleQueryOptions()),
   head: () => ({
-    meta: pageMeta(m.meta_special_cards(), m.meta_special_cards_description()),
+    meta: pageMeta(m.meta_special_cards(), m.meta_special_cards_description(), "special-cards"),
     links: hreflangLinks("/special-cards")
   }),
   pendingComponent: SpecialCardsSkeleton,

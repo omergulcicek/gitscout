@@ -16,7 +16,7 @@ export const Route = createFileRoute("/{-$lang}/login")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      ...pageMeta(m.meta_login(), m.meta_login_description()),
+      ...pageMeta(m.meta_login(), m.meta_login_description(), "login"),
       { name: "robots", content: "noindex" }
     ],
     links: hreflangLinks("/login")

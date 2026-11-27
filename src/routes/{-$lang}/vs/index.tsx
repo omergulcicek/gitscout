@@ -24,7 +24,7 @@ export const Route = createFileRoute("/{-$lang}/vs/")({
         : undefined
     ]),
   head: () => ({
-    meta: pageMeta(m.meta_duel(), m.meta_duel_description()),
+    meta: pageMeta(m.meta_duel(), m.meta_duel_description(), "vs"),
     links: hreflangLinks("/vs")
   }),
   pendingComponent: DuelPickerSkeleton,
