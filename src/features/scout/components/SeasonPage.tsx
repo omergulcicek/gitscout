@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { ArrowLeft, ArrowUpRight, Check, Download, Swords } from "lucide-react"
+import { ArrowLeft, ArrowUpRight, Check, Monitor, Smartphone, Swords } from "lucide-react"
 import { cn } from "cn"
 
 import { avatarSrc } from "@/helpers/avatar-src"
@@ -39,11 +39,18 @@ export function SeasonPage({ username }: SeasonPageProps) {
   const { player, season } = data
   const lang = getLangParam()
   const {
-    cardRef: posterRef,
-    download: downloadPoster,
-    isDownloading: posterDownloading
-  } = useCardDownload(`gitscout-${player.login}-${season.year}-season`)
+    cardRef: landscapeRef,
+    download: downloadLandscape,
+    isDownloading: landscapeDownloading
+  } = useCardDownload(`gitscout-${player.login}-${season.year}-16x9`)
+  const {
+    cardRef: portraitRef,
+    download: downloadPortrait,
+    isDownloading: portraitDownloading
+  } = useCardDownload(`gitscout-${player.login}-${season.year}-9x16`)
   const top = standingTop(data.standing)
+  const standingText =
+    top === null ? null : `${m.season_standing_value({ pct: top })} · ${poolName(data.standing)}`
 
   return (
     <main
@@ -76,16 +83,26 @@ export function SeasonPage({ username }: SeasonPageProps) {
             <p className="text-sm text-muted-foreground">
               {data.final ? m.season_final() : m.season_through({ date: dayMonth(season.through) })}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2 w-fit"
-              onClick={downloadPoster}
-              disabled={posterDownloading}
-            >
-              <Download aria-hidden />
-              {posterDownloading ? m.download_preparing() : m.season_poster_download()}
-            </Button>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadLandscape}
+                disabled={landscapeDownloading}
+              >
+                <Monitor aria-hidden />
+                {landscapeDownloading ? m.download_preparing() : m.season_poster_landscape()}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadPortrait}
+                disabled={portraitDownloading}
+              >
+                <Smartphone aria-hidden />
+                {portraitDownloading ? m.download_preparing() : m.season_poster_portrait()}
+              </Button>
+            </div>
           </header>
 
           <SeasonStats season={season} />
@@ -102,15 +119,20 @@ export function SeasonPage({ username }: SeasonPageProps) {
       {/* Off-screen copy that the download captures; the inner node has no position of its own. */}
       <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px]">
         <SeasonPoster
-          ref={posterRef}
+          ref={landscapeRef}
+          format="landscape"
           player={player}
           season={season}
           career={data.career}
-          standingText={
-            top === null
-              ? null
-              : `${m.season_standing_value({ pct: top })} · ${poolName(data.standing)}`
-          }
+          standingText={standingText}
+        />
+        <SeasonPoster
+          ref={portraitRef}
+          format="portrait"
+          player={player}
+          season={season}
+          career={data.career}
+          standingText={standingText}
         />
       </div>
     </main>
