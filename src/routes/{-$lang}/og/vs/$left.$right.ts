@@ -6,7 +6,7 @@ import { duelOgResponse } from "@/features/scout/api/og-image.api"
 export const Route = createFileRoute("/{-$lang}/og/vs/$left/$right")({
   server: {
     handlers: {
-      GET: ({ params }) => duelOgResponse(params.left, params.right)
+      GET: ({ params, request }) => duelOgResponse(params.left, params.right, new URL(request.url))
     }
   }
 })

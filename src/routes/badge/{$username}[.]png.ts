@@ -12,10 +12,17 @@ export const Route = createFileRoute("/badge/{$username}.png")({
   server: {
     handlers: {
       GET: ({ params, request }) => {
-        const search = new URL(request.url).searchParams
-        const size = badgeCardSizeSchema.catch("medium").parse(search.get("size") ?? undefined)
-        const locale = badgeLocaleSchema.catch("en").parse(search.get("lang") ?? undefined)
-        return playerBadgeCardResponse(params.username, size, locale)
+        const url = new URL(request.url)
+        // Unknown values are dropped (and redirected away) instead of failing, so READMEs never break.
+        const size = badgeCardSizeSchema
+          .optional()
+          .catch(undefined)
+          .parse(url.searchParams.get("size") ?? undefined)
+        const locale = badgeLocaleSchema
+          .optional()
+          .catch(undefined)
+          .parse(url.searchParams.get("lang") ?? undefined)
+        return playerBadgeCardResponse(params.username, url, { size, locale })
       }
     }
   }
