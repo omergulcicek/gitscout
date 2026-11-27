@@ -95,6 +95,9 @@ importers:
       react-hook-form:
         specifier: ^7.91.0
         version: 7.92.0(@types/react@19.3.0)(react@19.3.1)
+      react-snowfall:
+        specifier: 2.4.0
+        version: 2.4.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       satori:
         specifier: 0.63.2
         version: 0.63.2
@@ -3704,6 +3707,9 @@ packages:
     peerDependencies:
       react: ^19.3.1
 
+  react-fast-compare@3.2.4:
+    resolution: {integrity: sha512-YbkgZfjvuokdt6zR8Oki8Bt4QXAZim/9HKSUr5J23GVyX2o8sYD/JlKSFrJvEFIPjotWvkGY7DgUS+udyr8cEw==}
+
   react-hook-form@7.92.0:
     resolution: {integrity: sha512-O5ILyY5fYHN7N13Pfxpe55KboyNFsJdM03BHpshQkClJd8raugiAUGY7VjifITrfhVxyx81ko25azXCoayhf1w==}
     engines: {node: '>=18.0.0'}
@@ -3716,6 +3722,12 @@ packages:
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+
+  react-snowfall@2.4.0:
+    resolution: {integrity: sha512-KAPMiGnxt11PEgC2pTVrTQsvk5jt1kLUtG+ZamiKLphTZ7GiYT1Aa5kX6jp4jKWq1kqJHchnGT9CDm4g86A5Gg==}
+    peerDependencies:
+      react: "^16.8 ||\_17.x || 18.x || 19.x"
+      react-dom: ^16.8 || 17.x || 18.x || 19.x
 
   react@19.3.1:
     resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
@@ -7547,6 +7559,8 @@ snapshots:
       react: 19.3.1
       scheduler: 0.28.0
 
+  react-fast-compare@3.2.4: {}
+
   react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1):
     dependencies:
       react: 19.3.1
@@ -7554,6 +7568,12 @@ snapshots:
       '@types/react': 19.3.0
 
   react-is@17.0.2: {}
+
+  react-snowfall@2.4.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
+    dependencies:
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+      react-fast-compare: 3.2.4
 
   react@19.3.1: {}
 

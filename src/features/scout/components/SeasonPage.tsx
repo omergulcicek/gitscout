@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft, ArrowUpRight, Check, Monitor, Smartphone, Swords } from "lucide-react"
 import { cn } from "cn"
@@ -9,6 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { RarityChip } from "@/features/scout/components/RarityChip"
 import { SeasonPack } from "@/features/scout/components/SeasonPack"
 import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
+import { SeasonSnow } from "@/features/scout/components/SeasonSnow"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { archetypeNote, number, titleText } from "@/features/scout/helpers/player-text"
 import { careerRecord, careerYearLabel, seasonGrowth } from "@/features/scout/helpers/season"
@@ -19,6 +22,11 @@ import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import type { SeasonReport } from "@/features/scout/types/season.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
+
+/** Flakes on screen normally and during the pack's reveal, and how long the flurry lasts. */
+const LIGHT_FLAKES = 60
+const FLURRY_FLAKES = 320
+const FLURRY_MS = 6000
 
 type SeasonPageProps = {
   username: string
@@ -49,6 +57,13 @@ export function SeasonPage({ username }: SeasonPageProps) {
     isDownloading: portraitDownloading
   } = useCardDownload(`gitscout-${player.login}-${season.year}-9x16`)
   const top = standingTop(data.standing)
+  // Light snow all the time; a flurry while the pack opens, then it settles back.
+  const [flurry, setFlurry] = useState(false)
+  useEffect(() => {
+    if (!flurry) return
+    const timer = window.setTimeout(() => setFlurry(false), FLURRY_MS)
+    return () => window.clearTimeout(timer)
+  }, [flurry])
   const standingText =
     top === null ? null : `${m.season_standing_value({ pct: top })} · ${poolName(data.standing)}`
 
@@ -58,6 +73,7 @@ export function SeasonPage({ username }: SeasonPageProps) {
       tabIndex={-1}
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-clip px-4 pt-2 pb-20 outline-none sm:px-6"
     >
+      <SeasonSnow count={flurry ? FLURRY_FLAKES : LIGHT_FLAKES} />
       <Link
         to="/{-$lang}/u/$username"
         params={{ lang, username: player.login }}
@@ -69,7 +85,7 @@ export function SeasonPage({ username }: SeasonPageProps) {
 
       <div className="grid gap-8 md:grid-cols-[20rem_1fr] md:items-start">
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
-          <SeasonPack player={player} year={season.year} />
+          <SeasonPack player={player} year={season.year} onOpen={() => setFlurry(true)} />
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6">
@@ -166,7 +182,10 @@ function SeasonStats({ season }: { season: Season }) {
   ]
 
   return (
-    <section aria-labelledby="season-stats-heading" className="surface flex flex-col gap-4 p-4">
+    <section
+      aria-labelledby="season-stats-heading"
+      className="surface season-ice flex flex-col gap-4 p-4"
+    >
       <h2 id="season-stats-heading" className="text-sm font-medium">
         {m.season_stats_title()}
       </h2>
@@ -190,7 +209,10 @@ function FormChart({ season }: { season: Season }) {
   const peak = season.peakRound
 
   return (
-    <section aria-labelledby="season-form-heading" className="surface flex flex-col gap-4 p-4">
+    <section
+      aria-labelledby="season-form-heading"
+      className="surface season-ice flex flex-col gap-4 p-4"
+    >
       <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
         <h2 id="season-form-heading" className="text-sm font-medium">
           {m.season_form_title()}
@@ -280,7 +302,10 @@ function ScoutReport({
   ].filter((line) => line !== null)
 
   return (
-    <section aria-labelledby="season-report-heading" className="surface flex flex-col gap-3 p-4">
+    <section
+      aria-labelledby="season-report-heading"
+      className="surface season-ice flex flex-col gap-3 p-4"
+    >
       <h2 id="season-report-heading" className="text-sm font-medium">
         {m.season_report_title()}
       </h2>
@@ -310,7 +335,10 @@ function CareerChart({ season, career }: { season: Season; career: SeasonReport[
   const last = career.at(-1)
 
   return (
-    <section aria-labelledby="season-career-heading" className="surface flex flex-col gap-3 p-4">
+    <section
+      aria-labelledby="season-career-heading"
+      className="surface season-ice flex flex-col gap-3 p-4"
+    >
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex flex-col gap-0.5">
           <h2 id="season-career-heading" className="text-sm font-medium">
@@ -398,7 +426,10 @@ function Standing({ standing }: { standing: SeasonStanding }) {
   if (top === null) return null
 
   return (
-    <section aria-labelledby="season-standing-heading" className="surface flex flex-col gap-1 p-4">
+    <section
+      aria-labelledby="season-standing-heading"
+      className="surface season-ice flex flex-col gap-1 p-4"
+    >
       <h2 id="season-standing-heading" className="text-sm font-medium">
         {m.season_standing_title()}
       </h2>
@@ -420,7 +451,7 @@ function Rival({ report }: { report: SeasonReport }) {
   return (
     <section
       aria-labelledby="season-rival-heading"
-      className="surface flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+      className="surface season-ice flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-center gap-3">
         <img
