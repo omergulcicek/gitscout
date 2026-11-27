@@ -9,6 +9,7 @@ import type { Position, Rarity } from "@/features/scout/types/player.types"
 
 const SEPARATOR = ","
 const STAR_PROGRAM = "star"
+const VERIFIED_ON = 1
 
 const split = (value: string | undefined) =>
   (value ?? "")
@@ -57,4 +58,14 @@ export function parseStar(value: string | undefined): boolean {
 /** Kapalı filtre URL'den kalksın diye undefined döner. */
 export function serializeStar(star: boolean): string | undefined {
   return star ? STAR_PROGRAM : undefined
+}
+
+/** `?verified=1` filtreyi açar; başka her değer kapalı sayılır. */
+export function parseVerified(value: number | undefined): boolean {
+  return value === VERIFIED_ON
+}
+
+/** Kapalı filtre URL'den kalksın diye undefined döner. */
+export function serializeVerified(verified: boolean): typeof VERIFIED_ON | undefined {
+  return verified ? VERIFIED_ON : undefined
 }

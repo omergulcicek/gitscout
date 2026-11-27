@@ -22,14 +22,15 @@ export function LeaderboardPage() {
   const { players: allPlayers } = data
   const { search, filters, update, setFilters } = useLeaderboardSearch()
   const query = search.q ?? ""
-  // Sıra numarası seçili mevki, kart türü ve ülke içinde sayılır; isim araması sırayı değiştirmez,
+  // Sıra numarası seçili mevki, kart türü, ülke ve onay filtresi içinde sayılır; isim araması sırayı değiştirmez,
   // yoksa aranan herkes 1. görünür.
   const rankPool = allPlayers.filter(
     (player) =>
       (filters.positions.length === 0 || filters.positions.includes(player.position)) &&
       (filters.rarities.length === 0 || filters.rarities.includes(player.rarity)) &&
       (filters.country === undefined || playerCountryFilter(player) === filters.country) &&
-      (!filters.star || isGithubStar(player.login))
+      (!filters.star || isGithubStar(player.login)) &&
+      (!filters.verified || player.verified === true)
   )
   const players = rankPool.filter((player) => matchesPlayer(player, query))
   const remaining = players.length - search.limit
@@ -37,7 +38,8 @@ export function LeaderboardPage() {
     filters.positions.length > 0 ||
     filters.rarities.length > 0 ||
     filters.country !== undefined ||
-    filters.star
+    filters.star ||
+    filters.verified
 
   return (
     <main
@@ -76,7 +78,13 @@ export function LeaderboardPage() {
                   size="sm"
                   className="px-1 text-muted-foreground hover:text-foreground"
                   onClick={() =>
-                    setFilters({ positions: [], rarities: [], country: undefined, star: false })
+                    setFilters({
+                      positions: [],
+                      rarities: [],
+                      country: undefined,
+                      star: false,
+                      verified: false
+                    })
                   }
                 >
                   {m.filter_clear()}

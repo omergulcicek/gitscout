@@ -1,8 +1,9 @@
-import { ListFilter, Star } from "lucide-react"
+import { BadgeCheck, ListFilter, Star } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuRadioGroup,
@@ -25,16 +26,22 @@ type LeaderboardFiltersProps = {
 
 /** Radyo grubunda "hepsi" seçeneğinin değeri; filtreyi kaldırır. */
 const ALL = "all"
-const STAR = "star"
 
-/** Mevki ve GitHub Star filtreleri (kart türü ayrı çiplerde); yalnızca tabloda gerçekten bulunan seçenekler listelenir. */
+/** Öğenin odak stili alt öğelerin hepsini boyar; simge çizgileri beyaza dönmesin diye svg'nin rengini miras alırlar. */
+const KEEP_ICON_COLOR = "focus:**:text-inherit"
+
+/**
+ * Mevki alt menüsü ile tek tıkla açılıp kapanan GitHub Star ve onaylı hesap filtreleri (kart türü ayrı
+ * çiplerde); yalnızca tabloda gerçekten bulunan seçenekler listelenir.
+ */
 export function LeaderboardFilters({ players }: LeaderboardFiltersProps) {
   const { filters, setFilters } = useLeaderboardSearch()
   const positions = POSITIONS.filter((position) =>
     players.some((player) => player.position === position)
   )
   const hasStars = players.some((player) => isGithubStar(player.login))
-  const activeCount = filters.positions.length + (filters.star ? 1 : 0)
+  const hasVerified = players.some((player) => player.verified === true)
+  const activeCount = filters.positions.length + (filters.star ? 1 : 0) + (filters.verified ? 1 : 0)
 
   return (
     <DropdownMenu>
@@ -73,27 +80,33 @@ export function LeaderboardFilters({ players }: LeaderboardFiltersProps) {
             </DropdownMenuRadioGroup>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+        {hasStars || hasVerified ? <DropdownMenuSeparator /> : null}
         {hasStars ? (
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>{m.github_star()}</DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-44">
-              <DropdownMenuRadioGroup
-                value={filters.star ? STAR : ALL}
-                onValueChange={(value) => setFilters({ star: value === STAR })}
-              >
-                <DropdownMenuRadioItem value={ALL}>{m.filter_all_people()}</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={STAR}>
-                  <Star aria-hidden className="size-3.5 fill-github-star text-github-star" />
-                  {m.github_star()}
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
+          <DropdownMenuCheckboxItem
+            className={KEEP_ICON_COLOR}
+            checked={filters.star}
+            onCheckedChange={(checked) => setFilters({ star: checked })}
+          >
+            <Star aria-hidden className="size-3.5 fill-github-star text-github-star!" />
+            {m.github_star()}
+          </DropdownMenuCheckboxItem>
+        ) : null}
+        {hasVerified ? (
+          <DropdownMenuCheckboxItem
+            className={KEEP_ICON_COLOR}
+            checked={filters.verified}
+            onCheckedChange={(checked) => setFilters({ verified: checked })}
+          >
+            <BadgeCheck aria-hidden className="size-3.5 text-verified!" />
+            {m.filter_verified()}
+          </DropdownMenuCheckboxItem>
         ) : null}
         {activeCount > 0 ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setFilters({ positions: [], star: false })}>
+            <DropdownMenuItem
+              onClick={() => setFilters({ positions: [], star: false, verified: false })}
+            >
               {m.filter_clear()}
             </DropdownMenuItem>
           </>

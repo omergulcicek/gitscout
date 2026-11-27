@@ -377,6 +377,7 @@
   "duel_change_placeholder": "Başka bir geliştirici ara",
   "duel_add_new": "@{username} için kart çıkar ve kapıştır",
   "remove_card_link": "Kartının kaldırılmasını mı istiyorsun?",
+  "filter_verified": "Onaylı",
   "og_rating": "Genel puan:",
   "og_meta": "{rarity} kart · {position}",
   "og_description": "{name} Gitscout'ta {ovr} puan aldı. Senin kartın kaç puan?",

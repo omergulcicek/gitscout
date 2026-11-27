@@ -391,6 +391,7 @@
   "duel_change_placeholder": "Search another developer",
   "duel_add_new": "Get a card for @{username} and compare",
   "remove_card_link": "Want your card removed?",
+  "filter_verified": "Verified",
   "og_rating": "Overall:",
   "og_meta": "{rarity} card · {position}",
   "og_description": "{name} got a {ovr} rating on Gitscout. What's yours?",

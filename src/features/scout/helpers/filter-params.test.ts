@@ -5,10 +5,12 @@ import {
   parsePositions,
   parseRarities,
   parseStar,
+  parseVerified,
   serializeCountry,
   serializePositions,
   serializeRarities,
-  serializeStar
+  serializeStar,
+  serializeVerified
 } from "@/features/scout/helpers/filter-params"
 
 describe("filtre parametreleri", () => {
@@ -39,5 +41,13 @@ describe("filtre parametreleri", () => {
     expect(parseStar(undefined)).toBe(false)
     expect(serializeStar(true)).toBe("star")
     expect(serializeStar(false)).toBeUndefined()
+  })
+
+  it("onaylı filtresini yalnızca 1 değeriyle açar", () => {
+    expect(parseVerified(1)).toBe(true)
+    expect(parseVerified(0)).toBe(false)
+    expect(parseVerified(undefined)).toBe(false)
+    expect(serializeVerified(true)).toBe(1)
+    expect(serializeVerified(false)).toBeUndefined()
   })
 })

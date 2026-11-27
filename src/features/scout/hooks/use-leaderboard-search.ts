@@ -6,10 +6,12 @@ import {
   parsePositions,
   parseRarities,
   parseStar,
+  parseVerified,
   serializeCountry,
   serializePositions,
   serializeRarities,
-  serializeStar
+  serializeStar,
+  serializeVerified
 } from "@/features/scout/helpers/filter-params"
 import { leaderboardSearchSchema } from "@/features/scout/schemas/leaderboard-search.schema"
 import type { LeaderboardSearch } from "@/features/scout/schemas/leaderboard-search.schema"
@@ -20,6 +22,7 @@ type Filters = {
   rarities: Rarity[]
   country: CountryFilter | undefined
   star: boolean
+  verified: boolean
 }
 
 /**
@@ -33,7 +36,8 @@ export function useLeaderboardSearch() {
     positions: parsePositions(search.pos),
     rarities: parseRarities(search.rarity),
     country: parseCountry(search.country),
-    star: parseStar(search.program)
+    star: parseStar(search.program),
+    verified: parseVerified(search.verified)
   }
 
   const update = (patch: Partial<LeaderboardSearch>) => {
@@ -50,7 +54,8 @@ export function useLeaderboardSearch() {
       pos: serializePositions(next.positions ?? filters.positions),
       rarity: serializeRarities(next.rarities ?? filters.rarities),
       country: serializeCountry("country" in next ? next.country : filters.country),
-      program: serializeStar(next.star ?? filters.star)
+      program: serializeStar(next.star ?? filters.star),
+      verified: serializeVerified(next.verified ?? filters.verified)
     })
   }
 

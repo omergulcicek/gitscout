@@ -59,6 +59,8 @@ export const leaderboardSearchSchema = z.object({
   country: z.string().optional().catch(undefined),
   /** Yalnızca GitHub Stars programındakiler: `?program=star`. */
   program: z.string().optional().catch(undefined),
+  /** Yalnızca onaylı hesaplar: `?verified=1`. Sayı tutulur ki router değeri tırnağa almasın. */
+  verified: z.literal(1).optional().catch(undefined),
   sort: z
     .enum(LEADERBOARD_SORT_KEYS)
     .default(leaderboardSearchDefaults.sort)
