@@ -24,6 +24,12 @@ import {
   updateAccountCountry,
   updateAccountProfileDetails
 } from "@/features/scout/api/player-store"
+import {
+  COUNTRY_PAGE_MIN,
+  COUNTRY_TOP_LIMIT,
+  UPCOMING_COUNTRY_LIMIT,
+  UPCOMING_COUNTRY_MIN
+} from "@/features/scout/constants/country-pages.constants"
 import { EXAMPLE_LOGINS } from "@/features/scout/constants/example-players.constants"
 import { COUNTRIES } from "@/features/scout/constants/player-country.constants"
 import { SPECIAL_CARDS_SAMPLE_LOGIN } from "@/features/scout/constants/profile.constants"
@@ -34,6 +40,12 @@ import {
 } from "@/features/scout/constants/scoring.constants"
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
+import {
+  countryFromSlug,
+  countrySlug,
+  playersByCountry
+} from "@/features/scout/helpers/country-pages"
+import { countrySummary } from "@/features/scout/helpers/country-summary"
 import { dailyBest } from "@/features/scout/helpers/daily-best"
 import type { DailyBestSlot } from "@/features/scout/helpers/daily-best"
 import { popularPresets } from "@/features/scout/helpers/duel-presets"
@@ -50,12 +62,14 @@ import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
 import type { AddPlayerEvent, ScoutingStage } from "@/features/scout/types/add-player.types"
 import type {
+  CountryTop,
   HomeData,
   LeaderboardFacets,
   LeaderboardSlice,
   ListPlayer,
   PlayerDetail,
-  ScoredPlayer
+  ScoredPlayer,
+  TopCountries
 } from "@/features/scout/types/player.types"
 import { locales } from "@/paraglide/runtime.js"
 
@@ -208,6 +222,58 @@ export const getHome = createServerFn({ method: "GET" }).handler(async (): Promi
     lastDayCount,
     generatedAt: new Date(at).toISOString()
   }
+})
+
+/** Countries with their own page, then those closest to one, for the "top developers" hub. */
+export const getTopCountries = createServerFn({ method: "GET" }).handler(
+  async (): Promise<TopCountries> => {
+    const groups = [...playersByCountry(await cachedPlayers())].sort(
+      ([, a], [, b]) => b.length - a.length
+    )
+    const unlocked = groups.flatMap(([country, players]) => {
+      const [leader] = players
+      return leader && players.length >= COUNTRY_PAGE_MIN
+        ? [{ country, slug: countrySlug(country), total: players.length, leader }]
+        : []
+    })
+    const upcoming = groups
+      .filter(([, players]) => players.length < COUNTRY_PAGE_MIN)
+      .filter(([, players]) => players.length >= UPCOMING_COUNTRY_MIN)
+      .slice(0, UPCOMING_COUNTRY_LIMIT)
+      .map(([country, players]) => ({
+        country,
+        slug: countrySlug(country),
+        total: players.length
+      }))
+    return { unlocked, upcoming, min: COUNTRY_PAGE_MIN }
+  }
+)
+
+/** One country's page by its URL segment; an unknown segment is a 404. */
+export const getCountryTop = createServerFn({ method: "GET" })
+  .validator(z.object({ slug: z.string().max(60) }))
+  .handler(async ({ data }): Promise<CountryTop> => {
+    const country = countryFromSlug(data.slug)
+    if (!country) throw notFound()
+    const players = playersByCountry(await cachedPlayers()).get(country) ?? []
+    return {
+      country,
+      slug: countrySlug(country),
+      unlocked: players.length >= COUNTRY_PAGE_MIN,
+      min: COUNTRY_PAGE_MIN,
+      ...countrySummary(players),
+      players: players
+        .slice(0, COUNTRY_TOP_LIMIT)
+        .map((player, index) => ({ ...player, rank: index + 1 }))
+    }
+  })
+
+/** URL segments of the countries that have a page, for the sitemap. */
+export const getCountryPageSlugs = createServerOnlyFn(async (): Promise<string[]> => {
+  const groups = playersByCountry(await cachedPlayers())
+  return [...groups].flatMap(([country, players]) =>
+    players.length >= COUNTRY_PAGE_MIN ? [countrySlug(country)] : []
+  )
 })
 
 const leaderboardSliceSchema = leaderboardSearchSchema

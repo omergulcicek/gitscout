@@ -25,6 +25,8 @@ import { Route as Char123LangChar125SettingsRouteImport } from './routes/{-$lang
 import { Route as Char123LangChar125SpecialCardsRouteImport } from './routes/{-$lang}/special-cards'
 import { Route as ApiCronRefreshRouteImport } from './routes/api/cron/refresh'
 import { Route as Char123LangChar125OgUsernameRouteImport } from './routes/{-$lang}/og/$username'
+import { Route as Char123LangChar125TopIndexRouteImport } from './routes/{-$lang}/top/index'
+import { Route as Char123LangChar125TopCountryRouteImport } from './routes/{-$lang}/top/$country'
 import { Route as Char123LangChar125UUsernameRouteImport } from './routes/{-$lang}/u/$username'
 import { Route as Char123LangChar125VsIndexRouteImport } from './routes/{-$lang}/vs/index'
 import { Route as Char123LangChar125VsLeftRightRouteImport } from './routes/{-$lang}/vs/$left.$right'
@@ -116,6 +118,18 @@ const Char123LangChar125OgUsernameRoute =
     path: '/og/$username',
     getParentRoute: () => Char123LangChar125Route,
   } as any)
+const Char123LangChar125TopIndexRoute =
+  Char123LangChar125TopIndexRouteImport.update({
+    id: '/top/',
+    path: '/top/',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
+const Char123LangChar125TopCountryRoute =
+  Char123LangChar125TopCountryRouteImport.update({
+    id: '/top/$country',
+    path: '/top/$country',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
 const Char123LangChar125UUsernameRoute =
   Char123LangChar125UUsernameRouteImport.update({
     id: '/u/$username',
@@ -158,7 +172,9 @@ export interface FileRoutesByFullPath {
   '/{-$lang}/': typeof Char123LangChar125IndexRoute
   '/api/cron/refresh': typeof ApiCronRefreshRoute
   '/{-$lang}/og/$username': typeof Char123LangChar125OgUsernameRoute
+  '/{-$lang}/top/$country': typeof Char123LangChar125TopCountryRoute
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
+  '/{-$lang}/top/': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
@@ -179,7 +195,9 @@ export interface FileRoutesByTo {
   '/{-$lang}': typeof Char123LangChar125IndexRoute
   '/api/cron/refresh': typeof ApiCronRefreshRoute
   '/{-$lang}/og/$username': typeof Char123LangChar125OgUsernameRoute
+  '/{-$lang}/top/$country': typeof Char123LangChar125TopCountryRoute
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
+  '/{-$lang}/top': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs': typeof Char123LangChar125VsIndexRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
@@ -202,7 +220,9 @@ export interface FileRoutesById {
   '/{-$lang}/': typeof Char123LangChar125IndexRoute
   '/api/cron/refresh': typeof ApiCronRefreshRoute
   '/{-$lang}/og/$username': typeof Char123LangChar125OgUsernameRoute
+  '/{-$lang}/top/$country': typeof Char123LangChar125TopCountryRoute
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
+  '/{-$lang}/top/': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
@@ -226,7 +246,9 @@ export interface FileRouteTypes {
     | '/{-$lang}/'
     | '/api/cron/refresh'
     | '/{-$lang}/og/$username'
+    | '/{-$lang}/top/$country'
     | '/{-$lang}/u/$username'
+    | '/{-$lang}/top/'
     | '/{-$lang}/vs/'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
@@ -247,7 +269,9 @@ export interface FileRouteTypes {
     | '/{-$lang}'
     | '/api/cron/refresh'
     | '/{-$lang}/og/$username'
+    | '/{-$lang}/top/$country'
     | '/{-$lang}/u/$username'
+    | '/{-$lang}/top'
     | '/{-$lang}/vs'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
@@ -269,7 +293,9 @@ export interface FileRouteTypes {
     | '/{-$lang}/'
     | '/api/cron/refresh'
     | '/{-$lang}/og/$username'
+    | '/{-$lang}/top/$country'
     | '/{-$lang}/u/$username'
+    | '/{-$lang}/top/'
     | '/{-$lang}/vs/'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
@@ -401,6 +427,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LangChar125OgUsernameRouteImport
       parentRoute: typeof Char123LangChar125Route
     }
+    '/{-$lang}/top/': {
+      id: '/{-$lang}/top/'
+      path: '/top'
+      fullPath: '/{-$lang}/top/'
+      preLoaderRoute: typeof Char123LangChar125TopIndexRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
+    '/{-$lang}/top/$country': {
+      id: '/{-$lang}/top/$country'
+      path: '/top/$country'
+      fullPath: '/{-$lang}/top/$country'
+      preLoaderRoute: typeof Char123LangChar125TopCountryRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
     '/{-$lang}/u/$username': {
       id: '/{-$lang}/u/$username'
       path: '/u/$username'
@@ -440,7 +480,9 @@ interface Char123LangChar125RouteChildren {
   Char123LangChar125SpecialCardsRoute: typeof Char123LangChar125SpecialCardsRoute
   Char123LangChar125IndexRoute: typeof Char123LangChar125IndexRoute
   Char123LangChar125OgUsernameRoute: typeof Char123LangChar125OgUsernameRoute
+  Char123LangChar125TopCountryRoute: typeof Char123LangChar125TopCountryRoute
   Char123LangChar125UUsernameRoute: typeof Char123LangChar125UUsernameRoute
+  Char123LangChar125TopIndexRoute: typeof Char123LangChar125TopIndexRoute
   Char123LangChar125VsIndexRoute: typeof Char123LangChar125VsIndexRoute
   Char123LangChar125VsLeftRightRoute: typeof Char123LangChar125VsLeftRightRoute
   Char123LangChar125OgVsLeftRightRoute: typeof Char123LangChar125OgVsLeftRightRoute
@@ -454,7 +496,9 @@ const Char123LangChar125RouteChildren: Char123LangChar125RouteChildren = {
   Char123LangChar125SpecialCardsRoute: Char123LangChar125SpecialCardsRoute,
   Char123LangChar125IndexRoute: Char123LangChar125IndexRoute,
   Char123LangChar125OgUsernameRoute: Char123LangChar125OgUsernameRoute,
+  Char123LangChar125TopCountryRoute: Char123LangChar125TopCountryRoute,
   Char123LangChar125UUsernameRoute: Char123LangChar125UUsernameRoute,
+  Char123LangChar125TopIndexRoute: Char123LangChar125TopIndexRoute,
   Char123LangChar125VsIndexRoute: Char123LangChar125VsIndexRoute,
   Char123LangChar125VsLeftRightRoute: Char123LangChar125VsLeftRightRoute,
   Char123LangChar125OgVsLeftRightRoute: Char123LangChar125OgVsLeftRightRoute,

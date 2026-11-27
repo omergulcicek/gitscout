@@ -16,6 +16,8 @@ import { cn } from "cn"
 import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
+import { useViewer } from "@/hooks/use-viewer"
+
 import { GithubStarIcon } from "@/features/scout/components/GithubStarIcon"
 import { RarityChip } from "@/features/scout/components/RarityChip"
 import { VerifiedIcon } from "@/features/scout/components/VerifiedIcon"
@@ -222,6 +224,8 @@ type LeaderboardTableProps = {
 
 export function LeaderboardTable({ players, manualSorting = false }: LeaderboardTableProps) {
   const { search, update } = useLeaderboardSearch()
+  const { data: viewer } = useViewer()
+  const viewerLogin = viewer?.login.toLowerCase()
   const sorting: SortingState = [{ id: search.sort, desc: search.dir === "desc" }]
 
   const table = useTable({
@@ -299,35 +303,44 @@ export function LeaderboardTable({ players, manualSorting = false }: Leaderboard
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.original.login}
-              className="border-b transition-colors last:border-0 hover:bg-muted/40"
-            >
-              {row.getAllCells().map((cell) => {
-                const { align } = readMeta(cell.column.columnDef.meta)
-                const isRank = cell.column.id === "rank"
-                return (
-                  <td
-                    key={cell.id}
-                    className={cn(
-                      isRank
-                        ? "w-12 px-3 py-3 font-mono text-muted-foreground tabular-nums"
-                        : align === "center"
-                          ? "px-1 py-3 text-center font-mono tabular-nums"
-                          : "px-3 py-3",
-                      // Uzun adlar kesilir; tablo yana kaydığında isim sütunu tüm alanı yutmaz. Linkin tıklama
-                      // alanı hücreye bağlı: eski WebKit `tr` üzerindeki `relative`i yok sayar, satıra bağlı alan
-                      // sayfaya taşıp ana sayfadaki input'u son satırın linkiyle kaplıyordu.
-                      cell.column.id === "name" && "relative max-w-64"
-                    )}
-                  >
-                    <table.FlexRender cell={cell} />
-                  </td>
-                )
-              })}
-            </tr>
-          ))}
+          {table.getRowModel().rows.map((row) => {
+            // The signed-in developer's own row stands out, same as on the country pages.
+            const mine = row.original.login.toLowerCase() === viewerLogin
+            return (
+              <tr
+                key={row.original.login}
+                aria-current={mine ? "true" : undefined}
+                className={cn(
+                  "border-b transition-colors last:border-0 hover:bg-muted/40",
+                  mine && "bg-primary/10 hover:bg-primary/15"
+                )}
+              >
+                {row.getAllCells().map((cell, index) => {
+                  const { align } = readMeta(cell.column.columnDef.meta)
+                  const isRank = cell.column.id === "rank"
+                  return (
+                    <td
+                      key={cell.id}
+                      className={cn(
+                        isRank
+                          ? "w-12 px-3 py-3 font-mono text-muted-foreground tabular-nums"
+                          : align === "center"
+                            ? "px-1 py-3 text-center font-mono tabular-nums"
+                            : "px-3 py-3",
+                        // Uzun adlar kesilir; tablo yana kaydığında isim sütunu tüm alanı yutmaz. Linkin tıklama
+                        // alanı hücreye bağlı: eski WebKit `tr` üzerindeki `relative`i yok sayar, satıra bağlı alan
+                        // sayfaya taşıp ana sayfadaki input'u son satırın linkiyle kaplıyordu.
+                        cell.column.id === "name" && "relative max-w-64",
+                        mine && index === 0 && "shadow-[inset_3px_0_0_var(--color-primary)]"
+                      )}
+                    >
+                      <table.FlexRender cell={cell} />
+                    </td>
+                  )
+                })}
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

@@ -699,5 +699,40 @@
   "lost_card_chip": "Lost",
   "lost_card_player_subtitle": "Yet to be scouted",
   "lost_card_page_name": "Missing page",
-  "lost_card_page_subtitle": "Nobody here"
+  "lost_card_page_subtitle": "Nobody here",
+  "footer_top": "Top developers",
+  "meta_top": "Top GitHub developers by country · Gitscout",
+  "meta_top_description": "The highest-rated GitHub developers of each country. A country gets its own page once {min} of its developers join Gitscout.",
+  "top_title": "Top developers by country",
+  "top_lead": "A country gets its own page once {min} of its developers have made a card.",
+  "top_count": {
+    "declarations": ["input count", "local countPlural = count: plural"],
+    "selectors": ["countPlural"],
+    "match": {
+      "countPlural=one": "{count} developer",
+      "countPlural=other": "{count} developers"
+    }
+  },
+  "top_leader": "Number one",
+  "top_upcoming_title": "Opening soon",
+  "top_upcoming_lead": "These countries are a few developers away from their own page. Invite your friends and open it together.",
+  "top_missing": "{missing} more to go until {country} gets its page",
+  "top_progress_label": "{count} of {min} developers",
+  "top_invite": "Invite a friend",
+  "top_invite_text": "{country} is close to its own page on Gitscout. Turn your GitHub profile into a player card:",
+  "top_invite_copied": "Invite link copied",
+  "top_invite_failed": "Couldn't copy the link",
+  "top_make_card": "Make your card",
+  "top_back": "All countries",
+  "meta_top_country": "Top {count} GitHub developers in {country} · Gitscout",
+  "meta_top_country_description": "The {count} highest-rated of {total} developers in {country}, scored from public GitHub data.",
+  "meta_top_locked": "Top GitHub developers in {country} · Gitscout",
+  "top_country_title": "Top {count} GitHub developers in {country}",
+  "top_country_intro": "Gitscout has scored {count} developers here: {icon} Icon, {gold} Gold, {silver} Silver and {bronze} Bronze cards.",
+  "top_country_intro_role": "The most common role is {role}.",
+  "top_country_full_table": "Full {country} table ({count})",
+  "top_podium": "Top {count}",
+  "top_locked_title": "Top GitHub developers in {country}",
+  "top_locked_lead": "This page opens once {min} developers from here join Gitscout. {count} so far.",
+  "top_locked_members": "Here so far"
 }

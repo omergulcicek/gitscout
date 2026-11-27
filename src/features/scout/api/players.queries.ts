@@ -1,12 +1,14 @@
 import { queryOptions } from "@tanstack/react-query"
 
 import {
+  getCountryTop,
   getDuelPresets,
   getHome,
   getLeaderboardSlice,
   getPlayer,
   getPlayersByLogin,
   getSpecialCardsSample,
+  getTopCountries,
   searchPlayers
 } from "@/features/scout/api/players.functions"
 import { playerKeys } from "@/features/scout/api/query-keys"
@@ -29,6 +31,23 @@ export const homeQueryOptions = () =>
     queryFn: ({ signal }) => getHome({ signal }),
     // The featured card turns over every hour; shorter than the list's day so it isn't stuck.
     staleTime: 5 * 60 * 1000
+  })
+
+// Short like the home page: a country page opens as soon as its 25th developer arrives.
+const COUNTRY_STALE_MS = 5 * 60 * 1000
+
+export const topCountriesQueryOptions = () =>
+  queryOptions({
+    queryKey: playerKeys.countries(),
+    queryFn: ({ signal }) => getTopCountries({ signal }),
+    staleTime: COUNTRY_STALE_MS
+  })
+
+export const countryTopQueryOptions = (slug: string) =>
+  queryOptions({
+    queryKey: playerKeys.country(slug),
+    queryFn: ({ signal }) => getCountryTop({ data: { slug }, signal }),
+    staleTime: COUNTRY_STALE_MS
   })
 
 export type LeaderboardSliceParams = Pick<

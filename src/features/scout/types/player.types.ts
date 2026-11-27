@@ -381,6 +381,30 @@ export type HomeData = {
   generatedAt: string
 }
 
+/** A country with its own top page, on the "top developers" hub. */
+export type CountryEntry = { country: CountryCode; slug: string; total: number; leader: ListPlayer }
+
+/** A country still short of its own page, with how many developers it has so far. */
+export type CountryProgress = { country: CountryCode; slug: string; total: number }
+
+/** The hub: countries with a page, then the ones closest to getting one. */
+export type TopCountries = { unlocked: CountryEntry[]; upcoming: CountryProgress[]; min: number }
+
+/**
+ * One country's page. Unlocked: its top 100 with counts for the intro. Locked: everyone so far and how far
+ * it is from the threshold.
+ */
+export type CountryTop = {
+  country: CountryCode
+  slug: string
+  unlocked: boolean
+  min: number
+  total: number
+  rarityCounts: Record<Rarity, number>
+  topPosition: Position | null
+  players: RankedPlayer[]
+}
+
 /** Filter options and summary counts for the leaderboard, computed from the whole list. */
 export type LeaderboardFacets = {
   total: number
