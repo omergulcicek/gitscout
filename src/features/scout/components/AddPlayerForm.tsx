@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
+import type { FormEvent } from "react"
 
 import { useNavigate } from "@tanstack/react-router"
 import { CornerDownLeft, LoaderCircle } from "lucide-react"
@@ -46,34 +47,43 @@ export function AddPlayerForm({
 }: AddPlayerFormProps) {
   const navigate = useNavigate()
   const [progress, setProgress] = useState<Progress>({ step: 0, profile: null })
+  // Stages only arrive while a new card is being scouted; an existing card comes back without any.
+  const isNewCard = useRef(false)
   const addPlayer = useAddPlayer({
-    onStage: (event) =>
+    onStage: (event) => {
+      isNewCard.current = true
       setProgress((current) => ({
         step: Math.max(current.step, NEXT_STEP[event.stage]),
         profile: event.stage === "profile" ? event.profile : current.profile
       }))
+    }
   })
   const form = useForm<AddPlayerInput>({
     resolver: zodResolver(addPlayerSchema),
     defaultValues: { username: defaultUsername }
   })
 
-  const onSubmit = form.handleSubmit(async (values) => {
+  const submit = async (values: AddPlayerInput) => {
     setProgress({ step: 0, profile: null })
+    isNewCard.current = false
     try {
       const player = await addPlayer.mutateAsync(values.username)
       trackEvent({ name: "card_requested", login: player.login })
       form.reset()
       await navigate({
         to: "/{-$lang}/u/$username",
-        params: { lang: getLangParam(), username: player.login }
+        params: { lang: getLangParam(), username: player.login },
+        // A brand-new card opens with its reveal; looking up an existing card doesn't.
+        state: (previous) => ({ ...previous, cardReveal: isNewCard.current })
       })
     } catch (error) {
       // Yalnızca hata kodu gider (ör. github:not-found); yazılan metin gönderilmez.
       trackEvent({ name: "card_request_failed", reason: failureReason(error) })
       form.setError("root.server", { message: errorText(error) })
     }
-  })
+  }
+  // Wrapped per event so the ref is only read when the form is submitted, never during render.
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => void form.handleSubmit(submit)(event)
 
   const isSubmitting = form.formState.isSubmitting
   const progressList =

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft, ArrowUpRight } from "lucide-react"
+import { cn } from "cn"
 
 import { getLangParam } from "@/helpers/localized-url"
 
@@ -16,6 +17,7 @@ import { GithubStarBadge } from "@/features/scout/components/GithubStarBadge"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { PlayerRank } from "@/features/scout/components/PlayerRank"
 import { PositionBreakdown } from "@/features/scout/components/PositionBreakdown"
+import { RevealConfetti } from "@/features/scout/components/RevealConfetti"
 import { ScoutNote } from "@/features/scout/components/ScoutNote"
 import { ShareTextSection } from "@/features/scout/components/ShareTextSection"
 import { SimilarPlayers } from "@/features/scout/components/SimilarPlayers"
@@ -28,11 +30,19 @@ import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { isProgrammersDay } from "@/features/scout/helpers/programmers-day"
+import { computeRarity } from "@/features/scout/helpers/score-player"
 import { isHalloween, isNewYear, isRepublicDay } from "@/features/scout/helpers/special-days"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
+import { useCardReveal } from "@/features/scout/hooks/use-card-reveal"
+import { useEasedCount } from "@/features/scout/hooks/use-eased-count"
 import { usePlayer } from "@/features/scout/hooks/use-player"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
+
+/** Rarities that get confetti when their card is first revealed. */
+const CELEBRATED_RARITIES = new Set(["gold", "icon"])
+/** The score starts counting once the card has finished turning. */
+const REVEAL_COUNT_DELAY_MS = 900
 
 /** Anchor for the share menu's "ready-made texts" item. */
 const SHARE_TEXTS_ID = "share-texts"
@@ -66,6 +76,17 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
   const cardPlayer = birthday
     ? { ...player, ovr: BIRTHDAY_OVR, ovrExact: BIRTHDAY_OVR, rarity: "icon" as const }
     : player
+  // Right after creation the card flips in, its score counts up and gold or better gets confetti.
+  const revealing = useCardReveal()
+  const revealOvr = useEasedCount(revealing ? cardPlayer.ovr : 0, { delay: REVEAL_COUNT_DELAY_MS })
+  // Confetti waits for the real score to land, after the flip and the count.
+  const revealDone = revealing && revealOvr === cardPlayer.ovr
+  // While counting, the card climbs the tiers with its number (bronze → silver → gold → icon), so its
+  // colour doesn't give the score away. A birthday card keeps its own look.
+  const shownCard =
+    revealing && !birthday
+      ? { ...cardPlayer, ovr: revealOvr, rarity: computeRarity(revealOvr) }
+      : cardPlayer
   const { cardRef, download, isDownloading, copy, isCopying } = useCardDownload(
     shownOccasion ? `gitscout-${username}-${shownOccasion}` : `gitscout-${username}`
   )
@@ -93,12 +114,26 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
           {birthday ? <BirthdayConfetti /> : null}
           <div
-            data-rarity={cardPlayer.rarity}
+            data-rarity={shownCard.rarity}
             className="relative flex w-full max-w-80 justify-center"
           >
-            <div aria-hidden className="scout-card-glow pointer-events-none absolute -inset-8" />
+            {/* Inside the rarity scope so the pieces pick up the card's own frame colours. */}
+            {revealDone && !birthday && CELEBRATED_RARITIES.has(cardPlayer.rarity) ? (
+              <RevealConfetti />
+            ) : null}
+            {/* Keyed by tier so the glow flares again each time the counting card levels up. */}
+            <div
+              key={revealing ? shownCard.rarity : undefined}
+              aria-hidden
+              className={cn(
+                "scout-card-glow pointer-events-none absolute -inset-8",
+                revealing && "card-reveal-glow"
+              )}
+            />
             <div className="card-lift relative">
-              <PlayerCard player={cardPlayer} ref={cardRef} occasion={shownOccasion} />
+              <div className={revealing ? "card-reveal" : undefined}>
+                <PlayerCard player={shownCard} ref={cardRef} occasion={shownOccasion} />
+              </div>
             </div>
           </div>
           <PlayerRank ranking={player.ranking} position={player.position} />
