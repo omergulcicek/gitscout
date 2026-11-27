@@ -1,6 +1,12 @@
 import { OG_SIZE, renderOgPng } from "@/lib/og-image"
 
 import { getScoredPlayer } from "@/features/scout/api/player-store"
+import { findCountryTop } from "@/features/scout/api/players.functions"
+import {
+  OG_COUNTRY_AVATARS,
+  OG_COUNTRY_CARDS,
+  OgCountryImage
+} from "@/features/scout/components/OgCountryImage"
 import { OgDuelImage } from "@/features/scout/components/OgDuelImage"
 import { OgImage } from "@/features/scout/components/OgImage"
 import { canonicalUrl } from "@/features/scout/helpers/canonical-url"
@@ -120,5 +126,23 @@ export async function duelOgResponse(
   const png = await renderOgPng(
     <OgDuelImage left={left} right={right} leftAvatar={leftAvatar} rightAvatar={rightAvatar} />
   )
+  return pngResponse(png)
+}
+
+/**
+ * A country page's link preview. The address carries the country's headcount (`v`): a new developer
+ * changes the picture (the top four or the progress), so platforms fetch the new image.
+ */
+export async function countryOgResponse(slug: string, url: URL): Promise<Response> {
+  const top = await findCountryTop(slug)
+  if (!top) return notFound()
+  const segments = url.pathname.split("/")
+  const path = [...segments.slice(0, -1), top.slug].join("/")
+  const canonical = canonicalUrl(url, { v: String(top.total) }, path)
+  if (canonical) return redirectTo(canonical)
+
+  const shown = top.players.slice(0, top.unlocked ? OG_COUNTRY_CARDS : OG_COUNTRY_AVATARS)
+  const avatars = await Promise.all(shown.map((player) => loadAvatar(player.avatarUrl)))
+  const png = await renderOgPng(<OgCountryImage top={top} avatars={avatars} />)
   return pngResponse(png)
 }

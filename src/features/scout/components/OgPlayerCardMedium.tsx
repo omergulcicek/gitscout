@@ -13,13 +13,20 @@ type OgPlayerCardMediumProps = {
   avatar: string | null
   /** Kart metinlerinin dili; verilmezse isteğin dili. Tarayıcıdaki README önizlemesi rozet dilini verir. */
   locale?: Locale
+  /** The site address at the card's foot; off where the image already shows it once, like a country preview. */
+  signature?: boolean
 }
 
 /**
  * Sitedeki `PlayerCardMedium` düzeninin Satori sürümü: avatar ve puan üstte, ad ve unvan ortada,
  * altı stat 3×2 ızgarada. Satori yalnızca flex düzen ve satır içi stil desteklediği için ayrı yazılır.
  */
-export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediumProps) {
+export function OgPlayerCardMedium({
+  player,
+  avatar,
+  locale,
+  signature = true
+}: OgPlayerCardMediumProps) {
   const colors = RARITY_COLORS[player.rarity]
 
   return (
@@ -136,19 +143,21 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
           })}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: 10,
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: 1,
-            color: colors.muted
-          }}
-        >
-          {BADGE_SIGNATURE}
-        </div>
+        {signature ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: 10,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 1,
+              color: colors.muted
+            }}
+          >
+            {BADGE_SIGNATURE}
+          </div>
+        ) : null}
       </div>
     </div>
   )

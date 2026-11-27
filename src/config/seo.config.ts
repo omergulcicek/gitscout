@@ -55,14 +55,17 @@ export function pageMeta(title: string, description?: string, image?: PageOgImag
           { name: "twitter:description", content: description }
         ]
       : []),
-    ...(imageUrl
-      ? [
-          { property: "og:image", content: imageUrl },
-          { property: "og:image:width", content: "1200" },
-          { property: "og:image:height", content: "630" },
-          { name: "twitter:image", content: imageUrl }
-        ]
-      : [])
+    ...(imageUrl ? ogImageMeta(imageUrl) : [])
+  ]
+}
+
+/** Social preview tags for a 1200×630 image; pages with a generated image add these to `pageMeta`. */
+export function ogImageMeta(url: string) {
+  return [
+    { property: "og:image", content: url },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { name: "twitter:image", content: url }
   ]
 }
 

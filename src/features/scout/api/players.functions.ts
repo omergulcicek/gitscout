@@ -249,12 +249,14 @@ export const getTopCountries = createServerFn({ method: "GET" }).handler(
   }
 )
 
-/** One country's page by its URL segment; an unknown segment is a 404. */
-export const getCountryTop = createServerFn({ method: "GET" })
-  .validator(z.object({ slug: z.string().max(60) }))
-  .handler(async ({ data }): Promise<CountryTop> => {
-    const country = countryFromSlug(data.slug)
-    if (!country) throw notFound()
+/**
+ * One country's page data by its URL segment, or null for an unknown segment. Server-only so the
+ * country page and its link preview image read the same cached list.
+ */
+export const findCountryTop = createServerOnlyFn(
+  async (slug: string): Promise<CountryTop | null> => {
+    const country = countryFromSlug(slug)
+    if (!country) return null
     const players = playersByCountry(await cachedPlayers()).get(country) ?? []
     return {
       country,
@@ -266,6 +268,16 @@ export const getCountryTop = createServerFn({ method: "GET" })
         .slice(0, COUNTRY_TOP_LIMIT)
         .map((player, index) => ({ ...player, rank: index + 1 }))
     }
+  }
+)
+
+/** One country's page by its URL segment; an unknown segment is a 404. */
+export const getCountryTop = createServerFn({ method: "GET" })
+  .validator(z.object({ slug: z.string().max(60) }))
+  .handler(async ({ data }): Promise<CountryTop> => {
+    const top = await findCountryTop(data.slug)
+    if (!top) throw notFound()
+    return top
   })
 
 /** URL segments of the countries that have a page, for the sitemap. */
