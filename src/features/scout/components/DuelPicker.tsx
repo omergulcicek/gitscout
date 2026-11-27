@@ -3,6 +3,7 @@ import { useState } from "react"
 import { getRouteApi, useNavigate, useRouter } from "@tanstack/react-router"
 import { Dices, Swords } from "lucide-react"
 import { cn } from "cn"
+import { toast } from "sonner"
 
 import { getLangParam } from "@/helpers/localized-url"
 
@@ -12,8 +13,9 @@ import { DuelSlot } from "@/features/scout/components/DuelSlot"
 import { PageHeader } from "@/features/scout/components/PageHeader"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { statShort } from "@/features/scout/helpers/player-text"
-import { useLeaderboard } from "@/features/scout/hooks/use-leaderboard"
+import { usePlayersByLogin } from "@/features/scout/hooks/use-players-by-login"
 import { usePrefetchPlayer } from "@/features/scout/hooks/use-prefetch-player"
+import { useRandomPlayer } from "@/features/scout/hooks/use-random-player"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -28,17 +30,15 @@ const RIGHT_ID = "duel-right"
  * maç özeti ortada belirir.
  */
 export function DuelPicker() {
-  const { data } = useLeaderboard()
   const search = routeApi.useSearch()
+  // `?left=` comes from a profile's "Duel" button; the route loader prefetches that player.
+  const { data: preselected } = usePlayersByLogin(search.left ? [search.left] : [])
+  const randomPlayer = useRandomPlayer()
   const navigate = useNavigate()
   const router = useRouter()
   const prefetchPlayer = usePrefetchPlayer()
   const [isOpening, setIsOpening] = useState(false)
-  const [left, setLeft] = useState<ListPlayer | null>(
-    () =>
-      data.players.find((player) => player.login.toLowerCase() === search.left?.toLowerCase()) ??
-      null
-  )
+  const [left, setLeft] = useState<ListPlayer | null>(() => preselected?.[0] ?? null)
   const [right, setRight] = useState<ListPlayer | null>(null)
 
   const open = (nextLeft: ListPlayer | null, nextRight: ListPlayer | null) => {
@@ -78,11 +78,17 @@ export function DuelPicker() {
     if (player && missing) requestAnimationFrame(() => document.getElementById(missing)?.focus())
   }
 
-  /** Boş kalan tarafları listeden rastgele doldurur; seçilmiş taraf yerinde kalır. */
-  const pickRandom = () => {
-    const nextLeft = left ?? randomPlayer(data.players, right)
-    const nextRight = right ?? randomPlayer(data.players, nextLeft)
-    open(nextLeft, nextRight)
+  /** Fills the empty sides with random players from the server; a picked side stays. */
+  const pickRandom = async () => {
+    const draw = (except: ListPlayer | null) =>
+      randomPlayer.mutateAsync(except ? [except.login] : [])
+    try {
+      const nextLeft = left ?? (await draw(right))
+      const nextRight = right ?? (await draw(nextLeft))
+      open(nextLeft, nextRight)
+    } catch {
+      toast.error(m.error_generic())
+    }
   }
 
   return (
@@ -111,7 +117,7 @@ export function DuelPicker() {
             side="left"
             label={m.duel_home()}
             player={left}
-            players={data.players.filter((player) => player.login !== right?.login)}
+            exclude={right ? [right.login] : []}
             onChange={(player) => choose("left", player)}
           />
           <div className="flex flex-col items-center gap-6 self-center max-lg:hidden lg:mt-12">
@@ -121,8 +127,8 @@ export function DuelPicker() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={pickRandom}
-              disabled={isOpening}
+              onClick={() => void pickRandom()}
+              disabled={isOpening || randomPlayer.isPending}
             >
               <Dices aria-hidden />
               {m.duel_random()}
@@ -133,7 +139,7 @@ export function DuelPicker() {
             side="right"
             label={m.duel_away()}
             player={right}
-            players={data.players.filter((player) => player.login !== left?.login)}
+            exclude={left ? [left.login] : []}
             onChange={(player) => choose("right", player)}
             autoFocus={left !== null}
           />
@@ -145,8 +151,8 @@ export function DuelPicker() {
           type="button"
           variant="outline"
           size="sm"
-          onClick={pickRandom}
-          disabled={isOpening}
+          onClick={() => void pickRandom()}
+          disabled={isOpening || randomPlayer.isPending}
           className="lg:hidden"
         >
           <Dices aria-hidden />
@@ -157,11 +163,7 @@ export function DuelPicker() {
         </p>
       </div>
 
-      <DuelPresets
-        players={data.players}
-        seed={data.featuredSeed}
-        profileViews={data.profileViews}
-      />
+      <DuelPresets />
     </main>
   )
 }
@@ -174,11 +176,6 @@ const REVEAL_HOLD_MS = 1000
 
 function flipDuration() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : FLIP_MS
-}
-
-function randomPlayer(players: ListPlayer[], except: ListPlayer | null): ListPlayer | null {
-  const pool = players.filter((player) => player.login !== except?.login)
-  return pool[Math.floor(Math.random() * pool.length)] ?? null
 }
 
 /** Ortadaki çapraz kılıçlar: kapışmanın işareti. Açılırken nabız gibi atar. */

@@ -149,3 +149,22 @@ export function duelPresetGroups(
 
   return groups.filter((group) => group.presets.length > 0)
 }
+
+/**
+ * The most-viewed pairs among the seeded presets: both sides' profile views from the last week added up.
+ * Used for the duel page's "popular duels" row.
+ */
+export function popularPresets(
+  players: ListPlayer[],
+  seed: number,
+  profileViews: Readonly<Record<string, number>>,
+  count: number
+): DuelPreset[] {
+  const interest = (preset: DuelPreset) =>
+    (profileViews[preset.left.login.toLowerCase()] ?? 0) +
+    (profileViews[preset.right.login.toLowerCase()] ?? 0)
+  return duelPresetGroups(players, seed, profileViews)
+    .flatMap((group) => group.presets)
+    .sort((a, b) => interest(b) - interest(a))
+    .slice(0, count)
+}

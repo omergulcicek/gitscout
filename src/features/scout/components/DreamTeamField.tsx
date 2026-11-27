@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { PlayerCombobox } from "@/features/scout/components/PlayerCombobox"
 import { RarityChip } from "@/features/scout/components/RarityChip"
 import { DREAM_TEAM_SIZE } from "@/features/scout/constants/profile.constants"
-import { useLeaderboardPlayers } from "@/features/scout/hooks/use-leaderboard-players"
+import { usePlayersByLogin } from "@/features/scout/hooks/use-players-by-login"
 import * as m from "@/paraglide/messages.js"
 
 type DreamTeamFieldProps = {
@@ -25,15 +25,12 @@ export function DreamTeamField({
   ownLogin,
   disabled = false
 }: DreamTeamFieldProps) {
-  const { players } = useLeaderboardPlayers()
+  const { data: picked = [] } = usePlayersByLogin(value)
   // Seçimden sonra arama kutusu boşalsın diye kutu yeniden kurulur.
   const [searchKey, setSearchKey] = useState(0)
 
   const own = ownLogin.toLowerCase()
-  const byLogin = new Map(players.map((player) => [player.login.toLowerCase(), player]))
-  const candidates = players.filter(
-    (player) => player.login.toLowerCase() !== own && !value.includes(player.login.toLowerCase())
-  )
+  const byLogin = new Map(picked.map((player) => [player.login.toLowerCase(), player]))
   const full = value.length >= DREAM_TEAM_SIZE
 
   return (
@@ -95,7 +92,7 @@ export function DreamTeamField({
           <PlayerCombobox
             key={searchKey}
             id="dream-team-search"
-            players={candidates}
+            exclude={[own, ...value]}
             value={null}
             onChange={(player) => {
               if (!player) return

@@ -318,6 +318,7 @@
   "duel_away": "Developer 2",
   "duel_placeholder": "Name or username",
   "duel_no_match": "No developer with that name.",
+  "search_loading": "Searching…",
   "duel_missing": "Someone missing? Get their card on the home page first.",
   "duel_summary": "Duel summary",
   "duel_score": "Score {left}-{right}",

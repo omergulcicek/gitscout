@@ -6,7 +6,8 @@ import type { Gender } from "@/constants/account.constants"
 import type { Team } from "@/constants/team.constants"
 
 import {
-  getLeaderboard,
+  getPlayersByLogin,
+  searchPlayers,
   updateBirthDate,
   updateProfileCountry,
   updateProfileDetails
@@ -17,7 +18,8 @@ import type { ListPlayer } from "@/features/scout/types/player.types"
 import { renderWithProviders } from "@/test/render"
 
 vi.mock("@/features/scout/api/players.functions", () => ({
-  getLeaderboard: vi.fn(),
+  getPlayersByLogin: vi.fn(),
+  searchPlayers: vi.fn(),
   updateBirthDate: vi.fn(),
   updateProfileCountry: vi.fn(),
   updateProfileDetails: vi.fn()
@@ -47,9 +49,22 @@ function renderForm(saved: Saved = {}) {
 describe("ProfileForm", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(getLeaderboard).mockResolvedValue({
-      players: [player("me"), player("ada"), player("linus")]
-    } as Awaited<ReturnType<typeof getLeaderboard>>)
+    const players = [player("me"), player("ada"), player("linus")]
+    // Mirrors the server: match by login, leave out excluded logins.
+    vi.mocked(searchPlayers).mockImplementation((({
+      data
+    }: {
+      data: { q: string; exclude: string[] }
+    }) =>
+      Promise.resolve(
+        players.filter(
+          (entry) =>
+            entry.login.includes(data.q.toLowerCase()) && !data.exclude.includes(entry.login)
+        )
+      )) as unknown as typeof searchPlayers)
+    vi.mocked(getPlayersByLogin).mockImplementation(({ data }: { data: { logins: string[] } }) =>
+      Promise.resolve(players.filter((entry) => data.logins.includes(entry.login)))
+    )
     vi.mocked(updateProfileDetails).mockResolvedValue(undefined)
   })
 

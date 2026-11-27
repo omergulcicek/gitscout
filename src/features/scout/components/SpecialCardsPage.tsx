@@ -13,9 +13,9 @@ import { SampleCardWithActions } from "@/features/scout/components/SpecialCardSa
 import { TeamCardShowcase } from "@/features/scout/components/TeamCardShowcase"
 import { CARD_OCCASIONS } from "@/features/scout/constants/card-occasion.constants"
 import { GITHUB_STARS } from "@/features/scout/constants/github-star.constants"
-import { SPECIAL_CARDS_SAMPLE_LOGIN } from "@/features/scout/constants/profile.constants"
 import { nextProgrammersDay } from "@/features/scout/helpers/programmers-day"
-import { useLeaderboard } from "@/features/scout/hooks/use-leaderboard"
+import { usePlayersByLogin } from "@/features/scout/hooks/use-players-by-login"
+import { useSpecialCardsSample } from "@/features/scout/hooks/use-special-cards-sample"
 import type { CardOccasion } from "@/features/scout/types/card-preview.types"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -91,13 +91,12 @@ function occasionInfos(settingsLink: ReactNode): OccasionInfo[] {
  */
 export function SpecialCardsPage() {
   const lang = getLangParam()
-  const { data } = useLeaderboard()
+  const { data: fallback } = useSpecialCardsSample()
   const { data: viewer } = useViewer()
-  const own = viewer
-    ? data.players.find((player) => player.login.toLowerCase() === viewer.login.toLowerCase())
-    : undefined
-  const fallback = data.players.find((player) => player.login === SPECIAL_CARDS_SAMPLE_LOGIN)
-  const sample = own ?? fallback ?? data.players[0]
+  // The viewer's own card loads in the browser only; the server-rendered page stays the same for everyone.
+  const { data: ownCards } = usePlayersByLogin(viewer ? [viewer.login] : [])
+  const own = ownCards?.[0]
+  const sample = own ?? fallback ?? undefined
 
   const settingsLink = (
     <Link

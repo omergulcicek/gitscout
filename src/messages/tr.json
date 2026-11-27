@@ -304,6 +304,7 @@
   "duel_away": "2. geliştirici",
   "duel_placeholder": "Geliştirici ara",
   "duel_no_match": "Bu adla bir geliştirici yok.",
+  "search_loading": "Aranıyor…",
   "duel_missing": "Listede olmayan biri mi? Önce ana sayfadan kartını çıkar.",
   "duel_summary": "Kapışma özeti",
   "duel_score": "Skor {left}-{right}",
