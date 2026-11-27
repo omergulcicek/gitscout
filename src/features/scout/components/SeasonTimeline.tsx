@@ -24,10 +24,13 @@ function StepText({ text, date }: { text: (inputs: { date: string }) => string; 
   )
 }
 
-/** Index of the step in progress: the last one that has started. */
+/** Index of the phase in progress: the last one that has started. Notes without a start never count. */
 function currentStep(now: Date): number {
   const today = now.toISOString().slice(0, 10)
-  return SEASON_TIMELINE.reduce((current, step, index) => (step.from <= today ? index : current), 0)
+  return SEASON_TIMELINE.reduce(
+    (current, step, index) => (step.from && step.from <= today ? index : current),
+    0
+  )
 }
 
 type SeasonTimelineProps = {
@@ -47,7 +50,7 @@ export function SeasonTimeline({ now }: SeasonTimelineProps) {
       <ol className="grid gap-3 sm:grid-cols-3">
         {SEASON_TIMELINE.map((step, index) => (
           <li
-            key={step.from}
+            key={step.title()}
             aria-current={index === current ? "step" : undefined}
             className={cn(
               "surface season-ice flex flex-col gap-1.5 p-4",
@@ -64,7 +67,11 @@ export function SeasonTimeline({ now }: SeasonTimelineProps) {
               ) : null}
             </span>
             <span className="text-sm text-muted-foreground">
-              <StepText text={step.text} date={stepDate(step.date)} />
+              {step.date ? (
+                <StepText text={step.text} date={stepDate(step.date)} />
+              ) : (
+                step.text({ date: "" })
+              )}
             </span>
           </li>
         ))}
