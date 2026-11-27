@@ -9,6 +9,21 @@ const stepDate = (date: string) =>
     new Date(`${date}T00:00:00Z`)
   )
 
+/** Stands in for the date while the sentence is built, so the date can be set in bold around it. */
+const DATE_SLOT = "\u0000"
+
+/** A step's sentence with its date in bold, wherever the language puts the date. */
+function StepText({ text, date }: { text: (inputs: { date: string }) => string; date: string }) {
+  const [before, after = ""] = text({ date: DATE_SLOT }).split(DATE_SLOT)
+  return (
+    <>
+      {before}
+      <strong className="font-semibold text-foreground">{date}</strong>
+      {after}
+    </>
+  )
+}
+
 /** Index of the step in progress: the last one that has started. */
 function currentStep(now: Date): number {
   const today = now.toISOString().slice(0, 10)
@@ -40,16 +55,17 @@ export function SeasonTimeline({ now }: SeasonTimelineProps) {
               index === current && "ring-2 ring-chart-home"
             )}
           >
-            <span className="flex items-center justify-between gap-2 font-mono text-xs text-muted-foreground">
-              {stepDate(step.from)}
+            <span className="flex items-center justify-between gap-2">
+              <span className="font-semibold">{step.title()}</span>
               {index === current ? (
-                <span className="rounded-full bg-chart-home px-2 py-0.5 text-[10px] font-semibold text-white">
+                <span className="shrink-0 rounded-full bg-chart-home px-2 py-0.5 text-[10px] font-semibold text-white">
                   {m.season_timeline_now()}
                 </span>
               ) : null}
             </span>
-            <span className="font-semibold">{step.title()}</span>
-            <span className="text-sm text-muted-foreground">{step.text()}</span>
+            <span className="text-sm text-muted-foreground">
+              <StepText text={step.text} date={stepDate(step.date)} />
+            </span>
           </li>
         ))}
       </ol>
