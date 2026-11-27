@@ -233,13 +233,19 @@ export const getLeaderboardSlice = createServerFn({ method: "GET" })
     }): Promise<{
       slice: LeaderboardSlice
       facets: LeaderboardFacets
-      dailyBest: DailyBestSlot[]
+      dailyBest: { world: DailyBestSlot[]; tr: DailyBestSlot[] }
     }> => {
       const { players, recentLogins } = await cachedList()
       return {
         slice: queryLeaderboard(players, data, data.locale),
         facets: leaderboardFacets(players),
-        dailyBest: dailyBest(players, recentLogins)
+        dailyBest: {
+          world: dailyBest(players, recentLogins),
+          tr: dailyBest(
+            players.filter((player) => playerCountry(player) === "TR"),
+            recentLogins
+          )
+        }
       }
     }
   )

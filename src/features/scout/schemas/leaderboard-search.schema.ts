@@ -81,10 +81,14 @@ export const leaderboardSearchSchema = z.object({
 
 export type LeaderboardSearch = z.infer<typeof leaderboardSearchSchema>
 
+/** `?top=tr` or `?top=world`: which pool a "World · Türkiye" switch shows. Only the Turkish page reads it. */
+const topViewSchema = z.enum(["tr", "world"]).optional().catch(undefined)
+
 /**
  * Ana sayfa aynı tabloyu kullanır; ek olarak Türkçe sayfada ilk 10'un hangi liste olduğunu seçer.
  * Türkçede varsayılan Türkiye'dir (`?top=tr` ile aynı), `?top=world` genel listeyi gösterir. İngilizcede bu parametre yok sayılır.
  */
-export const homeSearchSchema = leaderboardSearchSchema.extend({
-  top: z.enum(["tr", "world"]).optional().catch(undefined)
-})
+export const homeSearchSchema = leaderboardSearchSchema.extend({ top: topViewSchema })
+
+/** The leaderboard page also picks the pool of its "today's best" strip the same way. */
+export const leaderboardPageSearchSchema = leaderboardSearchSchema.extend({ top: topViewSchema })
