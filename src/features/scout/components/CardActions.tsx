@@ -1,7 +1,16 @@
 import { useSyncExternalStore } from "react"
 
 import { Link } from "@tanstack/react-router"
-import { Download, FileText, ImageIcon, Link2, Share2, Smartphone, Swords } from "lucide-react"
+import {
+  Download,
+  FileText,
+  ImageIcon,
+  Link2,
+  Share2,
+  Smartphone,
+  Swords,
+  Trophy
+} from "lucide-react"
 import { toast } from "sonner"
 
 import type { CARD_SHARE_TARGETS } from "@/schemas/analytics.schema"
@@ -95,6 +104,24 @@ export function CardActions({
     })
   }
 
+  // An invite to the duel picker with this card already in the home corner; the friend adds theirs.
+  const challenge = () => {
+    track("challenge")
+    const url = `${localizedUrl("/vs", getLocale())}?${new URLSearchParams({ left: player.login, challenge: "1" }).toString()}`
+    const message = m.challenge_share_text({ name: player.name })
+    if (canShareNatively) {
+      navigator.share({ text: message, url }).catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        toast.error(m.share_failed())
+      })
+      return
+    }
+    navigator.clipboard
+      .writeText(`${message} ${url}`)
+      .then(() => toast.success(m.challenge_copied()))
+      .catch(() => toast.error(m.duel_link_failed()))
+  }
+
   const copyLink = () => {
     track("link")
     navigator.clipboard
@@ -138,6 +165,11 @@ export function CardActions({
               <DropdownMenuSeparator />
             </>
           ) : null}
+          <DropdownMenuItem onClick={challenge}>
+            <Trophy aria-hidden />
+            {m.challenge_friend()}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={shareOnX}>
             <X aria-hidden className="dark:hidden" />
             <XDark aria-hidden className="hidden dark:block" />
