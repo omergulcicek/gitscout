@@ -1,3 +1,5 @@
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import type { RecentEntry } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -23,7 +25,7 @@ export function HeroProof({ recent, total, lastDayCount }: HeroProofProps) {
           {avatars.map((player) => (
             <li key={player.login}>
               <img
-                src={player.avatarUrl}
+                src={avatarSrc(player.avatarUrl, 28)}
                 alt=""
                 width={28}
                 height={28}

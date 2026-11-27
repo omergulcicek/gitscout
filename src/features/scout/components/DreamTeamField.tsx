@@ -2,6 +2,8 @@ import { useState } from "react"
 
 import { X } from "lucide-react"
 
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import { Button } from "@/components/ui/button"
 import { PlayerCombobox } from "@/features/scout/components/PlayerCombobox"
 import { RarityChip } from "@/features/scout/components/RarityChip"
@@ -50,7 +52,7 @@ export function DreamTeamField({
                 </span>
                 {player ? (
                   <img
-                    src={player.avatarUrl}
+                    src={avatarSrc(player.avatarUrl, 28)}
                     alt=""
                     width={28}
                     height={28}

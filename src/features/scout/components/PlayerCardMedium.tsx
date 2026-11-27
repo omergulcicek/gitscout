@@ -1,5 +1,7 @@
 import { cn } from "cn"
 
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { STAT_TIER_TEXT } from "@/features/scout/constants/stat-tier.constants"
 import { statShort, titleText } from "@/features/scout/helpers/player-text"
@@ -39,7 +41,7 @@ export function PlayerCardMedium({ player, className }: PlayerCardMediumProps) {
 
         <div aria-hidden className="relative flex items-start justify-between gap-2">
           <img
-            src={player.avatarUrl}
+            src={avatarSrc(player.avatarUrl, 56)}
             alt=""
             width={56}
             height={56}

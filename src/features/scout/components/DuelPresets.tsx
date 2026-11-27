@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router"
 import { ChevronRight, Shuffle } from "lucide-react"
 import { cn } from "cn"
 
+import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
@@ -170,7 +171,7 @@ function Avatar({ player, side }: { player: ListPlayer; side: "left" | "right" }
   const isHome = side === "left"
   return (
     <img
-      src={player.avatarUrl}
+      src={avatarSrc(player.avatarUrl, 48)}
       alt=""
       width={48}
       height={48}

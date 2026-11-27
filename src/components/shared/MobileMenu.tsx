@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site.config"
 
 import { trackEvent } from "@/lib/analytics"
 import { repoStarsQueryOptions } from "@/lib/repo-stars.queries"
+import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { useLogout, useViewer } from "@/hooks/use-viewer"
@@ -39,7 +40,13 @@ export function MobileMenu() {
         className="inline-flex size-7 items-center justify-center overflow-hidden rounded-full text-muted-foreground ring-1 ring-border transition-colors outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {viewer ? (
-          <img src={viewer.avatarUrl} alt="" width={28} height={28} className="size-full" />
+          <img
+            src={avatarSrc(viewer.avatarUrl, 28)}
+            alt=""
+            width={28}
+            height={28}
+            className="size-full"
+          />
         ) : (
           <Menu aria-hidden className="size-4" />
         )}

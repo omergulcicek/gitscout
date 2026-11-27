@@ -2,6 +2,8 @@ import type { ReactNode } from "react"
 
 import { cn } from "cn"
 
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import { GithubMark } from "@/components/shared/GithubMark"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { PlayerCombobox } from "@/features/scout/components/PlayerCombobox"
@@ -221,7 +223,7 @@ function MiniCard({ player }: { player: ListPlayer }) {
     <div data-rarity={player.rarity} className="scout-card flex size-full rounded-2xl p-1.5">
       <div className="scout-card-inner flex w-full flex-col items-center justify-center gap-2 rounded-xl px-2">
         <img
-          src={player.avatarUrl}
+          src={avatarSrc(player.avatarUrl, 64)}
           alt=""
           width={64}
           height={64}

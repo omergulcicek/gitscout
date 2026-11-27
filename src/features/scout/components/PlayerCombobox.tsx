@@ -1,5 +1,7 @@
 import { useRef, useState } from "react"
 
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import {
   Combobox,
   ComboboxContent,
@@ -108,7 +110,7 @@ export function PlayerCombobox({
           {(player: ListPlayer) => (
             <ComboboxItem key={player.login} value={player}>
               <img
-                src={player.avatarUrl}
+                src={avatarSrc(player.avatarUrl, 24)}
                 alt=""
                 width={24}
                 height={24}

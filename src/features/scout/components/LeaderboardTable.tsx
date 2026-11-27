@@ -13,6 +13,7 @@ import type { SortingState } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 import { cn } from "cn"
 
+import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { GithubStarIcon } from "@/features/scout/components/GithubStarIcon"
@@ -182,10 +183,12 @@ function PlayerCell({ player }: { player: ListPlayer }) {
       className="flex items-center gap-3 rounded-sm outline-none after:absolute after:inset-0 focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       <img
-        src={player.avatarUrl}
+        src={avatarSrc(player.avatarUrl, 36)}
         alt=""
         width={36}
         height={36}
+        // A hundred rows; only the ones on screen should load.
+        loading="lazy"
         className="size-9 rounded-full bg-muted outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
       />
       <span className="min-w-0">

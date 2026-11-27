@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { Star } from "lucide-react"
 import { cn } from "cn"
 
+import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
@@ -75,7 +76,7 @@ export function RecentlyAdded({ entries, lastDayCount, generatedAt }: RecentlyAd
                     </span>
                   ) : null}
                   <img
-                    src={player.avatarUrl}
+                    src={avatarSrc(player.avatarUrl, 48)}
                     alt=""
                     width={48}
                     height={48}

@@ -5,6 +5,8 @@ import { cn } from "cn"
 import { TEAMS } from "@/constants/team.constants"
 import type { Team } from "@/constants/team.constants"
 
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import { BadgeIcon } from "@/features/scout/components/BadgeIcon"
 import { CARD_OCCASIONS } from "@/features/scout/constants/card-occasion.constants"
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
@@ -148,7 +150,7 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
         {/* Kart sabit yükseklikte: ad iki satıra sarılınca alt satır taşmasın diye boşluğu avatar küçülerek verir. */}
         <div className="relative mt-3 flex h-38 min-h-0 shrink justify-center">
           <img
-            src={player.avatarUrl}
+            src={avatarSrc(player.avatarUrl, 152)}
             alt={m.avatar_alt({ name: player.name })}
             crossOrigin="anonymous"
             width={152}
