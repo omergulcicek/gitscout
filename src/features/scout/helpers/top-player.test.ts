@@ -35,7 +35,10 @@ describe("ilk 100 oyuncusu", () => {
     })
   })
 
-  it("elle atanmış ülkeyi taşır", () => {
-    expect(toTopPlayer(player("ademilter"), 4)).toMatchObject({ rank: 5, country: "TR" })
+  it("veritabanındaki ülkeyi taşır", () => {
+    expect(toTopPlayer({ ...player("ademilter"), claimedCountry: "TR" }, 4)).toMatchObject({
+      rank: 5,
+      country: "TR"
+    })
   })
 })

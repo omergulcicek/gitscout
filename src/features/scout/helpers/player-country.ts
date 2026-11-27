@@ -1,8 +1,4 @@
-import {
-  COUNTRIES,
-  PLAYER_COUNTRIES,
-  UNKNOWN_COUNTRY
-} from "@/features/scout/constants/player-country.constants"
+import { COUNTRIES, UNKNOWN_COUNTRY } from "@/features/scout/constants/player-country.constants"
 import type {
   CountryCode,
   CountryFilter
@@ -13,14 +9,12 @@ import { getLocale } from "@/paraglide/runtime.js"
 type CountryHolder = { login: string; country?: string | null; claimedCountry?: string | null }
 
 /**
- * Oyuncunun ülkesi: önce onaylı sahibinin kendi seçtiği ülke, sonra elle atanmış liste (nereli olduğu),
- * yoksa GitHub konumundan çıkarılan ülke. Hiçbirinde yoksa `undefined`. GitHub kullanıcı adları büyük-küçük harf ayırmaz.
+ * The player's country: first the `players.country` column (set by hand or by the card owner), then the
+ * country derived from the GitHub location. `undefined` when neither is known.
  */
 export function playerCountry(player: CountryHolder): CountryCode | undefined {
   const claimed = COUNTRIES.find((country) => country === player.claimedCountry)
   if (claimed) return claimed
-  const manual = PLAYER_COUNTRIES.get(player.login.toLowerCase())
-  if (manual) return manual
   // Veritabanındaki özet doğrulanmadan okunur; tanınmayan değer bayrak yerine "belirsiz" olur.
   return COUNTRIES.find((country) => country === player.country)
 }

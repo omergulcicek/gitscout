@@ -311,7 +311,10 @@ export type ScoredPlayer = {
   fetchedAt: string
   /** Hesabını GitHub ile sahiplenmiş ve onay koşullarını geçmiş. Okuma anında hesap tablosundan eklenir. */
   verified?: boolean
-  /** Onaylı sahibinin kendi seçtiği ülke; her kaynağın önüne geçer. Okuma anında hesap tablosundan eklenir. */
+  /**
+   * Country from the `players.country` column, set by hand or by the verified owner; it wins over the GitHub
+   * location. Added at read time, never stored in the score summary.
+   */
   claimedCountry?: CountryCode
   /** Onaylı sahibinin yerel saatine göre bugün doğum günü; yalnızca profil okumasında eklenir. */
   birthdayToday?: true

@@ -7,35 +7,29 @@ import {
 } from "@/features/scout/helpers/player-country"
 
 describe("oyuncu ülkesi", () => {
-  it("kullanıcı adını büyük-küçük harf ayırmadan eşler", () => {
-    expect(playerCountry({ login: "OmerGulcicek" })).toBe("TR")
-    expect(playerCountry({ login: "Gaearon" })).toBe("RU")
-    expect(playerCountry({ login: "octocat" })).toBeUndefined()
-  })
-
-  it("listede yoksa GitHub konumundan çıkarılan ülkeyi kullanır, elle atanan önde gelir", () => {
-    expect(playerCountry({ login: "octocat", country: "DE" })).toBe("DE")
-    expect(playerCountry({ login: "fatih", country: "DE" })).toBe("TR")
-    expect(playerCountry({ login: "octocat", country: "XX" })).toBeUndefined()
-  })
-
-  it("onaylı sahibin seçtiği ülke elle atanan listenin ve konumun önüne geçer", () => {
-    expect(playerCountry({ login: "fatih", country: "DE", claimedCountry: "NL" })).toBe("NL")
+  it("veritabanındaki ülke GitHub konumunun önüne geçer", () => {
+    expect(playerCountry({ login: "fatih", country: "DE", claimedCountry: "TR" })).toBe("TR")
     expect(playerCountry({ login: "octocat", country: "DE", claimedCountry: "JP" })).toBe("JP")
-    expect(playerCountry({ login: "fatih", claimedCountry: "XX" })).toBe("TR")
+  })
+
+  it("veritabanında ülke yoksa ya da tanınmıyorsa GitHub konumundan çıkarılanı kullanır", () => {
+    expect(playerCountry({ login: "octocat", country: "DE" })).toBe("DE")
     expect(playerCountry({ login: "octocat", country: "DE", claimedCountry: null })).toBe("DE")
+    expect(playerCountry({ login: "octocat", country: "DE", claimedCountry: "XX" })).toBe("DE")
+    expect(playerCountry({ login: "octocat", country: "XX" })).toBeUndefined()
+    expect(playerCountry({ login: "octocat" })).toBeUndefined()
   })
 
   it("ülkesi bilinmeyeni belirsiz sayar", () => {
     expect(playerCountryFilter({ login: "octocat" })).toBe("unknown")
-    expect(playerCountryFilter({ login: "fatih" })).toBe("TR")
+    expect(playerCountryFilter({ login: "fatih", claimedCountry: "TR" })).toBe("TR")
   })
 
   it("ülkeleri sayar, belirsizleri ayrı tutar", () => {
     const players = [
-      { login: "fatih" },
-      { login: "rakyll" },
-      { login: "torvalds" },
+      { login: "fatih", claimedCountry: "TR" },
+      { login: "rakyll", country: "US", claimedCountry: "TR" },
+      { login: "torvalds", country: "FI" },
       { login: "octocat" }
     ]
     expect(countPlayerCountries(players)).toEqual({
