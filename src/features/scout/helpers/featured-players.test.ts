@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest"
 import { featuredOrder } from "@/features/scout/helpers/featured-players"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 
-// Seçim yalnızca kullanıcı adına ve kart türüne bakar.
-const player = (login: string, rarity: ListPlayer["rarity"]) => ({ login, rarity }) as ListPlayer
+// Selection only looks at login, rarity and country.
+const player = (login: string, rarity: ListPlayer["rarity"], country?: string) =>
+  ({ login, rarity, country }) as ListPlayer
 
 const players = [
   player("ikon", "icon"),
@@ -49,5 +50,26 @@ describe("vitrin sırası", () => {
   it("Gold ve üstü kimse yoksa herkesi aday sayar", () => {
     const lowOnly = [player("gumus", "silver"), player("bronz", "bronze")]
     expect(featuredOrder(lowOnly, new Set(), 3)).toHaveLength(2)
+  })
+
+  it("with a country, only queues that country's Gold and above cards", () => {
+    const mixed = [
+      player("tr-ikon", "icon", "TR"),
+      player("tr-altin", "gold", "TR"),
+      player("tr-gumus", "silver", "TR"),
+      player("de-altin", "gold", "DE"),
+      player("belirsiz", "gold")
+    ]
+    expect(logins(featuredOrder(mixed, new Set(), 5, "TR")).sort()).toEqual(["tr-altin", "tr-ikon"])
+  })
+
+  it("without a country, everyone is a candidate", () => {
+    const mixed = [player("tr-altin", "gold", "TR"), player("de-altin", "gold", "DE")]
+    expect(featuredOrder(mixed, new Set(), 5)).toHaveLength(2)
+  })
+
+  it("falls back to the global pool when the country has no Gold and above cards", () => {
+    const mixed = [player("tr-gumus", "silver", "TR"), player("de-altin", "gold", "DE")]
+    expect(logins(featuredOrder(mixed, new Set(), 5, "TR"))).toEqual(["de-altin"])
   })
 })

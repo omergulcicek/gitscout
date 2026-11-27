@@ -207,11 +207,15 @@ export const getHome = createServerFn({ method: "GET" }).handler(async (): Promi
   const byLogin = new Map(players.map((player) => [player.login.toLowerCase(), player]))
   const turkish = players.filter((player) => playerCountry(player) === "TR")
   const seed = Math.floor(Date.now() / HOUR_MS)
+  const recentSet = new Set(recentLogins)
   return {
     top: { world: ranked(players), tr: ranked(turkish) },
     totals: { world: players.length, tr: turkish.length },
     examples: EXAMPLE_LOGINS.flatMap((login) => byLogin.get(login) ?? []),
-    featured: featuredOrder(players, new Set(recentLogins), seed).slice(0, HOME_FEATURED_LIMIT),
+    featured: {
+      world: featuredOrder(players, recentSet, seed).slice(0, HOME_FEATURED_LIMIT),
+      tr: featuredOrder(players, recentSet, seed, "TR").slice(0, HOME_FEATURED_LIMIT)
+    },
     recent: latest
       .flatMap((entry) => {
         const player = byLogin.get(entry.login.toLowerCase())
