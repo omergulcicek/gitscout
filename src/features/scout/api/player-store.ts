@@ -20,6 +20,7 @@ import {
   storedPlayerSchema
 } from "@/features/scout/schemas/player.schema"
 import type { ListPlayer, ScoredPlayer, StoredPlayer } from "@/features/scout/types/player.types"
+import type { FrozenSeason } from "@/features/scout/types/season.types"
 
 /**
  * Oyuncular Supabase'deki `gitscout.players` tablosunda durur. Her oyuncu GitHub'dan bir kez çekilir ve
@@ -582,4 +583,118 @@ export async function getSeasonFacts(
   if (!row) return null
   const parsed = seasonFactsSchema.safeParse(row)
   return parsed.success ? parsed.data : null
+}
+
+/* ---------- Frozen seasons ---------- */
+
+const frozenSeasonSchema = z.object({
+  format: z.literal(1),
+  login: z.string(),
+  githubId: z.number(),
+  year: z.number(),
+  counts: z.array(z.number()),
+  total: z.number(),
+  reviews: z.number(),
+  yearly: z.array(
+    z.object({ year: z.number(), total: z.number(), reviews: z.number().optional() })
+  ),
+  card: z.object({
+    ovr: z.number(),
+    rarity: z.enum(["bronze", "silver", "gold", "icon"]),
+    position: z.custom<ScoredPlayer["position"]>((value) => typeof value === "string"),
+    title: z.custom<ScoredPlayer["title"]>((value) => typeof value === "object" && value !== null),
+    country: z.enum(COUNTRIES).optional()
+  })
+}) satisfies z.ZodType<FrozenSeason>
+
+/**
+ * The player's frozen season, matched by GitHub account id so a login that changed hands doesn't show
+ * someone else's year. Cards stored before the id was kept fall back to the login.
+ */
+export async function getFrozenSeason(login: string, year: number): Promise<FrozenSeason | null> {
+  const sql = getDb()
+  const rows = z.array(z.object({ data: z.unknown() })).parse(
+    await sql`
+      select s.data
+      from players p
+      join seasons s on s.year = ${year}
+        and (s.github_id = p.github_id or (p.github_id is null and s.login = p.login))
+      where p.login = ${keyOf(login)}
+      order by s.frozen_at desc
+      limit 1
+    `
+  )
+  const row = rows[0]
+  if (!row) return null
+  const parsed = frozenSeasonSchema.safeParse(row.data)
+  if (!parsed.success) {
+    console.error("[db] unreadable frozen season", login, year)
+    return null
+  }
+  return parsed.data
+}
+
+/** What freezing takes from the stored card: the yearly totals and the card as it stands. */
+export async function getFreezeInputs(
+  login: string,
+  db: "app" | "refresh"
+): Promise<{ login: string; yearly: FrozenSeason["yearly"]; scored: ScoredPlayer } | null> {
+  const sql = db === "app" ? getDb() : getRefreshDb()
+  const rows = z
+    .array(
+      z.object({
+        login: z.string(),
+        yearly: z.unknown(),
+        scored: scoredPlayerSchema,
+        claimed_country: z.string().nullable()
+      })
+    )
+    .parse(
+      await sql`
+        select login, facts -> 'yearly' as yearly, scored, country as claimed_country
+        from players
+        where login = ${keyOf(login)}
+      `
+    )
+  const row = rows[0]
+  if (!row) return null
+  const yearly = frozenSeasonSchema.shape.yearly.safeParse(row.yearly)
+  return {
+    login: row.login,
+    yearly: yearly.success ? yearly.data : [],
+    scored: {
+      ...row.scored,
+      claimedCountry: COUNTRIES.find((code) => code === row.claimed_country)
+    }
+  }
+}
+
+/** Writes a closed season once; a second write for the same account and year is ignored. */
+export async function insertFrozenSeason(row: FrozenSeason, db: "app" | "refresh"): Promise<void> {
+  const data = frozenSeasonSchema.parse(row)
+  const sql = db === "app" ? getDb() : getRefreshDb()
+  await sql`
+    insert into seasons (github_id, year, login, format, data)
+    values (${data.githubId}, ${data.year}, ${keyOf(data.login)}, ${data.format}, ${sql.json(data)})
+    on conflict (github_id, year) do nothing
+  `
+}
+
+/** Players whose season `year` isn't frozen yet, in random order. */
+export async function getUnfrozenLogins(year: number, limit: number): Promise<string[]> {
+  const sql = getRefreshDb()
+  const rows = z.array(z.object({ login: z.string() })).parse(
+    await sql`
+      select p.login from players p
+      where not exists (
+        select 1 from seasons s
+        where s.year = ${year}
+          and (s.github_id = p.github_id or (p.github_id is null and s.login = p.login))
+      )
+      -- Random order: an account that keeps failing can't hold the front of the queue.
+      order by random()
+      limit ${limit}
+    `
+  )
+  return rows.map((row) => row.login)
 }

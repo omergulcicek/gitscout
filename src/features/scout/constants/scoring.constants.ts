@@ -39,6 +39,12 @@ export const NOT_FOUND_TTL_MS = 10 * 60_000
 export const REFRESH = { maxAgeDays: 7, maxPerRun: 30, timeBudgetMs: 50_000 }
 
 /**
+ * Freezing closed seasons runs in the same hourly job, before the refresh: one light GitHub query per
+ * player, capped so the refresh keeps most of the run.
+ */
+export const SEASON_FREEZE = { maxPerRun: 40, timeBudgetMs: 15_000 }
+
+/**
  * Puan ve sıra geçmişi: saatlik yenileme işi son kayıttan bu kadar gün geçince bütün oyuncuların puanını ve
  * sırasını kaydeder. `SCORE_VERSION` değişince süre beklenmeden yeni bir kayıt alınır.
  */

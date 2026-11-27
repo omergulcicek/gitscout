@@ -11,6 +11,7 @@ import {
   profileBaseSchema,
   reposPageSchema,
   searchCountsSchema,
+  seasonCalendarResponseSchema,
   starredPageSchema,
   yearlyResponseSchema
 } from "@/features/scout/schemas/github.schema"
@@ -471,6 +472,57 @@ export async function fetchYearlyContributions(login: string, years: number[]) {
     for (const result of batch) Object.assign(user, result.user)
   }
   return { user }
+}
+
+const SEASON_CALENDAR_QUERY = /* GraphQL */ `
+  query SeasonCalendar($login: String!, $from: DateTime!, $to: DateTime!) {
+    user(login: $login) {
+      databaseId
+      contributionsCollection(from: $from, to: $to) {
+        totalPullRequestReviewContributions
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              date
+              contributionCount
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+export type SeasonCalendar = {
+  githubId: number
+  days: { date: string; count: number }[]
+  total: number
+  reviews: number
+}
+
+/**
+ * One calendar year's daily contributions, asked for by date range. The stored calendar is a rolling
+ * year that never lines up with 1 January to 31 December, so a season is frozen from this instead.
+ */
+export async function fetchSeasonCalendar(login: string, year: number): Promise<SeasonCalendar> {
+  const data = await graphql(
+    SEASON_CALENDAR_QUERY,
+    { login, from: `${year}-01-01T00:00:00Z`, to: `${year}-12-31T23:59:59Z` },
+    seasonCalendarResponseSchema
+  )
+  if (!data.user) {
+    throw new GithubError("Bu kullanıcı adıyla bir GitHub hesabı bulunamadı", "not-found")
+  }
+  const collection = data.user.contributionsCollection
+  return {
+    githubId: data.user.databaseId,
+    days: collection.contributionCalendar.weeks.flatMap((week) =>
+      week.contributionDays.map((day) => ({ date: day.date, count: day.contributionCount }))
+    ),
+    total: collection.contributionCalendar.totalContributions,
+    reviews: collection.totalPullRequestReviewContributions
+  }
 }
 
 const PATCH_DATE = /^Date: .* ([+-])(\d{2})(\d{2})$/m

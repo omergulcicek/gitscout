@@ -35,13 +35,16 @@ const isFatal = (error: unknown) =>
  * En eski kartları sırayla GitHub'dan yeniden çeker; süre ya da kart sınırı dolunca durur.
  * Bir kartın hatası diğerlerini durdurmaz, kota ya da token hatası ise çalışmayı bitirir.
  */
-export async function refreshStalePlayers(clock: () => number = Date.now): Promise<RefreshResult> {
+export async function refreshStalePlayers(
+  clock: () => number = Date.now,
+  timeBudgetMs: number = REFRESH.timeBudgetMs
+): Promise<RefreshResult> {
   const result: RefreshResult = { refreshed: [], postponed: [], failed: [], skipped: [] }
   const startedAt = clock()
   const logins = await getStaleLogins(REFRESH.maxPerRun)
 
   for (const [index, login] of logins.entries()) {
-    if (clock() - startedAt >= REFRESH.timeBudgetMs) {
+    if (clock() - startedAt >= timeBudgetMs) {
       result.skipped.push(...logins.slice(index))
       break
     }
