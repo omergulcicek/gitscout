@@ -31,6 +31,9 @@ import { usePlayer } from "@/features/scout/hooks/use-player"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
+/** Anchor for the share menu's "ready-made texts" item. */
+const SHARE_TEXTS_ID = "share-texts"
+
 type PlayerDetailProps = {
   username: string
 }
@@ -60,7 +63,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
   const cardPlayer = birthday
     ? { ...player, ovr: BIRTHDAY_OVR, ovrExact: BIRTHDAY_OVR, rarity: "icon" as const }
     : player
-  const { cardRef, download, isDownloading } = useCardDownload(
+  const { cardRef, download, isDownloading, copy, isCopying } = useCardDownload(
     shownOccasion ? `gitscout-${username}-${shownOccasion}` : `gitscout-${username}`
   )
 
@@ -97,7 +100,14 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
           </div>
           <PlayerRank ranking={player.ranking} position={player.position} />
           {isGithubStar(player.login) ? <GithubStarBadge login={player.login} /> : null}
-          <CardActions player={player} onDownload={download} isDownloading={isDownloading} />
+          <CardActions
+            player={player}
+            onDownload={download}
+            isDownloading={isDownloading}
+            onCopyImage={copy}
+            isCopying={isCopying}
+            shareTextsId={SHARE_TEXTS_ID}
+          />
           <GithubStarCta />
           <div className="flex flex-col items-center gap-1">
             <span className="inline-flex items-center gap-1">
@@ -157,7 +167,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-6">
-        <ShareTextSection player={player} />
+        <ShareTextSection id={SHARE_TEXTS_ID} player={player} />
         <GetYourCard />
       </div>
     </main>
