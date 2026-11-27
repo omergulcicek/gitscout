@@ -9,6 +9,7 @@ import { BadgeList } from "@/features/scout/components/BadgeList"
 import { Benchmarks } from "@/features/scout/components/Benchmarks"
 import { BirthdayConfetti } from "@/features/scout/components/BirthdayConfetti"
 import { CardActions } from "@/features/scout/components/CardActions"
+import { DreamTeamSection } from "@/features/scout/components/DreamTeamSection"
 import { GetYourCard } from "@/features/scout/components/GetYourCard"
 import { GithubStarBadge } from "@/features/scout/components/GithubStarBadge"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
@@ -167,6 +168,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
       </div>
 
       <div className="mt-4 flex flex-col gap-6">
+        <DreamTeamSection owner={player} players={player.dreamTeam} />
         <ShareTextSection id={SHARE_TEXTS_ID} player={player} />
         <GetYourCard />
       </div>
