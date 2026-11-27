@@ -26,7 +26,7 @@ type SeasonPackProps = {
 }
 
 /**
- * A sealed pack that opens like a football card pack: the flag, then the position, then the tier, then the
+ * A sealed pack that opens like a collectible card pack: the flag, then the position, then the tier, then the
  * card itself. With reduced motion the card shows straight away.
  */
 export function SeasonPack({ player, year, onOpen }: SeasonPackProps) {

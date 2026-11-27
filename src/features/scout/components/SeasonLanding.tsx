@@ -1,9 +1,8 @@
 import { useState } from "react"
-import type { ComponentType, SVGProps } from "react"
 
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { BarChart3, ClipboardList, Download, LogIn, Snowflake, TrendingUp } from "lucide-react"
+import { LogIn, Snowflake } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -27,19 +26,6 @@ import * as m from "@/paraglide/messages.js"
 
 const formSchema = z.object({ username: usernameSchema })
 type FormValues = z.infer<typeof formSchema>
-
-type Feature = {
-  icon: ComponentType<SVGProps<SVGSVGElement>>
-  title: () => string
-  text: () => string
-}
-
-const FEATURES: Feature[] = [
-  { icon: BarChart3, title: m.season_feature_matches, text: m.season_feature_matches_text },
-  { icon: TrendingUp, title: m.season_feature_career, text: m.season_feature_career_text },
-  { icon: ClipboardList, title: m.season_feature_scout, text: m.season_feature_scout_text },
-  { icon: Download, title: m.season_feature_poster, text: m.season_feature_poster_text }
-]
 
 /**
  * The menu's season entry. A signed-in player with a card sees their own New Year card and goes straight
@@ -120,23 +106,6 @@ export function SeasonLanding() {
             </figcaption>
           </figure>
         ) : null}
-      </section>
-
-      <section aria-labelledby="season-features-heading" className="flex flex-col gap-4">
-        <h2 id="season-features-heading" className="text-lg font-semibold">
-          {m.season_features_title()}
-        </h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((feature) => (
-            <li key={feature.title()} className="surface season-ice flex flex-col gap-2 p-4">
-              <span className="grid size-9 place-items-center rounded-lg bg-chart-home/15 text-chart-home">
-                <feature.icon aria-hidden className="size-5" />
-              </span>
-              <span className="font-semibold">{feature.title()}</span>
-              <span className="text-sm text-muted-foreground">{feature.text()}</span>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <SeasonTimeline now={now} />
