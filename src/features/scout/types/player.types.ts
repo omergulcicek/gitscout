@@ -359,8 +359,11 @@ export type HomeData = {
   /** Pool sizes for the "full table (N)" link. */
   totals: { world: number; tr: number }
   examples: ListPlayer[]
-  /** The hour's featured card first, then the next ones "Another card" cycles through. */
-  featured: ListPlayer[]
+  /**
+   * The hour's featured card first, then the next ones "Another card" cycles through.
+   * The Turkish page shows the `tr` pool, the English page the `world` pool.
+   */
+  featured: { world: ListPlayer[]; tr: ListPlayer[] }
   recent: RecentEntry[]
   lastDayCount: number
   /** When the data was built; relative times are written against it so server and browser agree. */

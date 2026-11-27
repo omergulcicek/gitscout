@@ -1,3 +1,5 @@
+import type { CountryCode } from "@/features/scout/constants/player-country.constants"
+import { playerCountry } from "@/features/scout/helpers/player-country"
 import { seededRandom } from "@/features/scout/helpers/seeded-random"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 
@@ -8,17 +10,21 @@ const FEATURED_RARITIES = new Set<ListPlayer["rarity"]>(["icon", "gold"])
 const RECENT_WEIGHT = 3
 
 /**
- * Vitrin sırası: Gold ve üstü kartlar, tohuma göre ağırlıklı karıştırılmış halde.
- * Aynı tohum her yerde aynı sırayı verir; böylece sunucu ve tarayıcı aynı kartı gösterir.
- * İlk eleman "saatin kartı", sonrakiler "Başka kart" ile sırayla gelir.
+ * Showcase order: Gold and above cards in a seeded, weighted shuffle.
+ * The same seed gives the same order everywhere, so server and browser show the same card.
+ * The first entry is the "card of the hour"; "Another card" walks through the rest.
+ * With `country`, only that country's cards are candidates; if it has none, the global pool is used.
  */
 export function featuredOrder(
   players: ListPlayer[],
   recentLogins: ReadonlySet<string>,
-  seed: number
+  seed: number,
+  country?: CountryCode
 ): ListPlayer[] {
   const elite = players.filter((player) => FEATURED_RARITIES.has(player.rarity))
-  const pool = elite.length > 0 ? elite : players
+  const ranked = elite.length > 0 ? elite : players
+  const local = country ? ranked.filter((player) => playerCountry(player) === country) : []
+  const pool = local.length > 0 ? local : ranked
   const random = seededRandom(seed)
   // Efraimidis-Spirakis: her öğeye u^(1/ağırlık) anahtarı verip büyükten küçüğe dizmek ağırlıklı karıştırmadır.
   return pool
