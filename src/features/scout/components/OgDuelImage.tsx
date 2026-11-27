@@ -7,6 +7,7 @@ import {
   DUEL_HOME_COLOR,
   OgDuelRadar
 } from "@/features/scout/components/OgDuelRadar"
+import { OgLink } from "@/features/scout/components/OgLink"
 import { OgPlayerCard } from "@/features/scout/components/OgPlayerCard"
 import { computeDuel } from "@/features/scout/helpers/duel"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
@@ -61,7 +62,7 @@ export function OgDuelImage({ left, right, leftAvatar, rightAvatar }: OgDuelImag
       <Absolute left={400} top={384} width={400} center>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 34 }}>
           <Score score={score} size={84} />
-          <Link />
+          <OgLink />
         </div>
       </Absolute>
     </div>
@@ -125,30 +126,6 @@ function Brand() {
       style={{ display: "flex", fontSize: 18, fontWeight: 800, letterSpacing: 4, color: "#d8d8d8" }}
     >
       GITSCOUT
-    </div>
-  )
-}
-
-const LINK_COLOR = "#a3a3a3"
-
-/** Sönük renkli adres ve küçük bir zincir ikonu; skorla yarışmasın diye vurgusuz. */
-function Link() {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 19, color: LINK_COLOR }}>
-      <svg
-        width={18}
-        height={18}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={LINK_COLOR}
-        strokeWidth={2.2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-      </svg>
-      gitscout.io
     </div>
   )
 }
