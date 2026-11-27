@@ -25,7 +25,8 @@ export function FeaturedCard({ players }: FeaturedCardProps) {
   if (!player) return null
 
   return (
-    <div className="hidden w-80 flex-col gap-3 lg:flex">
+    // Same card and "Another card" button on phones; there it sits under the hero, centered.
+    <div className="mx-auto flex w-full max-w-80 flex-col gap-3 lg:mx-0 lg:w-80">
       <Link
         to="/{-$lang}/u/$username"
         params={{ lang: getLangParam(), username: player.login }}

@@ -57,7 +57,7 @@ export function ScoutHome() {
           />
           <GithubStarLink placement="hero" className="self-start" />
         </section>
-        {/* Ödül önden görünsün: geniş ekranda vitrin kartı başlığın yanında. */}
+        {/* The prize up front: beside the title on wide screens, right under the hero on phones. */}
         {/* The showcase follows the page language, not the top-list switch. */}
         <FeaturedCard players={data.featured[getLocale() === "tr" ? "tr" : "world"]} />
       </div>
