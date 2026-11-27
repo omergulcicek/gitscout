@@ -44,14 +44,15 @@ function TabLogo({ tab }: { tab: ShareTab }) {
  * Kartı paylaşmanın üç yolu tek kutuda: LinkedIn ve X için kopyalanacak hazır metin (dili
  * sayfadan bağımsız seçilir) ve profil README'sine eklenecek rozet.
  */
-export function ShareTextSection({ player }: { player: PlayerDetail }) {
+export function ShareTextSection({ id, player }: { id?: string; player: PlayerDetail }) {
   const [tab, setTab] = useState<ShareTab>("linkedin")
   const [locale, setLocale] = useState<ShareLocale>(getLocale())
 
   return (
     <section
+      id={id}
       aria-labelledby="share-text-heading"
-      className="surface mx-auto flex w-full max-w-3xl flex-col gap-4 px-5 py-5"
+      className="surface mx-auto flex w-full max-w-3xl scroll-mt-20 flex-col gap-4 px-5 py-5"
     >
       <div className="flex flex-col gap-1">
         <h2 id="share-text-heading" className="text-lg font-semibold">
