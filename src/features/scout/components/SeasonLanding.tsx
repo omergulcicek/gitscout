@@ -9,7 +9,7 @@ import { z } from "zod"
 
 import { getLangParam } from "@/helpers/localized-url"
 
-import { useViewer } from "@/hooks/use-viewer"
+import { useStartGithubLogin, useViewer } from "@/hooks/use-viewer"
 
 import { GithubMark } from "@/components/shared/GithubMark"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -36,6 +36,7 @@ type FormValues = z.infer<typeof formSchema>
 export function SeasonLanding() {
   const lang = getLangParam()
   const { data: viewer } = useViewer()
+  const signIn = useStartGithubLogin()
   const { data: sample } = useSuspenseQuery(specialCardsSampleQueryOptions())
   const { data: own } = useQuery({
     ...playersByLoginQueryOptions(viewer ? [viewer.login] : []),
@@ -81,14 +82,19 @@ export function SeasonLanding() {
               </Link>
             ) : (
               <>
-                <Link
-                  to="/{-$lang}/login"
-                  params={{ lang }}
-                  className={buttonVariants({ size: "lg" })}
+                <Button
+                  size="lg"
+                  disabled={signIn.isPending || signIn.isSuccess}
+                  onClick={() => signIn.mutate()}
                 >
                   <GithubMark />
                   {m.season_landing_cta_login()}
-                </Link>
+                </Button>
+                {signIn.isError ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {m.login_failed()}
+                  </p>
+                ) : null}
               </>
             )}
           </div>
