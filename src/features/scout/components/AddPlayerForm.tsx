@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { cn } from "cn"
 import { Controller, useForm } from "react-hook-form"
 
+import { CARD_FAILURE_REASONS } from "@/schemas/analytics.schema"
+
 import { trackEvent } from "@/lib/analytics"
 import { getLangParam } from "@/helpers/localized-url"
 
@@ -68,10 +70,7 @@ export function AddPlayerForm({
       })
     } catch (error) {
       // Yalnızca hata kodu gider (ör. github:not-found); yazılan metin gönderilmez.
-      trackEvent({
-        name: "card_request_failed",
-        reason: error instanceof Error ? error.message.slice(0, 40) : "unknown"
-      })
+      trackEvent({ name: "card_request_failed", reason: failureReason(error) })
       form.setError("root.server", { message: errorText(error) })
     }
   })
@@ -213,4 +212,10 @@ export function AddPlayerForm({
       </p>
     </form>
   )
+}
+
+/** The error's code if it's one we track, else `other`; free text never reaches analytics. */
+function failureReason(error: unknown): (typeof CARD_FAILURE_REASONS)[number] {
+  const code = error instanceof Error ? error.message : ""
+  return CARD_FAILURE_REASONS.find((reason) => reason === code) ?? "other"
 }

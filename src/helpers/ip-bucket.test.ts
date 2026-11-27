@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { ipBucket } from "@/features/scout/helpers/ip-bucket"
+import { ipBucket } from "@/helpers/ip-bucket"
 
 describe("ipBucket", () => {
   it("IPv4 adresini olduğu gibi bırakır", () => {

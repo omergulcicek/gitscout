@@ -1,28 +1,29 @@
 import { describe, expect, it } from "vitest"
 
-import { pagePathSchema } from "@/schemas/analytics.schema"
+import { analyticsEventSchema } from "@/schemas/analytics.schema"
 
-describe("pagePathSchema", () => {
-  it.each([
-    "/",
-    "/tr",
-    "/tr/",
-    "/leaderboard",
-    "/tr/about",
-    "/vs",
-    "/u/OmerGulcicek",
-    "/tr/vs/a-b/c1"
-  ])("accepts %s", (path) => expect(pagePathSchema.safeParse(path).success).toBe(true))
+describe("analyticsEventSchema", () => {
+  it("accepts the events the site sends", () => {
+    expect(
+      analyticsEventSchema.safeParse({ name: "card_shared", login: "shadcn", target: "x" }).success
+    ).toBe(true)
+    expect(
+      analyticsEventSchema.safeParse({ name: "card_request_failed", reason: "github:not-found" })
+        .success
+    ).toBe(true)
+  })
 
-  it.each([
-    "",
-    "leaderboard",
-    "/wp-admin",
-    "/u/",
-    "/u/-bad",
-    "/u/a/b",
-    "/vs/a",
-    "/de/about",
-    "/og/x.png"
-  ])("rejects %s", (path) => expect(pagePathSchema.safeParse(path).success).toBe(false))
+  it("rejects free text in logins, reasons and share targets", () => {
+    expect(
+      analyticsEventSchema.safeParse({ name: "card_downloaded", login: "not a login!" }).success
+    ).toBe(false)
+    expect(
+      analyticsEventSchema.safeParse({ name: "card_request_failed", reason: "anything goes" })
+        .success
+    ).toBe(false)
+    expect(
+      analyticsEventSchema.safeParse({ name: "card_shared", login: "shadcn", target: "spam" })
+        .success
+    ).toBe(false)
+  })
 })
