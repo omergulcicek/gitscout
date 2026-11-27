@@ -1,44 +1,46 @@
 import { useEffect, useState } from "react"
 
 type EasedCountOptions = {
-  /** Wait before counting starts. */
+  /** Wait before the first step. */
   delay: number
-  /** Time from 0 to the target. */
-  duration: number
 }
 
-/** Slow at first, then faster and faster: the number "winds up" before landing. */
-const easeIn = (t: number) => t * t
+/** The first steps are slow enough to read each number: 1, 2, 3… */
+const FIRST_STEP_MS = 240
+/** Each step is this much shorter than the one before, so the count keeps speeding up. */
+const SPEED_UP = 0.93
+/** The fastest a step gets; the last stretch rushes to the score at this pace. */
+const LAST_STEP_MS = 12
 
 /**
- * Counts from 0 to `target` along an ease-in curve, one frame at a time. With `target` 0 nothing runs,
- * so callers can disable it without a conditional hook. Reduced motion shows the target right away.
+ * Time before step `index` (0-based). With these values 1→15 takes about 2s, 15→40 about 1s and the rest
+ * rushes by in a few hundred milliseconds.
  */
-export function useEasedCount(target: number, { delay, duration }: EasedCountOptions): number {
+export function stepDuration(index: number): number {
+  return Math.max(LAST_STEP_MS, FIRST_STEP_MS * SPEED_UP ** index)
+}
+
+/**
+ * Counts 0, 1, 2… up to `target`, slowly at first and faster with every step, so the number winds up and
+ * then rushes to the score. With `target` 0 nothing runs, so callers can disable it without a conditional
+ * hook. Reduced motion shows the target right away.
+ */
+export function useEasedCount(target: number, { delay }: EasedCountOptions): number {
   const [value, setValue] = useState(0)
 
   useEffect(() => {
     if (target <= 0) return
-    // Reduced motion: no wait and no count, the number lands on the first frame.
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    const wait = reduce ? 0 : delay
-    const length = reduce ? 0 : duration
-    let frame = 0
-    let start = 0
-    const tick = (now: number) => {
-      start ||= now
-      const progress = length === 0 ? 1 : Math.min(1, (now - start) / length)
-      setValue(Math.round(easeIn(progress) * target))
-      if (progress < 1) frame = requestAnimationFrame(tick)
+    let current = 0
+    let timer = 0
+    const step = () => {
+      current = reduce ? target : current + 1
+      setValue(current)
+      if (current < target) timer = window.setTimeout(step, stepDuration(current))
     }
-    const timer = window.setTimeout(() => {
-      frame = requestAnimationFrame(tick)
-    }, wait)
-    return () => {
-      window.clearTimeout(timer)
-      cancelAnimationFrame(frame)
-    }
-  }, [target, delay, duration])
+    timer = window.setTimeout(step, reduce ? 0 : delay)
+    return () => window.clearTimeout(timer)
+  }, [target, delay])
 
   return value
 }

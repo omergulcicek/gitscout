@@ -40,10 +40,8 @@ import { getLocale } from "@/paraglide/runtime.js"
 
 /** Rarities that get confetti when their card is first revealed. */
 const CELEBRATED_RARITIES = new Set(["gold", "icon"])
-/** The score starts counting once the card has turned past halfway… */
-const REVEAL_COUNT_DELAY_MS = 350
-/** …and winds up to its value over this long, slow at first and quicker towards the end. */
-const REVEAL_COUNT_MS = 2000
+/** The score starts counting once the card has finished turning. */
+const REVEAL_COUNT_DELAY_MS = 900
 
 /** Anchor for the share menu's "ready-made texts" item. */
 const SHARE_TEXTS_ID = "share-texts"
@@ -79,10 +77,9 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
     : player
   // Right after creation the card flips in, its score counts up and gold or better gets confetti.
   const revealing = useCardReveal()
-  const revealOvr = useEasedCount(revealing ? cardPlayer.ovr : 0, {
-    delay: REVEAL_COUNT_DELAY_MS,
-    duration: REVEAL_COUNT_MS
-  })
+  const revealOvr = useEasedCount(revealing ? cardPlayer.ovr : 0, { delay: REVEAL_COUNT_DELAY_MS })
+  // Confetti waits for the real score to land, after the flip and the count.
+  const revealDone = revealing && revealOvr === cardPlayer.ovr
   const { cardRef, download, isDownloading, copy, isCopying } = useCardDownload(
     shownOccasion ? `gitscout-${username}-${shownOccasion}` : `gitscout-${username}`
   )
@@ -114,7 +111,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
             className="relative flex w-full max-w-80 justify-center"
           >
             {/* Inside the rarity scope so the pieces pick up the card's own frame colours. */}
-            {revealing && !birthday && CELEBRATED_RARITIES.has(cardPlayer.rarity) ? (
+            {revealDone && !birthday && CELEBRATED_RARITIES.has(cardPlayer.rarity) ? (
               <RevealConfetti />
             ) : null}
             <div
