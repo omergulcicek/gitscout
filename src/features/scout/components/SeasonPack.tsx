@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
+import type { ReactNode } from "react"
 
+import { Download } from "lucide-react"
 import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
@@ -23,13 +25,15 @@ type SeasonPackProps = {
   year: number
   /** Called when the pack is opened; the page turns the snow up for the reveal. */
   onOpen?: () => void
+  /** More downloads under the card's own, shown only once the pack is open so nothing spoils it. */
+  actions?: ReactNode
 }
 
 /**
  * A sealed pack that opens like a collectible card pack: the flag, then the position, then the tier, then the
  * card itself. With reduced motion the card shows straight away.
  */
-export function SeasonPack({ player, year, onOpen }: SeasonPackProps) {
+export function SeasonPack({ player, year, onOpen, actions }: SeasonPackProps) {
   const [stage, setStage] = useState<Stage>("sealed")
   const { cardRef, download, isDownloading } = useCardDownload(`gitscout-${player.login}-${year}`)
   const country = playerCountry(player)
@@ -53,9 +57,13 @@ export function SeasonPack({ player, year, onOpen }: SeasonPackProps) {
     return (
       <div className="flex flex-col items-center gap-4">
         <SnowyCard player={player} ref={cardRef} reveal />
-        <Button variant="outline" size="sm" onClick={download} disabled={isDownloading}>
-          {isDownloading ? m.download_preparing() : m.download()}
-        </Button>
+        <div className="flex w-full max-w-80 flex-col gap-2">
+          <Button variant="outline" className="w-full" onClick={download} disabled={isDownloading}>
+            <Download aria-hidden />
+            {isDownloading ? m.download_preparing() : m.season_card_download()}
+          </Button>
+          {actions}
+        </div>
       </div>
     )
   }

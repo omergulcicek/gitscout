@@ -92,7 +92,33 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
 
       <div className="grid gap-8 md:grid-cols-[20rem_1fr] md:items-start">
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
-          <SeasonPack player={data.card} year={season.year} onOpen={() => setFlurry(true)} />
+          <SeasonPack
+            player={data.card}
+            year={season.year}
+            onOpen={() => setFlurry(true)}
+            actions={
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={downloadLandscape}
+                  disabled={landscapeDownloading}
+                >
+                  <Monitor aria-hidden />
+                  {landscapeDownloading ? m.download_preparing() : m.season_poster_landscape()}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={downloadPortrait}
+                  disabled={portraitDownloading}
+                >
+                  <Smartphone aria-hidden />
+                  {portraitDownloading ? m.download_preparing() : m.season_poster_portrait()}
+                </Button>
+              </>
+            }
+          />
         </aside>
 
         <div className="flex min-w-0 flex-col gap-6">
@@ -106,26 +132,6 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
             <p className="text-sm text-muted-foreground">
               {data.final ? m.season_final() : m.season_through({ date: dayMonth(season.through) })}
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={downloadLandscape}
-                disabled={landscapeDownloading}
-              >
-                <Monitor aria-hidden />
-                {landscapeDownloading ? m.download_preparing() : m.season_poster_landscape()}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={downloadPortrait}
-                disabled={portraitDownloading}
-              >
-                <Smartphone aria-hidden />
-                {portraitDownloading ? m.download_preparing() : m.season_poster_portrait()}
-              </Button>
-            </div>
           </header>
 
           <SeasonStats season={season} />

@@ -745,5 +745,6 @@
   "season_lookup_title": "Başka bir geliştiricinin sezonu",
   "season_lookup_text": "Bir arkadaşının ya da rakibinin sezonuna göz at.",
   "season_step_archive": "Geçmiş sezonların",
-  "season_step_archive_text": "Kaydedilen sezonlarını profilinde, kartının altındaki “Sezon raporları” satırından açabilirsin."
+  "season_step_archive_text": "Kaydedilen sezonlarını profilinde, kartının altındaki “Sezon raporları” satırından açabilirsin.",
+  "season_card_download": "Sezon kartını indir"
 }
