@@ -299,6 +299,7 @@ const PLAYERS_BY_COUNTRY: Record<CountryCode, readonly string[]> = {
     "sewox",
     "seyfeddin",
     "suleymanbeyaz10",
+    "suyalcinkaya",
     "tahsingibi",
     "tahtaciburak",
     "tbcteknoloji",
