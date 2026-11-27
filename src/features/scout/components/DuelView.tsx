@@ -26,12 +26,12 @@ import { STAT_TIER_TEXT } from "@/features/scout/constants/stat-tier.constants"
 import { computeDuel } from "@/features/scout/helpers/duel"
 import type { Duel, DuelSide } from "@/features/scout/helpers/duel"
 import { errorText } from "@/features/scout/helpers/error-text"
+import { toListPlayer } from "@/features/scout/helpers/list-player"
 import { number, statLabel } from "@/features/scout/helpers/player-text"
 import { statTier } from "@/features/scout/helpers/stat-tier"
 import { useAddPlayer } from "@/features/scout/hooks/use-add-player"
 import { useCountUp } from "@/features/scout/hooks/use-count-up"
 import { useImageCopy } from "@/features/scout/hooks/use-image-copy"
-import { useLeaderboard } from "@/features/scout/hooks/use-leaderboard"
 import { usePlayer } from "@/features/scout/hooks/use-player"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -53,7 +53,6 @@ export function DuelView({ left: leftLogin, right: rightLogin }: DuelViewProps) 
     excludeProps
   } = useImageCopy(`gitscout-${leftLogin}-vs-${rightLogin}`)
   const winner = duel.winner === "left" ? left : duel.winner === "right" ? right : null
-  const { data: board } = useLeaderboard()
   const navigate = useNavigate()
   const addPlayer = useAddPlayer()
   // Seçim sayfasından geçişle gelindiyse kartlar zaten yerine kaydı; giriş animasyonu ikinci kez oynamaz.
@@ -89,8 +88,8 @@ export function DuelView({ left: leftLogin, right: rightLogin }: DuelViewProps) 
       <div {...excludeProps} className="w-full max-w-80">
         <PlayerCombobox
           id={`duel-${side}${idSuffix}`}
-          players={board.players.filter((player) => player.login !== other.login)}
-          value={board.players.find((player) => player.login === current.login) ?? null}
+          exclude={[other.login]}
+          value={toListPlayer(current)}
           onChange={(player) => {
             if (player && player.login !== current.login) replace(side, player.login)
           }}

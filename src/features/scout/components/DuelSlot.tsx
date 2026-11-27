@@ -17,7 +17,8 @@ type DuelSlotProps = {
   side: DuelSide
   label: string
   player: ListPlayer | null
-  players: ListPlayer[]
+  /** Logins the search leaves out (the other side). */
+  exclude: readonly string[]
   onChange: (player: ListPlayer | null) => void
   autoFocus?: boolean
 }
@@ -27,7 +28,7 @@ type DuelSlotProps = {
  * ölçüde ve aynı geçiş adıyla durur; iki taraf seçilince kart oradaki yerine kayarak geçer.
  * Boşken o tarafın renginde ters duran bir kart görünür; oyuncu seçilince kart dönüp yüzünü gösterir.
  */
-export function DuelSlot({ id, side, label, player, players, onChange, autoFocus }: DuelSlotProps) {
+export function DuelSlot({ id, side, label, player, exclude, onChange, autoFocus }: DuelSlotProps) {
   const isHome = side === "left"
   return (
     // `data-side`, kart arkasına tarafın rengini verir (`--side`).
@@ -60,7 +61,7 @@ export function DuelSlot({ id, side, label, player, players, onChange, autoFocus
         >
           <PlayerCombobox
             id={id}
-            players={players}
+            exclude={exclude}
             value={player}
             onChange={onChange}
             autoFocus={autoFocus}

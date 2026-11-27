@@ -24,6 +24,7 @@ import {
 } from "@/features/scout/api/player-store"
 import { EXAMPLE_LOGINS } from "@/features/scout/constants/example-players.constants"
 import { COUNTRIES } from "@/features/scout/constants/player-country.constants"
+import { SPECIAL_CARDS_SAMPLE_LOGIN } from "@/features/scout/constants/profile.constants"
 import {
   NEW_LOOKUPS_PER_IP,
   NEW_PLAYERS_PER_HOUR,
@@ -31,12 +32,15 @@ import {
 } from "@/features/scout/constants/scoring.constants"
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
+import { popularPresets } from "@/features/scout/helpers/duel-presets"
+import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
 import { featuredOrder } from "@/features/scout/helpers/featured-players"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { ipBucket, UNKNOWN_IP_BUCKET } from "@/features/scout/helpers/ip-bucket"
 import { leaderboardFacets, queryLeaderboard } from "@/features/scout/helpers/leaderboard-query"
 import { playerCountry } from "@/features/scout/helpers/player-country"
 import { computeRanking } from "@/features/scout/helpers/score-player"
+import { matchesPlayer } from "@/features/scout/helpers/search-text"
 import { leaderboardSearchSchema } from "@/features/scout/schemas/leaderboard-search.schema"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
@@ -50,28 +54,6 @@ import type {
   ScoredPlayer
 } from "@/features/scout/types/player.types"
 import { locales } from "@/paraglide/runtime.js"
-
-type Leaderboard = {
-  players: ListPlayer[]
-  /** Son 24 saatte eklenenler; vitrinde daha sık çıkarlar. */
-  recentLogins: string[]
-  /**
-   * Vitrin tohumu: Unix saat numarası. Sunucuda hesaplanıp veriyle gider, böylece
-   * sunucuda çizilen kart ile tarayıcıdaki kart saat dönümünde bile aynı kalır.
-   */
-  featuredSeed: number
-  /** En son eklenenler, yeniden eskiye. */
-  latest: LatestAddition[]
-  /** Verinin üretildiği andan önceki 24 saatte eklenen oyuncu sayısı. */
-  lastDayCount: number
-  /** Son 7 günde profil görüntülenmeleri (küçük harfli kullanıcı adı → tekil ziyaretçi); hazır kapışmaları ağırlıklandırır. */
-  profileViews: Record<string, number>
-  /**
-   * Verinin üretildiği an. "5 dk önce" gibi göreli zamanlar buna göre yazılır; sunucu ile
-   * tarayıcı aynı metni üretir.
-   */
-  generatedAt: string
-}
 
 type LatestAddition = { login: string; addedAt: string }
 
@@ -159,22 +141,6 @@ export const getBadgePlayer = createServerOnlyFn(
   }
 )
 
-/** Kayıtlı bütün oyuncular, genel puana göre sıralı. GitHub'a istek atmaz. */
-export const getLeaderboard = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Leaderboard> => {
-    const { at, players, recentLogins, latest, lastDayCount, profileViews } = await cachedList()
-    return {
-      players,
-      recentLogins,
-      latest,
-      lastDayCount,
-      profileViews,
-      featuredSeed: Math.floor(Date.now() / HOUR_MS),
-      generatedAt: new Date(at).toISOString()
-    }
-  }
-)
-
 export const getPlayer = createServerFn({ method: "GET" })
   // Geçersiz kullanıcı adı doğrulama hatası (500) değil, "bulunamadı" (404) sayılır.
   .validator(z.object({ username: z.string() }))
@@ -251,6 +217,85 @@ export const getLeaderboardSlice = createServerFn({ method: "GET" })
       facets: leaderboardFacets(players)
     }
   })
+
+/** Rows a player search returns; the picker shows a short list and narrows as you type. */
+const SEARCH_LIMIT = 20
+
+const loginSchema = z.string().min(1).max(39)
+
+const searchPlayersSchema = z.object({
+  q: z.string().max(100),
+  /** Logins to leave out, e.g. the other side of a duel or players already picked. */
+  exclude: z.array(loginSchema).max(10).default([]),
+  locale: z.enum(locales)
+})
+
+/** Players matching a name or login, best OVR first; an empty query returns the top players. */
+export const searchPlayers = createServerFn({ method: "GET" })
+  .validator(searchPlayersSchema)
+  .handler(async ({ data }): Promise<ListPlayer[]> => {
+    const players = await cachedPlayers()
+    const excluded = new Set(data.exclude.map((login) => login.toLowerCase()))
+    const results: ListPlayer[] = []
+    for (const player of players) {
+      if (results.length === SEARCH_LIMIT) break
+      if (excluded.has(player.login.toLowerCase())) continue
+      if (matchesPlayer(player, data.q, data.locale)) results.push(player)
+    }
+    return results
+  })
+
+/** The listed players in the given order; unknown logins are skipped. */
+export const getPlayersByLogin = createServerFn({ method: "GET" })
+  .validator(z.object({ logins: z.array(loginSchema).max(10) }))
+  .handler(async ({ data }): Promise<ListPlayer[]> => {
+    const players = await cachedPlayers()
+    const byLogin = new Map(players.map((player) => [player.login.toLowerCase(), player]))
+    return data.logins.flatMap((login) => byLogin.get(login.toLowerCase()) ?? [])
+  })
+
+/** A random player for the duel picker's dice button, never one of `exclude`. */
+export const getRandomPlayer = createServerFn({ method: "GET" })
+  .validator(z.object({ exclude: z.array(loginSchema).max(2).default([]) }))
+  .handler(async ({ data }): Promise<ListPlayer | null> => {
+    const excluded = new Set(data.exclude.map((login) => login.toLowerCase()))
+    const pool = (await cachedPlayers()).filter(
+      (player) => !excluded.has(player.login.toLowerCase())
+    )
+    return pool[Math.floor(Math.random() * pool.length)] ?? null
+  })
+
+/** Popular duels shown under the picker. */
+const POPULAR_PRESETS = 3
+
+/**
+ * Popular duel suggestions for Türkiye and the world. Without a seed the current hour is used, so the
+ * server and the browser draw the same pairs; "shuffle" asks again with a random seed.
+ */
+export const getDuelPresets = createServerFn({ method: "GET" })
+  .validator(z.object({ seed: z.number().int().nonnegative().optional() }))
+  .handler(async ({ data }): Promise<{ seed: number; tr: DuelPreset[]; world: DuelPreset[] }> => {
+    const { players, profileViews } = await cachedList()
+    const seed = data.seed ?? Math.floor(Date.now() / HOUR_MS)
+    const turkish = players.filter((player) => playerCountry(player) === "TR")
+    return {
+      seed,
+      tr: popularPresets(turkish, seed, profileViews, POPULAR_PRESETS),
+      world: popularPresets(players, seed, profileViews, POPULAR_PRESETS)
+    }
+  })
+
+/**
+ * The fallback card on the special cards page: the site owner's, else the top player. Nothing personal,
+ * since pages may be cached; the browser swaps in the viewer's own card after sign-in is known.
+ */
+export const getSpecialCardsSample = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ListPlayer | null> => {
+    const players = await cachedPlayers()
+    const owner = SPECIAL_CARDS_SAMPLE_LOGIN.toLowerCase()
+    return players.find((player) => player.login.toLowerCase() === owner) ?? players[0] ?? null
+  }
+)
 
 /**
  * GitHub hataları istemciye sabit bir kodla gider (`github:not-found`); mesaj arayüzde dile göre yazılır.

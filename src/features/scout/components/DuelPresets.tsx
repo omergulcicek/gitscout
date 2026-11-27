@@ -7,53 +7,33 @@ import { cn } from "cn"
 
 import { getLangParam } from "@/helpers/localized-url"
 
-import { duelPresetGroups } from "@/features/scout/helpers/duel-presets"
 import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
-import { playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
+import { useDuelPresets } from "@/features/scout/hooks/use-duel-presets"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
-/** Sayfanın asıl işi iki kişiyi seçmek; burası yalnızca "kimi seçsem" diyen için birkaç öneri. */
-const POPULAR_COUNT = 3
-
 type PresetView = "tr" | "world"
-
-type DuelPresetsProps = {
-  players: ListPlayer[]
-  /** İlk liste bu tohumla kurulur; sunucu ve tarayıcı aynı eşleşmeleri çizsin diye veriyle gelir. */
-  seed: number
-  /** Son 7 günün profil görüntülenmeleri; çok bakılanlar eşleşmelerde daha sık çıkar. */
-  profileViews: Readonly<Record<string, number>>
-}
 
 /**
  * Popüler kapışmalar: aynı alan ve kart türünden eşleşmeler arasından iki tarafının profiline en çok
  * bakılan üçü. Tek tıkla kapışmayı açar.
  */
-export function DuelPresets({ players, seed, profileViews }: DuelPresetsProps) {
-  const [currentSeed, setCurrentSeed] = useState(seed)
+export function DuelPresets() {
+  // Undefined is this hour's set, prefetched by the route; "shuffle" asks the server for a new random one.
+  const [seed, setSeed] = useState<number | undefined>(undefined)
   const [selectedView, setSelectedView] = useState<PresetView>("tr")
+  const { data } = useDuelPresets(seed)
+  if (!data) return null
 
-  const popular = (pool: ListPlayer[]) => {
-    const interest = (preset: DuelPreset) =>
-      (profileViews[preset.left.login.toLowerCase()] ?? 0) +
-      (profileViews[preset.right.login.toLowerCase()] ?? 0)
-    return duelPresetGroups(pool, currentSeed, profileViews)
-      .flatMap((group) => group.presets)
-      .sort((a, b) => interest(b) - interest(a))
-      .slice(0, POPULAR_COUNT)
-  }
-
-  // Ana sayfadaki ilk 10 gibi: Türkçede varsayılan Türkiye, İngilizcede karışık liste.
-  const turkish = popular(players.filter((player) => playerCountry(player) === "TR"))
-  const canSwitch = getLocale() === "tr" && turkish.length > 0
+  // Like the home page's top 10: Türkiye by default in Turkish, the mixed list in English.
+  const canSwitch = getLocale() === "tr" && data.tr.length > 0
   const view: PresetView = canSwitch ? selectedView : "world"
-  const presets = view === "tr" ? turkish : popular(players)
+  const presets = data[view]
   if (presets.length === 0) return null
 
-  const reshuffle = () => setCurrentSeed(Math.floor(Math.random() * 2 ** 32))
+  const reshuffle = () => setSeed(Math.floor(Math.random() * 2 ** 31))
 
   return (
     <section
