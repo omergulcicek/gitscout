@@ -15,23 +15,28 @@ const players = [
   player("mobile-b", "Mobile", 70)
 ]
 
+const slots = (recent: string[]) =>
+  dailyBest(players, recent).map((slot) => [slot.position, slot.player?.login ?? null])
+
 describe("dailyBest", () => {
-  it("picks the best recent card of each role, best first", () => {
-    const recent = ["fe-new", "FE-LOW", "be-new", "mobile-b"]
-    expect(dailyBest(players, recent).map((entry) => entry.login)).toEqual([
-      "be-new",
-      "fe-new",
-      "mobile-b"
+  it("keeps every role in a fixed order with the best recent card or an empty slot", () => {
+    expect(slots(["fe-new", "FE-LOW", "be-new", "mobile-b"])).toEqual([
+      ["Frontend", "fe-new"],
+      ["Backend", "be-new"],
+      ["Full Stack", null],
+      ["DevOps", null],
+      ["Mobile", "mobile-b"],
+      ["Data", null],
+      ["Systems", null],
+      ["Game Dev", null]
     ])
   })
 
   it("breaks ties by login", () => {
-    expect(dailyBest(players, ["mobile-b", "mobile-a"]).map((entry) => entry.login)).toEqual([
-      "mobile-a"
-    ])
+    expect(slots(["mobile-b", "mobile-a"])).toContainEqual(["Mobile", "mobile-a"])
   })
 
-  it("returns nothing when no card was added", () => {
-    expect(dailyBest(players, [])).toEqual([])
+  it("leaves every slot empty when no card was added", () => {
+    expect(dailyBest(players, []).every((slot) => slot.player === null)).toBe(true)
   })
 })

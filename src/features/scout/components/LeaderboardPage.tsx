@@ -44,7 +44,7 @@ export function LeaderboardPage() {
         ) : null}
       </PageHeader>
 
-      <DailyBest players={dailyBest} />
+      <DailyBest slots={dailyBest} />
 
       {facets.total > 0 ? (
         <div className="flex flex-col gap-3">

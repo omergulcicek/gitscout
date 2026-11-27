@@ -35,6 +35,7 @@ import {
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
 import { dailyBest } from "@/features/scout/helpers/daily-best"
+import type { DailyBestSlot } from "@/features/scout/helpers/daily-best"
 import { popularPresets } from "@/features/scout/helpers/duel-presets"
 import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
 import { featuredOrder } from "@/features/scout/helpers/featured-players"
@@ -232,7 +233,7 @@ export const getLeaderboardSlice = createServerFn({ method: "GET" })
     }): Promise<{
       slice: LeaderboardSlice
       facets: LeaderboardFacets
-      dailyBest: ListPlayer[]
+      dailyBest: DailyBestSlot[]
     }> => {
       const { players, recentLogins } = await cachedList()
       return {
