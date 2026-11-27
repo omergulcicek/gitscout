@@ -711,7 +711,7 @@
   "season_reviews": "Reviews",
   "season_reviews_hint": "PRs reviewed",
   "season_form_title": "Form chart",
-  "season_form_caption": "Each bar is a 7-day week counted from 1 January",
+  "season_form_caption": "Each bar shows your contributions in one week of the year",
   "season_form_label": "Contributions over {weeks} weeks; busiest week {max} contributions",
   "season_best_week": "Best week of the season",
   "season_best_week_value": "Week of {date} · {count} contributions",

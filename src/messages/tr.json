@@ -690,7 +690,7 @@
   "season_reviews": "Review",
   "season_reviews_hint": "İncelenen PR",
   "season_form_title": "Form grafiği",
-  "season_form_caption": "Her çubuk 1 Ocak'tan sayılan 7 günlük bir hafta",
+  "season_form_caption": "Her çubuk yılın bir haftasındaki katkılarını gösterir",
   "season_form_label": "{weeks} haftanın katkıları; en yoğun hafta {max} katkı",
   "season_best_week": "Sezonun en iyi haftası",
   "season_best_week_value": "{date} haftası · {count} katkı",
