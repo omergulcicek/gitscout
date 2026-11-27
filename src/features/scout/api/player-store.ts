@@ -140,7 +140,8 @@ export async function getListPlayers(): Promise<{ players: ListPlayer[]; pending
         coalesce(a.eligible, false) as verified,
         p.country as claimed_country
       from players p
-      left join accounts a on a.login = p.login
+      -- Linked by GitHub's account id, never the login: a login can change hands.
+      left join accounts a on a.github_id = p.github_id
       order by p.ovr desc, p.login
     `
   )
@@ -199,7 +200,8 @@ export async function getScoredPlayer(login: string): Promise<ScoredPlayer | nul
         case when a.eligible and a.birth_date is not null
           then (p.facts ->> 'utcOffsetMinutes')::int end as utc_offset_minutes
       from players p
-      left join accounts a on a.login = p.login
+      -- Linked by GitHub's account id, never the login: a login can change hands.
+      left join accounts a on a.github_id = p.github_id
       where p.login = ${keyOf(login)}
     `
     )
@@ -262,12 +264,12 @@ export async function updateAccountCountry(
         and login is not null
         and (country_updated_at is null
           or country_updated_at < now() - make_interval(secs => ${minIntervalSeconds}))
-      returning login
+      returning github_id
     )
     update players as p
     set country = ${country}
     from account
-    where p.login = account.login
+    where p.github_id = account.github_id
     returning p.login
   `
   return rows.length > 0
@@ -544,9 +546,10 @@ export async function getDreamTeamLogins(login: string): Promise<string[]> {
   const rows = z.array(z.object({ player_login: z.string() })).parse(
     await sql`
         select d.player_login
-        from dream_team_picks d
-        join accounts a on a.github_id = d.github_id
-        where a.login = ${keyOf(login)} and a.eligible
+        from players p
+        join accounts a on a.github_id = p.github_id
+        join dream_team_picks d on d.github_id = a.github_id
+        where p.login = ${keyOf(login)} and a.eligible
         order by d.slot
       `
   )

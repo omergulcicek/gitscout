@@ -37,6 +37,8 @@ const profileResponseSchema = z.object({
   user: z
     .object({
       id: z.string(),
+      /** The numeric account id; it never changes, unlike the login. */
+      databaseId: z.number(),
       login: z.string(),
       name: z.string().nullable(),
       bio: z.string().nullable(),

@@ -100,7 +100,7 @@ export async function findViewer(token: string | undefined): Promise<Viewer | nu
   const [row] = z.array(viewerRowSchema).parse(
     await sql`
       select a.github_id, a.login, a.avatar_url, a.eligible,
-        (select p.country from players p where p.login = a.login) as country, a.verified_at,
+        (select p.country from players p where p.github_id = a.github_id limit 1) as country, a.verified_at,
         to_char(a.birth_date, 'YYYY-MM-DD') as birth_date, a.birth_date_changes, a.city, a.gender,
         a.favorite_team, a.card_face,
         coalesce(
