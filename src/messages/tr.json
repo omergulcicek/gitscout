@@ -743,5 +743,22 @@
   "season_step_frozen": "Sezon donar",
   "season_step_frozen_text": "Sayıların ve kartın 2026 hatırası olarak saklanır; profilinden her zaman açabilirsin.",
   "snow_stop": "Karı durdur",
-  "snow_start": "Kar yağsın"
+  "snow_start": "Kar yağsın",
+  "season_landing_cta_own": "Sezon raporunu aç",
+  "season_landing_cta_login": "GitHub ile giriş yap",
+  "season_landing_cta_create": "Kartını oluştur",
+  "season_landing_login_hint": "Giriş yaparsan kendi kartın burada belirir.",
+  "season_landing_card_own": "Senin 2026 yılbaşı kartın",
+  "season_landing_card_sample": "Örnek kart · @{login}",
+  "season_features_title": "Sezon raporunda neler var",
+  "season_feature_matches": "Maçlar ve form",
+  "season_feature_matches_text": "Katkı verdiğin haftalar, en uzun serin ve sezonun en iyi haftası.",
+  "season_feature_career": "Kariyer çizelgesi",
+  "season_feature_career_text": "Hesabın açıldığından bu yana her yıl; rekor sezonun hangisi?",
+  "season_feature_scout": "Scout raporu",
+  "season_feature_scout_text": "Sezonun birkaç cümlelik özeti ve gelecek sezon için bir tavsiye.",
+  "season_feature_poster": "Paylaşılabilir poster",
+  "season_feature_poster_text": "Masaüstü için 16:9, hikâye için 9:16 olarak indir.",
+  "season_lookup_title": "Başka bir oyuncunun sezonu",
+  "season_lookup_text": "Takım arkadaşının ya da rakibinin sezonuna göz at."
 }

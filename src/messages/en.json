@@ -764,5 +764,22 @@
   "season_step_frozen": "The season freezes",
   "season_step_frozen_text": "Your numbers and card are kept as your 2026 season; open them from your profile any time.",
   "snow_stop": "Stop the snow",
-  "snow_start": "Let it snow"
+  "snow_start": "Let it snow",
+  "season_landing_cta_own": "Open your season report",
+  "season_landing_cta_login": "Sign in with GitHub",
+  "season_landing_cta_create": "Create your card",
+  "season_landing_login_hint": "Sign in and your own card shows up here.",
+  "season_landing_card_own": "Your 2026 New Year card",
+  "season_landing_card_sample": "Sample card · @{login}",
+  "season_features_title": "What's in a season report",
+  "season_feature_matches": "Matches and form",
+  "season_feature_matches_text": "The weeks you contributed, your longest streak and the season's best week.",
+  "season_feature_career": "Career chart",
+  "season_feature_career_text": "Every year since the account opened; which one is your record?",
+  "season_feature_scout": "Scout report",
+  "season_feature_scout_text": "The season in a few sentences and one tip for next season.",
+  "season_feature_poster": "A poster to share",
+  "season_feature_poster_text": "Download it 16:9 for desktop or 9:16 for stories.",
+  "season_lookup_title": "Another player's season",
+  "season_lookup_text": "Take a look at a teammate's or a rival's season."
 }

@@ -3,12 +3,11 @@ import { useEffect, useState } from "react"
 import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
-import { PlayerCard } from "@/features/scout/components/PlayerCard"
+import { SnowyCard } from "@/features/scout/components/SnowyCard"
 import { COUNTRY_FLAGS } from "@/features/scout/constants/country-flag.constants"
 import { playerCountry } from "@/features/scout/helpers/player-country"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
-import { SnowCap } from "@/features/scout/icons/SnowCap"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -53,19 +52,7 @@ export function SeasonPack({ player, year, onOpen }: SeasonPackProps) {
   if (stage === "card") {
     return (
       <div className="flex flex-col items-center gap-4">
-        <div data-rarity={player.rarity} className="relative flex w-full max-w-80 justify-center">
-          <div
-            aria-hidden
-            className="scout-card-glow card-reveal-glow pointer-events-none absolute -inset-8"
-          />
-          <div className="card-lift relative">
-            <div className="card-reveal season-frost relative">
-              <PlayerCard player={player} ref={cardRef} occasion="new-year" />
-            </div>
-            {/* Lands once the card has turned, as if snow had settled on it. */}
-            <SnowCap className="season-snow-cap pointer-events-none absolute -top-3 -right-1.5 -left-1.5 h-10 w-[calc(100%+0.75rem)]" />
-          </div>
-        </div>
+        <SnowyCard player={player} ref={cardRef} reveal />
         <Button variant="outline" size="sm" onClick={download} disabled={isDownloading}>
           {isDownloading ? m.download_preparing() : m.download()}
         </Button>
