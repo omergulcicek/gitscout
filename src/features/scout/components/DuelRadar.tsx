@@ -1,12 +1,20 @@
 import { cn } from "cn"
-import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from "recharts"
 
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
-import type { ChartConfig } from "@/components/ui/chart"
+import { RadarSvg } from "@/features/scout/components/RadarSvg"
+import type { RadarGeometry, RadarSeries } from "@/features/scout/components/RadarSvg"
 import { RADAR_ORDER } from "@/features/scout/constants/scoring.constants"
 import { statLabel } from "@/features/scout/helpers/player-text"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
+
+/** Same layout the Recharts version had: radius 85% inside 40/20px margins, 260px tall from `sm`, 220px below. */
+const WIDE: RadarGeometry = {
+  height: 260,
+  outerRatio: 0.85,
+  margin: { x: 40, y: 20 },
+  fallbackWidth: 360
+}
+const NARROW: RadarGeometry = { ...WIDE, height: 220, fallbackWidth: 343 }
 
 type DuelRadarProps = {
   left: ListPlayer
@@ -15,15 +23,31 @@ type DuelRadarProps = {
 
 /** İki oyuncunun altı statı aynı grafikte: hangi yönde kimin üstün olduğu tek bakışta. */
 export function DuelRadar({ left, right }: DuelRadarProps) {
-  const chartConfig = {
-    left: { label: left.name, color: "var(--chart-home)" },
-    right: { label: right.name, color: "var(--chart-away)" }
-  } satisfies ChartConfig
-  const data = RADAR_ORDER.map((key) => ({
-    label: statLabel(key),
-    left: left.stats[key].value,
-    right: right.stats[key].value
-  }))
+  const labels = RADAR_ORDER.map((key) => statLabel(key))
+  const series: RadarSeries[] = [
+    {
+      values: RADAR_ORDER.map((key) => left.stats[key].value),
+      color: "var(--chart-home)",
+      fillOpacity: 0.22,
+      dotRadius: 3
+    },
+    {
+      values: RADAR_ORDER.map((key) => right.stats[key].value),
+      color: "var(--chart-away)",
+      fillOpacity: 0.22,
+      dotRadius: 3
+    }
+  ]
+  const tooltip = (index: number) => {
+    const key = RADAR_ORDER[index]
+    if (!key) return null
+    const row = {
+      label: statLabel(key),
+      left: left.stats[key].value,
+      right: right.stats[key].value
+    }
+    return <DuelTooltip row={row} left={left.name} right={right.name} />
+  }
 
   return (
     <section className="surface flex flex-col gap-1 px-0 py-4" aria-label={m.duel_radar_label()}>
@@ -40,66 +64,27 @@ export function DuelRadar({ left, right }: DuelRadarProps) {
           </li>
         ))}
       </ul>
-      <ChartContainer
-        config={chartConfig}
-        className="mx-auto aspect-auto h-[220px] w-full max-w-[360px] sm:h-[260px]"
-        aria-label={m.duel_radar_label()}
-      >
-        <RadarChart
-          data={data}
-          outerRadius="85%"
-          margin={{ top: 20, right: 40, bottom: 20, left: 40 }}
-        >
-          <ChartTooltip
-            cursor={false}
-            content={({ active, payload }) => {
-              const row: unknown = payload[0]?.payload
-              return active && isRow(row) ? (
-                <DuelTooltip row={row} left={left.name} right={right.name} />
-              ) : null
-            }}
-          />
-          <PolarAngleAxis
-            dataKey="label"
-            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-          />
-          <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-          <PolarGrid />
-          <Radar
-            dataKey="left"
-            isAnimationActive={false}
-            fill="var(--color-left)"
-            stroke="var(--color-left)"
-            strokeWidth={2}
-            fillOpacity={0.22}
-            dot={{ r: 3, fillOpacity: 1 }}
-          />
-          <Radar
-            dataKey="right"
-            isAnimationActive={false}
-            fill="var(--color-right)"
-            stroke="var(--color-right)"
-            strokeWidth={2}
-            fillOpacity={0.22}
-            dot={{ r: 3, fillOpacity: 1 }}
-          />
-        </RadarChart>
-      </ChartContainer>
+      <div role="img" aria-label={m.duel_radar_label()} className="mx-auto w-full max-w-[360px]">
+        <RadarSvg
+          labels={labels}
+          series={series}
+          geometry={NARROW}
+          tooltip={tooltip}
+          className="sm:hidden"
+        />
+        <RadarSvg
+          labels={labels}
+          series={series}
+          geometry={WIDE}
+          tooltip={tooltip}
+          className="max-sm:hidden"
+        />
+      </div>
     </section>
   )
 }
 
 type Row = { label: string; left: number; right: number }
-
-function isRow(value: unknown): value is Row {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "label" in value &&
-    "left" in value &&
-    "right" in value
-  )
-}
 
 /** İki oyuncunun o stattaki puanı; ad ile puan arasında net boşluk, puanlar hizalı. */
 function DuelTooltip({ row, left, right }: { row: Row; left: string; right: string }) {

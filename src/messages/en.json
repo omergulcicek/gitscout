@@ -290,7 +290,6 @@
   "readme_markdown_copied": "Markdown copied. Paste it into your profile README.",
   "readme_copy_failed": "Couldn't copy to the clipboard",
   "radar_label": "Stat profile chart",
-  "radar_score": "Score",
   "repo_count": "{count} repos",
   "position_roles": "Area shares",
   "position_languages": "Most used languages",
