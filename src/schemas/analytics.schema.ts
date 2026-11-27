@@ -35,7 +35,8 @@ export const CARD_SHARE_TARGETS = [
   "link",
   "image",
   "copy_x",
-  "copy_linkedin"
+  "copy_linkedin",
+  "challenge"
 ] as const
 
 /**

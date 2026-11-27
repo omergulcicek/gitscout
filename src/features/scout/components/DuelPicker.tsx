@@ -34,6 +34,7 @@ export function DuelPicker() {
   // `?left=` comes from a profile's "Duel" button; the route loader prefetches that player.
   const { data: preselected } = usePlayersByLogin(search.left ? [search.left] : [])
   const randomPlayer = useRandomPlayer()
+  const challenger = search.challenge === 1 ? (preselected?.[0] ?? null) : null
   const navigate = useNavigate()
   const router = useRouter()
   const prefetchPlayer = usePrefetchPlayer()
@@ -97,8 +98,15 @@ export function DuelPicker() {
       tabIndex={-1}
       className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 overflow-x-clip px-4 pt-6 pb-20 outline-none sm:px-6"
     >
-      <PageHeader eyebrow={m.duel_title()} title={m.duel_lead()} align="center">
-        <p className="max-w-xl text-sm text-balance text-muted-foreground">{m.duel_sublead()}</p>
+      {/* A challenge link only swaps the heading: same page, the challenger already in the home corner. */}
+      <PageHeader
+        eyebrow={m.duel_title()}
+        title={challenger ? m.challenge_title({ name: challenger.name }) : m.duel_lead()}
+        align="center"
+      >
+        <p className="max-w-xl text-sm text-balance text-muted-foreground">
+          {challenger ? m.challenge_lead() : m.duel_sublead()}
+        </p>
       </PageHeader>
 
       <div className="relative isolate">
