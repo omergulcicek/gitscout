@@ -3,8 +3,8 @@
   "site_description": "GitHub profilini koleksiyon kartına çevir, liderlik tablosunda yerini gör.",
   "language": "Dil",
   "go_home": "Ana sayfaya dön",
-  "not_found_title": "Sayfa bulunamadı",
-  "not_found_description": "Aradığınız sayfa yok ya da başka bir yere taşınmış.",
+  "not_found_title": "Bu sayfa kadroda yok",
+  "not_found_description": "Aradığın sayfa yok ya da başka bir yere taşınmış. Sahaya geri dönelim.",
   "error_title": "Bir şeyler ters gitti",
   "error_description": "Bu sayfa gösterilirken beklenmedik bir hata oluştu. Yeniden deneyebilir ya da ana sayfaya dönebilirsiniz.",
   "error_retry": "Yeniden dene",
@@ -289,8 +289,8 @@
   "year_prs": "PR",
   "year_reviews": "Review",
   "year_issues": "Issue",
-  "player_not_found_title": "@{username} henüz listede değil",
-  "player_not_found_description": "Bu geliştiricinin kartı henüz çıkarılmamış. Hemen çıkaralım:",
+  "player_not_found_title": "@{username} henüz scout edilmedi",
+  "player_not_found_description": "Bu kartı henüz kimse çıkarmadı ya da kullanıcı adı yanlış yazıldı. Doğruysa hemen çıkaralım:",
   "challenge_friend": "Arkadaşına meydan oku",
   "challenge_share_text": "GitHub kartımla seni kapışmaya çağırıyorum! Kartını çıkar, kim kazanıyor görelim:",
   "challenge_copied": "Meydan okuma bağlantısı kopyalandı",
@@ -663,5 +663,9 @@
   "readme_how_html": "HTML'i kopyalayıp GitHub profil README'ne kendin de yapıştırabilirsin. Kartlar, görsel doğru boyda dursun diye HTML olarak eklenir.",
   "readme_prompt_card": "{url} adresindeki talimatları izleyerek Gitscout kart rozetimi (boy: {size}) GitHub profil README'me ekle. GitHub kullanıcı adım: {username}.",
   "readme_lang_label": "Rozet dili",
-  "readme_prompt_lang": "Rozet dili olarak {lang} kullan (lang={lang} parametresi)."
+  "readme_prompt_lang": "Rozet dili olarak {lang} kullan (lang={lang} parametresi).",
+  "lost_card_chip": "Kayıp",
+  "lost_card_player_subtitle": "Henüz keşfedilmedi",
+  "lost_card_page_name": "Kayıp sayfa",
+  "lost_card_page_subtitle": "Burada kimse yok"
 }

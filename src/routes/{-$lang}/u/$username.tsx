@@ -1,9 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { ArrowRight } from "lucide-react"
 
 import { siteConfig } from "@/config/site.config"
 
-import { hreflangLinks } from "@/helpers/localized-url"
+import { getLangParam, hreflangLinks } from "@/helpers/localized-url"
 
+import { LostCard } from "@/components/shared/LostCard"
 import { playerQueryOptions } from "@/features/scout/api/players.queries"
 import { AddPlayerForm } from "@/features/scout/components/AddPlayerForm"
 import { PlayerDetail } from "@/features/scout/components/PlayerDetail"
@@ -57,13 +59,31 @@ function PlayerNotFound() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-4 px-6 py-24 text-center outline-none"
+      className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-12 px-4 py-16 outline-none sm:px-6 md:grid-cols-[auto_1fr] md:gap-16 md:py-24"
     >
       <meta name="robots" content="noindex" />
-      <h1 className="text-3xl font-bold">{m.player_not_found_title({ username })}</h1>
-      <p className="font-mono text-muted-foreground">{m.player_not_found_description()}</p>
-      <div className="w-full text-left">
-        <AddPlayerForm defaultUsername={username} />
+      <div className="flex justify-center">
+        <LostCard name={`@${username}`} subtitle={m.lost_card_player_subtitle()} />
+      </div>
+      <div className="flex min-w-0 flex-col gap-4">
+        <p className="font-mono text-sm font-semibold tracking-widest text-muted-foreground">404</p>
+        <h1 className="text-3xl font-bold tracking-tight text-balance break-words md:text-4xl">
+          {m.player_not_found_title({ username })}
+        </h1>
+        <p className="max-w-lg font-mono text-sm leading-relaxed text-muted-foreground">
+          {m.player_not_found_description()}
+        </p>
+        <div className="mt-2 w-full max-w-xl">
+          <AddPlayerForm defaultUsername={username} variant="command" />
+        </div>
+        <Link
+          to="/{-$lang}/leaderboard"
+          params={{ lang: getLangParam() }}
+          className="mt-2 inline-flex w-fit items-center gap-1 text-sm text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          {m.leaderboard_title()}
+          <ArrowRight aria-hidden className="size-4" />
+        </Link>
       </div>
     </main>
   )
