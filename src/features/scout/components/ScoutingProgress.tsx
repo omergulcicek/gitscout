@@ -1,6 +1,8 @@
 import { Check, LoaderCircle } from "lucide-react"
 import { cn } from "cn"
 
+import { avatarSrc } from "@/helpers/avatar-src"
+
 import { Skeleton } from "@/components/ui/skeleton"
 import type { ScoutingProfile } from "@/features/scout/types/add-player.types"
 import * as m from "@/paraglide/messages.js"
@@ -49,7 +51,7 @@ function ScoutingCard({ step, profile }: ScoutingProgressProps) {
         {profile ? (
           <>
             <img
-              src={profile.avatarUrl}
+              src={avatarSrc(profile.avatarUrl, 36)}
               alt=""
               width={36}
               height={36}

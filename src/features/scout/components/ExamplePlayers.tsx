@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 
+import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import type { ListPlayer } from "@/features/scout/types/player.types"
@@ -22,7 +23,7 @@ export function ExamplePlayers({ players }: { players: ListPlayer[] }) {
               className="inline-flex h-7 items-center gap-1.5 rounded-full bg-muted ps-0.5 pe-2.5 font-mono text-xs text-foreground transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               <img
-                src={player.avatarUrl}
+                src={avatarSrc(player.avatarUrl, 24)}
                 alt=""
                 width={24}
                 height={24}
