@@ -34,8 +34,8 @@ export function SiteFooter() {
             <p className="max-w-xs text-pretty">{m.footer_tagline()}</p>
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-            <Link to="/{-$lang}/top/turkey" params={{ lang }} className={navLinkClass}>
-              {m.footer_top_turkey()}
+            <Link to="/{-$lang}/top" params={{ lang }} className={navLinkClass}>
+              {m.footer_top()}
             </Link>
             <Link to="/{-$lang}/special-cards" params={{ lang }} className={navLinkClass}>
               {m.nav_special_cards()}
