@@ -24,7 +24,8 @@ export function TopRepos({ repos }: TopReposProps) {
       {repos.length === 0 ? (
         <p className="px-4 pb-4 text-sm text-muted-foreground">{m.top_repos_empty()}</p>
       ) : (
-        <ul className="flex flex-1 flex-col divide-y border-t">
+        // Geniş ekranda radar yüksekliği üçe bölünür: az repoda satırlar uzamaz, alt boş kalır.
+        <ul className="flex flex-1 flex-col divide-y border-t lg:grid lg:grid-rows-3">
           {repos.map((repo) => {
             // Kendi reposunda sahip zaten bu oyuncu; katkı verdiği repoda ürünün sahibi de yazılır.
             const [owner = "", name = repo.fullName] = repo.fullName.split("/")

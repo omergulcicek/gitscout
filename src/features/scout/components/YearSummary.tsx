@@ -21,7 +21,7 @@ export function YearSummary({ year }: YearSummaryProps) {
 
   return (
     <section
-      className="flex flex-col gap-3 border-t pt-4 lg:shrink-0 lg:border-s lg:border-t-0 lg:ps-8 lg:pt-0"
+      className="flex flex-col gap-3 border-t pt-4 lg:shrink-0 lg:self-stretch lg:border-s lg:border-t-0 lg:ps-8 lg:pt-0"
       aria-labelledby="year-heading"
     >
       <h2
@@ -53,7 +53,7 @@ function WeeklyBars({ totals }: { totals: number[] }) {
     <div
       role="img"
       aria-label={m.year_weekly_label({ weeks: totals.length, max })}
-      className="flex h-10 items-end gap-px"
+      className="mt-auto flex h-10 items-end gap-px"
     >
       {totals.map((total, week) => (
         // Çubuklar takvimdeki sabit haftalardır; sıra hiç değişmez.
