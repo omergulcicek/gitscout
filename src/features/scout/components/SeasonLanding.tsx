@@ -89,9 +89,6 @@ export function SeasonLanding() {
                   <GithubMark />
                   {m.season_landing_cta_login()}
                 </Link>
-                <span className="text-sm text-muted-foreground">
-                  {m.season_landing_login_hint()}
-                </span>
               </>
             )}
           </div>

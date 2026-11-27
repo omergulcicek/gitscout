@@ -767,7 +767,6 @@
   "season_landing_cta_own": "Open your season report",
   "season_landing_cta_login": "Sign in with GitHub",
   "season_landing_cta_create": "Create your card",
-  "season_landing_login_hint": "Sign in and your own card shows up here.",
   "season_landing_card_own": "Your 2026 New Year card",
   "season_landing_card_sample": "Sample card · @{login}",
   "season_lookup_title": "Another developer's season",

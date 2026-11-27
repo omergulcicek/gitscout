@@ -746,7 +746,6 @@
   "season_landing_cta_own": "Sezon raporunu aç",
   "season_landing_cta_login": "GitHub ile giriş yap",
   "season_landing_cta_create": "Kartını oluştur",
-  "season_landing_login_hint": "Giriş yaparsan kendi kartın burada belirir.",
   "season_landing_card_own": "Senin 2026 yılbaşı kartın",
   "season_landing_card_sample": "Örnek kart · @{login}",
   "season_lookup_title": "Başka bir geliştiricinin sezonu",
