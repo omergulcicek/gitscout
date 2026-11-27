@@ -15,6 +15,7 @@ import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { PlayerRank } from "@/features/scout/components/PlayerRank"
 import { PositionBreakdown } from "@/features/scout/components/PositionBreakdown"
 import { ScoutNote } from "@/features/scout/components/ScoutNote"
+import { ShareTextSection } from "@/features/scout/components/ShareTextSection"
 import { StatRadar } from "@/features/scout/components/StatRadar"
 import { TopRepos } from "@/features/scout/components/TopRepos"
 import { VerifiedIcon } from "@/features/scout/components/VerifiedIcon"
@@ -143,7 +144,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
                 <TopRepos repos={player.topRepos} />
               </div>
               <div className="surface flex flex-col gap-4 p-4 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-                <ScoutNote archetype={player.archetype} />
+                <ScoutNote archetype={player.archetype} stats={player.stats} />
                 <YearSummary year={player.year} />
               </div>
               <PositionBreakdown position={player.position} breakdown={player.positionBreakdown} />
@@ -155,7 +156,8 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-col gap-6">
+        <ShareTextSection player={player} />
         <GetYourCard />
       </div>
     </main>

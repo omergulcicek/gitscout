@@ -2,6 +2,7 @@ import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { rarityLabel, statShort, titleText } from "@/features/scout/helpers/player-text"
 import { statTier } from "@/features/scout/helpers/stat-tier"
 import type { ListPlayer, Rarity } from "@/features/scout/types/player.types"
+import type { Locale } from "@/paraglide/runtime.js"
 
 /**
  * Link önizlemelerindeki oyuncu kartı (300×450). Oyuncu ve düello görselleri ile README'nin tam kart
@@ -66,9 +67,11 @@ type OgPlayerCardProps = {
   avatar: string | null
   /** Sağ alt köşede kullanıcı adı yerine yazılır; README kartı site adresini taşır. */
   signature?: string
+  /** Kart metinlerinin dili; verilmezse isteğin dili. Tarayıcıdaki README önizlemesi rozet dilini verir. */
+  locale?: Locale
 }
 
-export function OgPlayerCard({ player, avatar, signature }: OgPlayerCardProps) {
+export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCardProps) {
   const colors = RARITY_COLORS[player.rarity]
 
   return (
@@ -116,7 +119,7 @@ export function OgPlayerCard({ player, avatar, signature }: OgPlayerCardProps) {
               border: `1px solid ${colors.muted}`
             }}
           >
-            {rarityLabel(player.rarity).toUpperCase()}
+            {rarityLabel(player.rarity, locale).toUpperCase()}
           </div>
         </div>
 
@@ -154,7 +157,7 @@ export function OgPlayerCard({ player, avatar, signature }: OgPlayerCardProps) {
         <div
           style={{ display: "flex", justifyContent: "center", fontSize: 12, color: colors.muted }}
         >
-          {titleText(player.title)}
+          {titleText(player.title, locale)}
         </div>
 
         <div
@@ -179,7 +182,7 @@ export function OgPlayerCard({ player, avatar, signature }: OgPlayerCardProps) {
               }}
             >
               <div style={{ fontSize: 10, fontWeight: 700, color: colors.muted }}>
-                {statShort(key)}
+                {statShort(key, locale)}
               </div>
               <div
                 style={{

@@ -9,6 +9,7 @@ import { trackEvent } from "@/lib/analytics"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { BadgeCardPreview } from "@/features/scout/components/BadgeCardPreview"
 import { BADGE_CARD_SIZES, BADGE_SIZES } from "@/features/scout/constants/badge.constants"
 import { playerBadgeSvg, svgDataUri } from "@/features/scout/helpers/player-badge"
 import { readmeBadgeParts, readmeBadgeSnippet } from "@/features/scout/helpers/readme-badge"
@@ -34,8 +35,7 @@ const COPIED_MS = 2000
 
 /**
  * Profil README'sine rozet eklemek için iki yol: AI ajanına verilecek komut ya da hazır Markdown.
- * Üç boy var: mini şerit, orta ve tam kart. Mini rozetin önizlemesi yerelde çizilir; kartlar
- * sunucunun ürettiği PNG'nin kendisiyle gösterilir.
+ * Üç boy var: mini şerit, orta ve tam kart. Hepsinin önizlemesi sunucuyu beklemeden yerelde çizilir.
  */
 export function ReadmeBadgeSection({ player }: ReadmeBadgeSectionProps) {
   return (
@@ -54,7 +54,7 @@ export function ReadmeBadgeSection({ player }: ReadmeBadgeSectionProps) {
 /** Başlıksız gövde: oyuncu sayfasındaki Paylaş menüsünün penceresi kendi başlığını kullanır. */
 export function ReadmeBadgeContent({ player }: ReadmeBadgeSectionProps) {
   const { login } = player
-  const [size, setSize] = useState<BadgeSize>("mini")
+  const [size, setSize] = useState<BadgeSize>("medium")
   // Rozet dili sayfa dilinden bağımsız: README'yi okuyanlar için İngilizce varsayılan.
   const [locale, setLocale] = useState<BadgeLocale>("en")
   const snippet = readmeBadgeSnippet(siteConfig.url, login, size, locale)
@@ -151,19 +151,8 @@ export function ReadmeBadgeContent({ player }: ReadmeBadgeSectionProps) {
                 className="my-2 h-7 w-fit drop-shadow-sm"
               />
             ) : (
-              // Kartlar sunucunun README'ye verdiği PNG'nin kendisiyle gösterilir: önizleme birebir aynı
-              // olsun. Adres göreli; geliştirmede de yerel sunucudan gelir. Boyut baştan verildiği için
-              // görsel yüklenirken yer kaymaz, tam kart sütuna sığsın diye küçültülür.
-              <img
-                key={`${size}-${locale}`}
-                src={readmeBadgeParts("", login, size, locale).image}
-                alt={m.readme_badge_preview({ username: login })}
-                width={previewWidth}
-                height={Math.round(
-                  (BADGE_CARD_SIZES[size].height / BADGE_CARD_SIZES[size].width) * previewWidth
-                )}
-                className="rounded-2xl bg-muted/40"
-              />
+              // Kartlar sunucuya gitmeden elimizdeki veriyle anında çizilir; PNG ile aynı bileşenler.
+              <BadgeCardPreview player={player} size={size} locale={locale} width={previewWidth} />
             )}
           </div>
         </figure>

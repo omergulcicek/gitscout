@@ -10,14 +10,18 @@ import type {
 } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
+import type { Locale } from "@/paraglide/runtime.js"
+
+/** Dili ayrıca seçilebilen mesaj; paylaşım metni sayfa dilinden bağımsız kurulur. */
+type LocalizedMessage = (inputs?: Record<string, never>, options?: { locale?: Locale }) => string
 
 /**
  * Skor çıktısı dilden bağımsızdır (anahtar + sayı); cümleler burada, okunduğu anda dile göre kurulur.
  * Mesajlar fonksiyon içinde çağrılır ki her istek kendi dilini kullansın.
  */
 
-export function number(value: number): string {
-  return new Intl.NumberFormat(getLocale()).format(Math.round(value))
+export function number(value: number, locale: Locale = getLocale()): string {
+  return new Intl.NumberFormat(locale).format(Math.round(value))
 }
 
 /** 0-100 arası tam sayı: Türkçede "%45", İngilizcede "45%". */
@@ -46,10 +50,10 @@ const STAT_SHORT = {
   rep: m.stat_short_rep,
   con: m.stat_short_con,
   exp: m.stat_short_exp
-} as const satisfies Record<StatKey, () => string>
+} as const satisfies Record<StatKey, LocalizedMessage>
 
-export function statShort(key: StatKey): string {
-  return STAT_SHORT[key]()
+export function statShort(key: StatKey, locale?: Locale): string {
+  return STAT_SHORT[key]({}, { locale })
 }
 
 export function statSummary(summary: Stat["summary"]): string {
@@ -95,10 +99,10 @@ const RARITY_LABELS = {
   gold: m.rarity_gold,
   silver: m.rarity_silver,
   bronze: m.rarity_bronze
-} as const satisfies Record<Rarity, () => string>
+} as const satisfies Record<Rarity, LocalizedMessage>
 
-export function rarityLabel(rarity: Rarity): string {
-  return RARITY_LABELS[rarity]()
+export function rarityLabel(rarity: Rarity, locale?: Locale): string {
+  return RARITY_LABELS[rarity]({}, { locale })
 }
 
 export function clubLabel(club: string | null): string {
@@ -124,10 +128,10 @@ const BADGE_NAMES = {
   documenter: m.badge_documenter,
   veteran: m.badge_veteran,
   regular: m.badge_regular
-} as const satisfies Record<BadgeId, () => string>
+} as const satisfies Record<BadgeId, LocalizedMessage>
 
-export function badgeName(id: BadgeId): string {
-  return BADGE_NAMES[id]()
+export function badgeName(id: BadgeId, locale?: Locale): string {
+  return BADGE_NAMES[id]({}, { locale })
 }
 
 export function badgeDetail(badge: Badge): string {
@@ -244,40 +248,71 @@ const TITLES = {
     silver: [m.title_exp_silver_0, m.title_exp_silver_1, m.title_exp_silver_2],
     bronze: [m.title_exp_bronze_0, m.title_exp_bronze_1, m.title_exp_bronze_2]
   }
-} as const satisfies Record<StatKey, Record<Rarity, readonly (() => string)[]>>
+} as const satisfies Record<StatKey, Record<Rarity, readonly LocalizedMessage[]>>
 
-export function titleText(title: TitleRef): string {
-  const pool: readonly (() => string)[] = TITLES[title.stat][title.rarity]
-  return (pool[title.variant] ?? pool[0] ?? m.title_act_bronze_0)()
+export function titleText(title: TitleRef, locale?: Locale): string {
+  const pool: readonly LocalizedMessage[] = TITLES[title.stat][title.rarity]
+  return (pool[title.variant] ?? pool[0] ?? m.title_act_bronze_0)({}, { locale })
 }
 
-const ARCHETYPE_STRENGTHS = {
-  act: m.archetype_strength_act,
-  imp: m.archetype_strength_imp,
-  com: m.archetype_strength_com,
-  rep: m.archetype_strength_rep,
-  con: m.archetype_strength_con,
-  exp: m.archetype_strength_exp
-} as const satisfies Record<StatKey, () => string>
+/** Büyük sayılar notta kısa yazılır: "269.131" yerine "269 B". */
+function compact(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(locale, {
+    notation: value >= 10_000 ? "compact" : "standard",
+    maximumFractionDigits: 1
+  }).format(Math.round(value))
+}
 
-const ARCHETYPE_WEAKNESSES = {
-  act: m.archetype_weakness_act,
-  imp: m.archetype_weakness_imp,
-  com: m.archetype_weakness_com,
-  rep: m.archetype_weakness_rep,
-  con: m.archetype_weakness_con,
-  exp: m.archetype_weakness_exp
-} as const satisfies Record<StatKey, () => string>
+/** Güçlü yan cümlesi; stat özetindeki sayılarla somutlaşır. */
+function strengthText(summary: Stat["summary"], locale: Locale): string {
+  const options = { locale }
+  switch (summary.key) {
+    case "act":
+      return m.archetype_strength_act(
+        { contributions: compact(summary.contributions, locale) },
+        options
+      )
+    case "imp":
+      return m.archetype_strength_imp({ stars: compact(summary.stars, locale) }, options)
+    case "com":
+      return m.archetype_strength_com({ followers: compact(summary.followers, locale) }, options)
+    case "rep":
+      return m.archetype_strength_rep({ prs: compact(summary.prs, locale) }, options)
+    case "con":
+      return m.archetype_strength_con(
+        { days: number(summary.days, locale), streak: number(summary.streak, locale) },
+        options
+      )
+    case "exp":
+      return m.archetype_strength_exp(
+        {
+          years: number(summary.years, locale),
+          contributions: compact(summary.contributions, locale)
+        },
+        options
+      )
+  }
+}
 
-/** Scout notu: en fazla iki güçlü yön ve varsa tek bir gelişim alanı. */
-export function archetypeNote(archetype: Archetype): {
-  strengths: string[]
-  growth: string | null
-} {
+const ARCHETYPE_GROWTH = {
+  act: m.archetype_growth_act,
+  imp: m.archetype_growth_imp,
+  com: m.archetype_growth_com,
+  rep: m.archetype_growth_rep,
+  con: m.archetype_growth_con,
+  exp: m.archetype_growth_exp
+} as const satisfies Record<StatKey, LocalizedMessage>
+
+/** Scout notu: güçlü yanlar sayılarıyla, ardından tavsiyeler; toplam üç madde. */
+export function archetypeNote(
+  archetype: Archetype,
+  stats: Record<StatKey, Stat>,
+  locale: Locale = getLocale()
+): { strengths: string[]; growth: string[] } {
+  // Yeniden puanlanmamış eski özetlerde tek bir `weakness` alanı durur.
+  const growth = archetype.growth ?? (archetype.weakness ? [archetype.weakness] : [])
   return {
-    strengths: archetype.strengths.map((key) => ARCHETYPE_STRENGTHS[key]()),
-    growth: archetype.weakness
-      ? m.archetype_growth({ area: ARCHETYPE_WEAKNESSES[archetype.weakness]() })
-      : null
+    strengths: archetype.strengths.map((key) => strengthText(stats[key].summary, locale)),
+    growth: growth.map((key) => ARCHETYPE_GROWTH[key]({}, { locale }))
   }
 }

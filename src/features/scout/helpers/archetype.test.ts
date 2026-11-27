@@ -21,20 +21,46 @@ const stats = (values: Record<StatKey, number>) => ({
 })
 
 describe("computeArchetype", () => {
-  it("en güçlü iki statı ve gerçekten düşük olanı seçer", () => {
+  it("zayıf yan varsa iki güçlü yan ve bir tavsiye verir", () => {
     const archetype = computeArchetype(
       stats({ act: 90, imp: 78, com: 77, rep: 62, con: 87, exp: 85 }),
       "gold"
     )
-    expect(archetype).toEqual({ rarity: "gold", strengths: ["act", "con"], weakness: "rep" })
+    expect(archetype).toEqual({ rarity: "gold", strengths: ["act", "con"], growth: ["rep"] })
   })
 
-  it("en düşük stat da yüksekse zayıf yan söylemez", () => {
+  it("zayıf yan yoksa üç güçlü yan verir", () => {
     const archetype = computeArchetype(
-      stats({ act: 93, imp: 94, com: 92, rep: 88, con: 95, exp: 95 }),
+      stats({ act: 93, imp: 94, com: 92, rep: 88, con: 95, exp: 96 }),
       "icon"
     )
-    expect(archetype.weakness).toBeNull()
-    expect(archetype.strengths).toHaveLength(2)
+    expect(archetype.strengths).toEqual(["con", "imp", "act"])
+    expect(archetype.growth).toEqual([])
+  })
+
+  it("güçlü yanı az olanda boşluğu en zayıftan başlayan tavsiyelerle doldurur", () => {
+    const archetype = computeArchetype(
+      stats({ act: 72, imp: 40, com: 30, rep: 20, con: 65, exp: 50 }),
+      "bronze"
+    )
+    expect(archetype.strengths).toEqual(["act"])
+    expect(archetype.growth).toEqual(["rep", "com"])
+  })
+
+  it("hiç güçlü yanı yoksa üç tavsiye verir", () => {
+    const archetype = computeArchetype(
+      stats({ act: 10, imp: 20, com: 30, rep: 40, con: 50, exp: 60 }),
+      "bronze"
+    )
+    expect(archetype.strengths).toEqual([])
+    expect(archetype.growth).toEqual(["act", "imp", "com"])
+  })
+
+  it("kıdemi ancak başka seçenek kalmazsa yazar", () => {
+    const archetype = computeArchetype(
+      stats({ act: 10, imp: 20, com: 30, rep: 40, con: 50, exp: 5 }),
+      "bronze"
+    )
+    expect(archetype.growth).toEqual(["act", "imp", "com"])
   })
 })

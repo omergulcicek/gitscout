@@ -23,7 +23,7 @@ const player = (ovr: number, values: Record<StatKey, number>, ovrExact = ovr): S
     ovrExact,
     rarity: "gold",
     title: { stat: "act", rarity: "gold", variant: 0 },
-    archetype: { rarity: "gold", strengths: [], weakness: null },
+    archetype: { rarity: "gold", strengths: [], growth: [] },
     stats: {
       act: stat("act"),
       imp: stat("imp"),

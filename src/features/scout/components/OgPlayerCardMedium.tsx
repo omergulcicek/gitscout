@@ -3,17 +3,23 @@ import { BADGE_CARD_SIZES, BADGE_SIGNATURE } from "@/features/scout/constants/ba
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { statShort, titleText } from "@/features/scout/helpers/player-text"
 import type { ListPlayer } from "@/features/scout/types/player.types"
+import type { Locale } from "@/paraglide/runtime.js"
 
 /** Dış çerçevenin kalınlığı. */
 const FRAME = 6
 
-type OgPlayerCardMediumProps = { player: ListPlayer; avatar: string | null }
+type OgPlayerCardMediumProps = {
+  player: ListPlayer
+  avatar: string | null
+  /** Kart metinlerinin dili; verilmezse isteğin dili. Tarayıcıdaki README önizlemesi rozet dilini verir. */
+  locale?: Locale
+}
 
 /**
  * Sitedeki `PlayerCardMedium` düzeninin Satori sürümü: avatar ve puan üstte, ad ve unvan ortada,
  * altı stat 3×2 ızgarada. Satori yalnızca flex düzen ve satır içi stil desteklediği için ayrı yazılır.
  */
-export function OgPlayerCardMedium({ player, avatar }: OgPlayerCardMediumProps) {
+export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediumProps) {
   const colors = RARITY_COLORS[player.rarity]
 
   return (
@@ -87,7 +93,7 @@ export function OgPlayerCardMedium({ player, avatar }: OgPlayerCardMediumProps) 
             textOverflow: "ellipsis"
           }}
         >
-          {titleText(player.title)}
+          {titleText(player.title, locale)}
         </div>
 
         <div
@@ -114,7 +120,7 @@ export function OgPlayerCardMedium({ player, avatar }: OgPlayerCardMediumProps) 
                 }}
               >
                 <div style={{ fontSize: 10, fontWeight: 700, color: colors.muted }}>
-                  {statShort(key)}
+                  {statShort(key, locale)}
                 </div>
                 <div
                   style={{

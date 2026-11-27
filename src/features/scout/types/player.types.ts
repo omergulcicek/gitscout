@@ -229,8 +229,15 @@ export type Badge = { [K in BadgeId]: { id: K; values: BadgeValues[K] } }[BadgeI
 /** Unvan: en güçlü stat, nadirlik ve o kombinasyondaki seçenek sırası. */
 export type TitleRef = { stat: StatKey; rarity: Rarity; variant: number }
 
-/** Arşetip cümlesinin parçaları; cümle arayüzde dile göre kurulur. */
-export type Archetype = { rarity: Rarity; strengths: StatKey[]; weakness: StatKey | null }
+/** Scout notunun parçaları; cümleler arayüzde dile göre, statların sayılarıyla kurulur. */
+export type Archetype = {
+  rarity: Rarity
+  strengths: StatKey[]
+  /** Tavsiye verilecek statlar, en zayıftan başlayarak. Eski özetlerde yerine `weakness` vardır. */
+  growth?: StatKey[]
+  /** Eski özetlerin tek gelişim alanı; yeni özetler `growth` yazar. */
+  weakness?: StatKey | null
+}
 
 export type RoleGroup = Exclude<Position, "Full Stack">
 

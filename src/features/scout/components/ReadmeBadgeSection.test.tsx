@@ -36,8 +36,15 @@ function renderSection() {
 }
 
 describe("ReadmeBadgeSection", () => {
-  it("rozetin önizlemesini ağ isteği olmadan kartın puanından üretir", () => {
+  it("varsayılan olarak orta boy kartı seçer", () => {
     renderSection()
+
+    expect(screen.getByRole("tab", { name: /medium/i })).toHaveAttribute("aria-selected", "true")
+  })
+
+  it("mini rozetin önizlemesini ağ isteği olmadan kartın puanından üretir", async () => {
+    const user = renderSection()
+    await user.click(screen.getByRole("tab", { name: /mini/i }))
 
     const src = screen.getByAltText(/octocat/i).getAttribute("src") ?? ""
     expect(src).toMatch(/^data:image\/svg\+xml/)
@@ -54,8 +61,9 @@ describe("ReadmeBadgeSection", () => {
     expect(text).toContain("octocat")
   })
 
-  it("README için Markdown'ı kullanıcı adıyla gösterir ve kopyalar", async () => {
+  it("mini rozette README için Markdown'ı kullanıcı adıyla gösterir ve kopyalar", async () => {
     const user = renderSection()
+    await user.click(screen.getByRole("tab", { name: /mini/i }))
     const markdown = `[![Gitscout](${siteConfig.url}/badge/octocat.svg)](${siteConfig.url}/u/octocat)`
 
     // Satır renklendirme için parçalara bölünür; okunan metin yine tek parça Markdown'dır.
@@ -75,8 +83,6 @@ describe("ReadmeBadgeSection", () => {
 
   it("kart boyunda HTML kodunu kopyalar", async () => {
     const user = renderSection()
-
-    await user.click(screen.getByRole("tab", { name: /medium/i }))
 
     const html = `<a href="${siteConfig.url}/u/octocat"><img src="${siteConfig.url}/badge/octocat.png?size=medium" alt="Gitscout" width="220"></a>`
     expect(screen.getByLabelText("HTML")).toHaveTextContent(html, { normalizeWhitespace: false })
