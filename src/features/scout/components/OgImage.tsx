@@ -2,8 +2,7 @@ import { OG_FONT_FAMILY } from "@/lib/og-image"
 
 import { OgLink } from "@/features/scout/components/OgLink"
 import { OgPlayerCard, RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
-import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
-import { rarityLabel, statLabel } from "@/features/scout/helpers/player-text"
+import { rarityLabel } from "@/features/scout/helpers/player-text"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -34,7 +33,6 @@ export function OgImage({ player, avatar }: OgImageProps) {
     >
       <OgPlayerCard player={player} avatar={avatar} />
 
-      {/* Sağ taraf */}
       <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 22 }}>
         <div
           style={{
@@ -47,52 +45,36 @@ export function OgImage({ player, avatar }: OgImageProps) {
         >
           GITSCOUT
         </div>
-        {/* İsim zaten kartın üzerinde; başlık tek satır, kim paylaşırsa paylaşsın doğru okunur. */}
-        <div style={{ display: "flex", fontSize: 64, fontWeight: 800, lineHeight: 1 }}>
-          {m.og_rating()}&nbsp;
-          <span style={{ color: colors.frame[0] }}>{String(player.ovr)}</span>
+        {/* The name is the headline: in a small feed preview the card's own text is too small to read. */}
+        <div
+          style={{
+            display: "flex",
+            fontSize: nameSize(player.name),
+            fontWeight: 800,
+            lineHeight: 1.1,
+            letterSpacing: -0.5,
+            maxWidth: 620
+          }}
+        >
+          {player.name}
         </div>
-        <div style={{ display: "flex", fontSize: 20, color: "#a3a3a3" }}>
+        <div style={{ display: "flex", fontSize: 24, color: "#a3a3a3" }}>
           {m.og_meta({ rarity: rarityLabel(player.rarity), position: player.position })}
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", width: 640, rowGap: 14 }}>
-          {STAT_ORDER.map((key) => (
-            <div
-              key={key}
-              style={{ display: "flex", flexDirection: "column", width: 200, marginRight: 13 }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 14,
-                  color: "#a3a3a3",
-                  marginBottom: 6
-                }}
-              >
-                <span>{statLabel(key)}</span>
-                <span style={{ color: "#fafafa" }}>{String(player.stats[key].value)}</span>
-              </div>
-              <div
-                style={{ display: "flex", height: 8, borderRadius: 99, backgroundColor: "#26262a" }}
-              >
-                <div
-                  style={{
-                    width: `${player.stats[key].value}%`,
-                    height: 8,
-                    borderRadius: 99,
-                    backgroundColor: "#3f8fd8"
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22, marginTop: 6 }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22, marginTop: 18 }}
+        >
           <span>{m.cta_title()}</span>
           <OgLink />
         </div>
       </div>
     </div>
   )
+}
+
+/** Long names step down so they stay on one or two lines next to the card. */
+function nameSize(name: string): number {
+  if (name.length <= 14) return 64
+  if (name.length <= 22) return 52
+  return 42
 }
