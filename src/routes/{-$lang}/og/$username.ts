@@ -6,7 +6,7 @@ import { playerOgResponse } from "@/features/scout/api/og-image.api"
 export const Route = createFileRoute("/{-$lang}/og/$username")({
   server: {
     handlers: {
-      GET: ({ params }) => playerOgResponse(params.username)
+      GET: ({ params, request }) => playerOgResponse(params.username, new URL(request.url))
     }
   }
 })

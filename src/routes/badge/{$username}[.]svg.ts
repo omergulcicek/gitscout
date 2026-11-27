@@ -11,10 +11,12 @@ export const Route = createFileRoute("/badge/{$username}.svg")({
   server: {
     handlers: {
       GET: ({ params, request }) => {
+        const url = new URL(request.url)
         const locale = badgeLocaleSchema
-          .catch("en")
-          .parse(new URL(request.url).searchParams.get("lang") ?? undefined)
-        return playerBadgeResponse(params.username, locale)
+          .optional()
+          .catch(undefined)
+          .parse(url.searchParams.get("lang") ?? undefined)
+        return playerBadgeResponse(params.username, url, locale)
       }
     }
   }
