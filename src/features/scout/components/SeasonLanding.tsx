@@ -2,7 +2,7 @@ import { useState } from "react"
 
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { LogIn, Snowflake } from "lucide-react"
+import { Snowflake } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -11,6 +11,7 @@ import { getLangParam } from "@/helpers/localized-url"
 
 import { useViewer } from "@/hooks/use-viewer"
 
+import { GithubMark } from "@/components/shared/GithubMark"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -85,7 +86,7 @@ export function SeasonLanding() {
                   params={{ lang }}
                   className={buttonVariants({ size: "lg" })}
                 >
-                  <LogIn aria-hidden />
+                  <GithubMark />
                   {m.season_landing_cta_login()}
                 </Link>
                 <span className="text-sm text-muted-foreground">
