@@ -1220,3 +1220,26 @@
     transform: translate3d(var(--dx), 80vh, 0) rotate(var(--spin));
   }
 }
+
+/* 404 card: tilted a little and drifting slowly, like a card left on the table. */
+.lost-card {
+  rotate: -4deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lost-card {
+    animation: lost-card-drift 6s ease-in-out infinite;
+  }
+}
+
+@keyframes lost-card-drift {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: -4deg;
+  }
+  50% {
+    translate: 0 -10px;
+    rotate: -2deg;
+  }
+}

@@ -3,8 +3,8 @@
   "site_description": "Turn any GitHub profile into a collectible card and see where it ranks.",
   "language": "Language",
   "go_home": "Go home",
-  "not_found_title": "Page not found",
-  "not_found_description": "The page you're looking for doesn't exist or has been moved.",
+  "not_found_title": "This page didn't make the squad",
+  "not_found_description": "The page you're looking for doesn't exist or has moved. Let's get you back on the pitch.",
   "error_title": "Something went wrong",
   "error_description": "An unexpected error occurred while rendering this page. You can try again, or head back to the homepage.",
   "error_retry": "Try again",
@@ -303,8 +303,8 @@
   "year_prs": "PRs",
   "year_reviews": "Reviews",
   "year_issues": "Issues",
-  "player_not_found_title": "@{username} isn't on the list yet",
-  "player_not_found_description": "This developer doesn't have a card yet. Get one now:",
+  "player_not_found_title": "@{username} hasn't been scouted yet",
+  "player_not_found_description": "Nobody has pulled this card yet, or the username has a typo. If it's right, let's get it now:",
   "challenge_friend": "Challenge a friend",
   "challenge_share_text": "I'm challenging you to a duel with my GitHub card! Make yours and let's see who wins:",
   "challenge_copied": "Challenge link copied",
@@ -677,5 +677,9 @@
   "readme_how_html": "You can also copy the HTML and paste it into your GitHub profile README yourself. Cards are HTML so the image keeps its size.",
   "readme_prompt_card": "Add my Gitscout card badge (size: {size}) to my GitHub profile README by following the instructions at {url}. My GitHub username: {username}.",
   "readme_lang_label": "Badge language",
-  "readme_prompt_lang": "Use the badge language {lang} (the lang={lang} parameter)."
+  "readme_prompt_lang": "Use the badge language {lang} (the lang={lang} parameter).",
+  "lost_card_chip": "Lost",
+  "lost_card_player_subtitle": "Yet to be scouted",
+  "lost_card_page_name": "Missing page",
+  "lost_card_page_subtitle": "Nobody here"
 }
