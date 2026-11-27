@@ -35,5 +35,7 @@ declare module "@tanstack/react-router" {
   interface HistoryState {
     /** Kapışma seçiminden geçişle gelindi: kartlar zaten yerine kayarak geldi, giriş animasyonu oynamaz. */
     duelTransition?: boolean
+    /** The card was just created: the profile plays its reveal once. */
+    cardReveal?: boolean
   }
 }

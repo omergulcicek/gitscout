@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft, ArrowUpRight } from "lucide-react"
+import { cn } from "cn"
 
 import { getLangParam } from "@/helpers/localized-url"
 
@@ -30,9 +31,18 @@ import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { isProgrammersDay } from "@/features/scout/helpers/programmers-day"
 import { isHalloween, isNewYear, isRepublicDay } from "@/features/scout/helpers/special-days"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
+import { useCardReveal } from "@/features/scout/hooks/use-card-reveal"
+import { useCountUp } from "@/features/scout/hooks/use-count-up"
 import { usePlayer } from "@/features/scout/hooks/use-player"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
+
+/** Rarities that get confetti when their card is first revealed. */
+const CELEBRATED_RARITIES = new Set(["gold", "icon"])
+/** The score starts counting once the card has turned past halfway… */
+const REVEAL_COUNT_DELAY_MS = 350
+/** …and reaches its value in about this long, whatever the number. */
+const REVEAL_COUNT_MS = 900
 
 /** Anchor for the share menu's "ready-made texts" item. */
 const SHARE_TEXTS_ID = "share-texts"
@@ -66,6 +76,12 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
   const cardPlayer = birthday
     ? { ...player, ovr: BIRTHDAY_OVR, ovrExact: BIRTHDAY_OVR, rarity: "icon" as const }
     : player
+  // Right after creation the card flips in, its score counts up and gold or better gets confetti.
+  const revealing = useCardReveal()
+  const revealOvr = useCountUp(revealing ? cardPlayer.ovr : 0, {
+    delay: REVEAL_COUNT_DELAY_MS,
+    step: Math.max(8, Math.round(REVEAL_COUNT_MS / Math.max(1, cardPlayer.ovr)))
+  })
   const { cardRef, download, isDownloading, copy, isCopying } = useCardDownload(
     shownOccasion ? `gitscout-${username}-${shownOccasion}` : `gitscout-${username}`
   )
@@ -91,14 +107,28 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
 
       <div className="grid gap-6 md:grid-cols-[20rem_1fr] md:items-start">
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
-          {birthday ? <BirthdayConfetti /> : null}
+          {birthday || (revealing && CELEBRATED_RARITIES.has(cardPlayer.rarity)) ? (
+            <BirthdayConfetti />
+          ) : null}
           <div
             data-rarity={cardPlayer.rarity}
             className="relative flex w-full max-w-80 justify-center"
           >
-            <div aria-hidden className="scout-card-glow pointer-events-none absolute -inset-8" />
+            <div
+              aria-hidden
+              className={cn(
+                "scout-card-glow pointer-events-none absolute -inset-8",
+                revealing && "card-reveal-glow"
+              )}
+            />
             <div className="card-lift relative">
-              <PlayerCard player={cardPlayer} ref={cardRef} occasion={shownOccasion} />
+              <div className={revealing ? "card-reveal" : undefined}>
+                <PlayerCard
+                  player={revealing ? { ...cardPlayer, ovr: revealOvr } : cardPlayer}
+                  ref={cardRef}
+                  occasion={shownOccasion}
+                />
+              </div>
             </div>
           </div>
           <PlayerRank ranking={player.ranking} position={player.position} />

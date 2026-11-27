@@ -1132,3 +1132,45 @@
   animation: none !important;
   transition: none !important;
 }
+
+/* Card reveal: plays once on the profile right after a card is created. */
+@media (prefers-reduced-motion: no-preference) {
+  .card-reveal {
+    backface-visibility: hidden;
+    animation: card-reveal 900ms var(--ease-out) both;
+  }
+
+  .card-reveal-glow {
+    animation: card-reveal-glow 1600ms var(--ease-out) both;
+  }
+}
+
+@keyframes card-reveal {
+  0% {
+    transform: perspective(1200px) rotateY(-180deg) scale(0.9);
+    filter: brightness(1.8);
+  }
+  70% {
+    transform: perspective(1200px) rotateY(10deg) scale(1.03);
+    filter: brightness(1.25);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes card-reveal-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
