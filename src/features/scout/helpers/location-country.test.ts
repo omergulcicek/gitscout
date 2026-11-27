@@ -23,7 +23,9 @@ describe("konumdan ülke", () => {
     ["Zurich, Switzerland", "CH"],
     ["Albuquerque, New Mexico", "US"],
     ["Phoenix, AZ", undefined],
-    ["Aotearoa", "NZ"]
+    ["Aotearoa", "NZ"],
+    ["Tripoli, Libya", "LY"],
+    ["Ashgabat", "TM"]
   ])("%s → %s", (location, country) => {
     expect(countryFromLocation(location)).toBe(country)
   })

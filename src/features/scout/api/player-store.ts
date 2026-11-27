@@ -7,7 +7,7 @@ import type { Team } from "@/constants/team.constants"
 
 import { getDb, getRefreshDb } from "@/lib/db"
 
-import { COUNTRIES } from "@/features/scout/constants/player-country.constants"
+import { COUNTRIES, HIDDEN_COUNTRY } from "@/features/scout/constants/player-country.constants"
 import { REFRESH, SCORE_VERSION } from "@/features/scout/constants/scoring.constants"
 import { isBirthdayToday } from "@/features/scout/helpers/birthday"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
@@ -108,8 +108,10 @@ type AccountColumns = z.infer<typeof accountColumnsSchema>
 /** Onay ve veritabanındaki ülke oyuncuya eklenir; yalnızca doluysa alan yazılır ki liste yükü büyümesin. */
 function withAccount<T extends ListPlayer | ScoredPlayer>(player: T, account: AccountColumns): T {
   const claimedCountry = COUNTRIES.find((country) => country === account.claimed_country)
+  const hidesLocationCountry = account.claimed_country === HIDDEN_COUNTRY
   return {
     ...player,
+    ...(hidesLocationCountry ? { country: undefined } : {}),
     ...(account.verified ? { verified: true } : {}),
     ...(claimedCountry ? { claimedCountry } : {})
   }
