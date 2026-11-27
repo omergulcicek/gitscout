@@ -31,7 +31,7 @@ import {
 import { computeBenchmarks } from "@/features/scout/helpers/benchmarks"
 import { ageOn } from "@/features/scout/helpers/birthday"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
-import { ipBucket } from "@/features/scout/helpers/ip-bucket"
+import { ipBucket, UNKNOWN_IP_BUCKET } from "@/features/scout/helpers/ip-bucket"
 import { computeRanking } from "@/features/scout/helpers/score-player"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
 import { profileDetailsSchema } from "@/features/scout/schemas/profile.schema"
@@ -241,7 +241,12 @@ async function createPlayer(
     }
     // Hak yalnızca GitHub'a gerçekten gidilecekken harcanır: kayıtlı kart, süren sorgu ve az önce
     // bulunamayan ad buraya hiç ulaşmaz.
-    if (!(await takeLookup(lookupBucket, NEW_LOOKUPS_PER_IP))) throw new Error("limit:ip-lookups")
+    // IP okunamazsa herkes aynı kovaya düşer ve site toptan kilitlenirdi; o durumda yalnızca ortak sınır geçerli.
+    if (lookupBucket === UNKNOWN_IP_BUCKET) {
+      console.warn("[limit] istek IP'si okunamadı; kişi başı sınır atlandı")
+    } else if (!(await takeLookup(lookupBucket, NEW_LOOKUPS_PER_IP))) {
+      throw new Error("limit:ip-lookups")
+    }
 
     const facts = await fetchFacts(username, onStage)
     const player = await insertPlayer({

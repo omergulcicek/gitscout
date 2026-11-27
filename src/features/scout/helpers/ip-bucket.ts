@@ -1,3 +1,6 @@
+/** IP okunamadığında ya da tanınmadığında dönen değer. */
+export const UNKNOWN_IP_BUCKET = "unknown"
+
 /** IPv6 adresinin sayılan ön eki: /64, yani ilk dört grup. */
 const IPV6_PREFIX_GROUPS = 4
 
@@ -22,15 +25,15 @@ function expandIpv6(ip: string): string[] | null {
 /**
  * Kart ekleme sınırının saydığı kimlik. IPv4 adresi olduğu gibi kalır. IPv6'da bir bağlantıya genellikle
  * koca bir /64 bloğu verilir ve adres bu blok içinde serbestçe değiştirilebilir; bu yüzden blok sayılır.
- * IPv6 içine gömülü IPv4 (`::ffff:1.2.3.4`) IPv4 sayılır. Boş ya da tanınmayan değer ortak bir kovaya düşer.
+ * IPv6 içine gömülü IPv4 (`::ffff:1.2.3.4`) IPv4 sayılır. Boş ya da tanınmayan değer `UNKNOWN_IP_BUCKET` olur.
  */
 export function ipBucket(ip: string | undefined): string {
   const value = (ip ?? "").trim().toLowerCase()
-  if (!value) return "unknown"
+  if (!value) return UNKNOWN_IP_BUCKET
   const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(value)
   if (mapped?.[1]) return mapped[1]
   if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(value)) return value
   const groups = expandIpv6(value.split("%")[0] ?? "")
-  if (!groups) return "unknown"
+  if (!groups) return UNKNOWN_IP_BUCKET
   return `${groups.slice(0, IPV6_PREFIX_GROUPS).join(":")}::/64`
 }
