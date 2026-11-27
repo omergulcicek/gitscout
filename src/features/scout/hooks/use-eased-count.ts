@@ -11,15 +11,15 @@ const FIRST_STEP_MS = 220
 const SPEED_UP = 0.9
 /** The fastest a step gets, in the middle of the count. */
 const CRUISE_STEP_MS = 24
-/** The very last step; the count slows down towards it so each tier change can be seen. */
-const LAST_STEP_MS = 170
+/** The very last step; the count eases into it so each tier change can be seen without crawling. */
+const LAST_STEP_MS = 100
 /** Each step before the last is this much shorter, counting back from the score. */
-const SLOW_DOWN = 0.95
+const SLOW_DOWN = 0.965
 
 /**
  * Time before step `index` (0-based) of a count to `target`: slow at first, quick through the middle and
- * slowing again near the score. For 90 that is about 1.7s to 15, silver at 3.2s, gold at 3.8s and the
- * score at 5.6s.
+ * easing off near the score. For 90 that is about 1.7s to 15, silver at 3.1s, gold at 3.6s and the
+ * score at 4.8s.
  */
 export function stepDuration(index: number, target: number): number {
   const stepsLeft = Math.max(0, target - index - 1)

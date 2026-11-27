@@ -23,11 +23,17 @@ describe("stepDuration", () => {
     }
   })
 
+  it("never crawls once it has picked up speed", () => {
+    for (let index = 20; index < 90; index++) {
+      expect(stepDuration(index, 90)).toBeLessThanOrEqual(120)
+    }
+  })
+
   it("keeps each tier on screen long enough to see", () => {
     const silver = timeUntil(75, 90) - timeUntil(65, 90)
     const gold = timeUntil(90, 90) - timeUntil(75, 90)
-    expect(silver).toBeGreaterThan(500)
-    expect(gold).toBeGreaterThan(1200)
-    expect(timeUntil(90, 90)).toBeLessThan(6500)
+    expect(silver).toBeGreaterThan(450)
+    expect(gold).toBeGreaterThan(1000)
+    expect(timeUntil(90, 90)).toBeLessThan(5500)
   })
 })
