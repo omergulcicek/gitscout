@@ -52,11 +52,7 @@ export function SeasonTimeline({ now }: SeasonTimelineProps) {
           <li
             key={step.title()}
             aria-current={index === current ? "step" : undefined}
-            className={cn(
-              "surface season-ice flex flex-col gap-1.5 p-4",
-              index < current && "opacity-60",
-              index === current && "ring-2 ring-chart-home"
-            )}
+            className={cn("surface flex flex-col gap-1.5 p-4", index < current && "opacity-60")}
           >
             <span className="flex items-center justify-between gap-2">
               <span className="font-semibold">{step.title()}</span>

@@ -136,7 +136,7 @@ function SeasonLookup() {
   return (
     <section
       aria-labelledby="season-lookup-heading"
-      className="surface season-ice flex flex-col gap-4 p-5 md:flex-row md:items-end md:justify-between"
+      className="surface flex flex-col gap-4 p-5 md:flex-row md:items-end md:justify-between"
     >
       <div className="flex flex-col gap-1">
         <h2 id="season-lookup-heading" className="font-semibold">

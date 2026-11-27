@@ -755,9 +755,9 @@
   "season_timeline_title": "Season calendar",
   "season_timeline_now": "Now",
   "season_step_preview": "Preview period",
-  "season_step_preview_text": "Until midnight on {date} you can preview your season card and report. Keep contributing and your numbers keep updating; the year's last day still counts towards the season.",
+  "season_step_preview_text": "Until midnight on {date} you can preview your season card while your numbers keep updating.",
   "season_step_frozen": "Your 2026 season is saved",
-  "season_step_frozen_text": "From {date} your 2026 card and season data are kept exactly as they are and won't change again.",
+  "season_step_frozen_text": "From {date} your 2026 card and season data are saved and won't change after that.",
   "snow_stop": "Stop the snow",
   "snow_start": "Let it snow",
   "season_landing_cta_own": "Open your season report",
@@ -768,5 +768,5 @@
   "season_lookup_title": "Another developer's season",
   "season_lookup_text": "Take a look at a friend's or a rival's season.",
   "season_step_archive": "Your past seasons",
-  "season_step_archive_text": "Saved season reports live on your profile, in the “Season reports” line under your card. Open any year from there whenever you like."
+  "season_step_archive_text": "Open your saved seasons from your profile, in the “Season reports” line under your card."
 }

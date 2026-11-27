@@ -187,10 +187,7 @@ function SeasonStats({ season }: { season: Season }) {
   ]
 
   return (
-    <section
-      aria-labelledby="season-stats-heading"
-      className="surface season-ice flex flex-col gap-4 p-4"
-    >
+    <section aria-labelledby="season-stats-heading" className="surface flex flex-col gap-4 p-4">
       <h2 id="season-stats-heading" className="text-sm font-medium">
         {m.season_stats_title()}
       </h2>
@@ -214,10 +211,7 @@ function FormChart({ season }: { season: Season }) {
   const peak = season.peakRound
 
   return (
-    <section
-      aria-labelledby="season-form-heading"
-      className="surface season-ice flex flex-col gap-4 p-4"
-    >
+    <section aria-labelledby="season-form-heading" className="surface flex flex-col gap-4 p-4">
       <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
         <h2 id="season-form-heading" className="text-sm font-medium">
           {m.season_form_title()}
@@ -307,10 +301,7 @@ function ScoutReport({
   ].filter((line) => line !== null)
 
   return (
-    <section
-      aria-labelledby="season-report-heading"
-      className="surface season-ice flex flex-col gap-3 p-4"
-    >
+    <section aria-labelledby="season-report-heading" className="surface flex flex-col gap-3 p-4">
       <h2 id="season-report-heading" className="text-sm font-medium">
         {m.season_report_title()}
       </h2>
@@ -340,10 +331,7 @@ function CareerChart({ season, career }: { season: Season; career: SeasonReport[
   const last = career.at(-1)
 
   return (
-    <section
-      aria-labelledby="season-career-heading"
-      className="surface season-ice flex flex-col gap-3 p-4"
-    >
+    <section aria-labelledby="season-career-heading" className="surface flex flex-col gap-3 p-4">
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex flex-col gap-0.5">
           <h2 id="season-career-heading" className="text-sm font-medium">
@@ -431,10 +419,7 @@ function Standing({ standing }: { standing: SeasonStanding }) {
   if (top === null) return null
 
   return (
-    <section
-      aria-labelledby="season-standing-heading"
-      className="surface season-ice flex flex-col gap-1 p-4"
-    >
+    <section aria-labelledby="season-standing-heading" className="surface flex flex-col gap-1 p-4">
       <h2 id="season-standing-heading" className="text-sm font-medium">
         {m.season_standing_title()}
       </h2>
@@ -456,7 +441,7 @@ function Rival({ report }: { report: SeasonReport }) {
   return (
     <section
       aria-labelledby="season-rival-heading"
-      className="surface season-ice flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+      className="surface flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-center gap-3">
         <img

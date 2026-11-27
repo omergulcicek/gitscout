@@ -734,9 +734,9 @@
   "season_timeline_title": "Sezon takvimi",
   "season_timeline_now": "Şu an",
   "season_step_preview": "Önizleme dönemi",
-  "season_step_preview_text": "{date} gece yarısına kadar sezon kartını ve raporunu önizleyebilirsin. Bu süre boyunca katkı verdikçe sayıların güncellenmeye devam eder; yılın son gününün katkıları da sezona sayılır.",
+  "season_step_preview_text": "{date} gece yarısına kadar sezon kartını önizleyebilirsin, sayıların güncellenmeye devam eder.",
   "season_step_frozen": "2026 sezonun kaydedilir",
-  "season_step_frozen_text": "{date} itibarıyla 2026 kartın ve sezon verilerin olduğu gibi saklanır ve bir daha değişmez.",
+  "season_step_frozen_text": "{date} itibarıyla 2026 kartın ve sezon verilerin kaydedilir, bundan sonra hiç değişmez.",
   "snow_stop": "Karı durdur",
   "snow_start": "Kar yağsın",
   "season_landing_cta_own": "Sezon raporunu aç",
@@ -747,5 +747,5 @@
   "season_lookup_title": "Başka bir geliştiricinin sezonu",
   "season_lookup_text": "Bir arkadaşının ya da rakibinin sezonuna göz at.",
   "season_step_archive": "Geçmiş sezonların",
-  "season_step_archive_text": "Kaydedilen sezon raporların profilinde, kartının altındaki “Sezon raporları” satırında durur. Dilediğin yılı oradan açıp tekrar bakabilirsin."
+  "season_step_archive_text": "Kaydedilen sezonlarını profilinde, kartının altındaki “Sezon raporları” satırından açabilirsin."
 }
