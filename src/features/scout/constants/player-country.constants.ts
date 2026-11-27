@@ -65,6 +65,7 @@ export const COUNTRIES = [
   "LT",
   "LU",
   "LV",
+  "LY",
   "MA",
   "MD",
   "ME",
@@ -100,6 +101,7 @@ export const COUNTRIES = [
   "SN",
   "SY",
   "TH",
+  "TM",
   "TN",
   "TW",
   "TZ",
@@ -118,5 +120,11 @@ export type CountryCode = (typeof COUNTRIES)[number]
 
 /** Ülkesi listede olmayan oyuncular ülke filtresinde bu değerle seçilir. */
 export const UNKNOWN_COUNTRY = "unknown"
+
+/**
+ * Written to `players.country` by hand to hide a misleading location match (a foreigner living in Istanbul).
+ * ISO 3166 leaves "ZZ" unassigned for unknown regions, so it passes the column's two-letter check.
+ */
+export const HIDDEN_COUNTRY = "ZZ"
 
 export type CountryFilter = CountryCode | typeof UNKNOWN_COUNTRY
