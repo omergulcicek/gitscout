@@ -17,7 +17,13 @@ describe("konumdan ülke", () => {
     ["München", "DE"],
     ["London, UK", "GB"],
     ["Remote - Netherlands", "NL"],
-    ["🇯🇵 Tokyo", "JP"]
+    ["🇯🇵 Tokyo", "JP"],
+    ["Tehran, Iran", "IR"],
+    ["Azərbaycan, Baku", "AZ"],
+    ["Zurich, Switzerland", "CH"],
+    ["Albuquerque, New Mexico", "US"],
+    ["Phoenix, AZ", undefined],
+    ["Aotearoa", "NZ"]
   ])("%s → %s", (location, country) => {
     expect(countryFromLocation(location)).toBe(country)
   })
