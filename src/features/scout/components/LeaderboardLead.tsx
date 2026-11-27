@@ -3,7 +3,7 @@ import { Fragment } from "react"
 import { REFRESH } from "@/features/scout/constants/scoring.constants"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { RARITIES } from "@/features/scout/schemas/leaderboard-search.schema"
-import type { ListPlayer } from "@/features/scout/types/player.types"
+import type { LeaderboardFacets } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
@@ -11,11 +11,10 @@ import { getLocale } from "@/paraglide/runtime.js"
  * Liderlik tablosunun üstündeki tek cümlelik özet: toplam geliştirici ve kart türü dağılımı.
  * Her sayının önünde o kart türünün renginde küçük bir kutu durur; "ve" gibi bağlaçlar dile göre gelir.
  */
-export function LeaderboardLead({ players }: { players: ListPlayer[] }) {
-  const items = RARITIES.map((rarity) => ({
-    rarity,
-    count: players.filter((player) => player.rarity === rarity).length
-  }))
+type LeaderboardLeadProps = Pick<LeaderboardFacets, "total" | "rarityCounts">
+
+export function LeaderboardLead({ total, rarityCounts }: LeaderboardLeadProps) {
+  const items = RARITIES.map((rarity) => ({ rarity, count: rarityCounts[rarity] }))
   const parts = new Intl.ListFormat(getLocale(), { type: "conjunction" }).formatToParts(
     items.map((item) => item.rarity)
   )
@@ -23,7 +22,7 @@ export function LeaderboardLead({ players }: { players: ListPlayer[] }) {
 
   return (
     <p className="max-w-prose font-mono text-sm text-pretty text-muted-foreground">
-      {m.leaderboard_lead_intro({ total: players.length })}
+      {m.leaderboard_lead_intro({ total })}
       <br />
       {parts.map((part) => {
         if (part.type === "literal") return <Fragment key={`lit-${index}`}>{part.value}</Fragment>

@@ -337,6 +337,47 @@ export type ListPlayer = Omit<
   "positionBreakdown" | "topRepos" | "archetype" | "stats"
 > & { stats: Record<StatKey, ListStat> }
 
+/** A list player with their rank inside the filtered pool (by OVR); search and column sorting don't change it. */
+export type RankedPlayer = ListPlayer & { rank: number }
+
+/** One page of the leaderboard, already filtered, searched, sorted and sliced on the server. */
+export type LeaderboardSlice = {
+  players: RankedPlayer[]
+  /** Players matching the filters and the search, before slicing. */
+  matched: number
+  /** Everyone on the leaderboard, ignoring filters. */
+  total: number
+}
+
+/** A card in the home page's "recently added" strip. */
+export type RecentEntry = { player: ListPlayer; addedAt: string }
+
+/** Everything the home page renders, resolved on the server so the full list never reaches the page. */
+export type HomeData = {
+  /** Top players overall and in Türkiye, each ranked inside its own pool. */
+  top: { world: RankedPlayer[]; tr: RankedPlayer[] }
+  /** Pool sizes for the "full table (N)" link. */
+  totals: { world: number; tr: number }
+  examples: ListPlayer[]
+  /** The hour's featured card first, then the next ones "Another card" cycles through. */
+  featured: ListPlayer[]
+  recent: RecentEntry[]
+  lastDayCount: number
+  /** When the data was built; relative times are written against it so server and browser agree. */
+  generatedAt: string
+}
+
+/** Filter options and summary counts for the leaderboard, computed from the whole list. */
+export type LeaderboardFacets = {
+  total: number
+  rarityCounts: Record<Rarity, number>
+  positions: Position[]
+  hasStars: boolean
+  hasVerified: boolean
+  countries: { country: CountryCode; count: number }[]
+  unknownCountry: number
+}
+
 export type BenchmarkKey = "commits" | "activeDays" | "longestStreak" | "stars" | "followers"
 
 /** Bir ölçüde oyuncunun diğer geliştiricilere göre yeri. */

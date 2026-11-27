@@ -7,24 +7,21 @@ import { getLangParam } from "@/helpers/localized-url"
 
 import { Button } from "@/components/ui/button"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
-import { featuredOrder } from "@/features/scout/helpers/featured-players"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
 type FeaturedCardProps = {
+  /** The hour's card first, in the server's featured order. */
   players: ListPlayer[]
-  recentLogins: string[]
-  seed: number
 }
 
 /**
  * Ana sayfa vitrini: saatin kartı, Gold ve üstü kartlardan seçilir. "Başka kart" sıradaki
  * kartı yalnızca tarayıcıda açar; sunucuda çizilen ilk kart her zaman saatin kartıdır.
  */
-export function FeaturedCard({ players, recentLogins, seed }: FeaturedCardProps) {
+export function FeaturedCard({ players }: FeaturedCardProps) {
   const [offset, setOffset] = useState(0)
-  const order = featuredOrder(players, new Set(recentLogins), seed)
-  const player = order[offset % Math.max(order.length, 1)]
+  const player = players[offset % Math.max(players.length, 1)]
   if (!player) return null
 
   return (
@@ -44,7 +41,7 @@ export function FeaturedCard({ players, recentLogins, seed }: FeaturedCardProps)
         <p className="text-xs text-muted-foreground" aria-live="polite">
           {offset === 0 ? m.featured_label() : m.featured_label_next({ name: player.name })}
         </p>
-        {order.length > 1 ? (
+        {players.length > 1 ? (
           <Button variant="ghost" size="sm" onClick={() => setOffset((value) => value + 1)}>
             <Shuffle aria-hidden />
             {m.featured_next()}

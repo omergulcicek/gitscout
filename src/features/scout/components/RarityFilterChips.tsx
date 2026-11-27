@@ -4,7 +4,7 @@ import { rarityLabel } from "@/features/scout/helpers/player-text"
 import { rarityRange } from "@/features/scout/helpers/rarity-range"
 import { useLeaderboardSearch } from "@/features/scout/hooks/use-leaderboard-search"
 import { RARITIES } from "@/features/scout/schemas/leaderboard-search.schema"
-import type { ListPlayer, Rarity } from "@/features/scout/types/player.types"
+import type { LeaderboardFacets, Rarity } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
 const CHIP =
@@ -17,9 +17,9 @@ const ACTIVE = "bg-foreground text-background"
  * Kart türü en çok kullanılan filtre; menüde değil, tek tıkla seçilen çipler olarak durur.
  * Tek seçim: seçili çipe yeniden basmak filtreyi kaldırır. Yalnızca tabloda bulunan türler çıkar.
  */
-export function RarityFilterChips({ players }: { players: ListPlayer[] }) {
+export function RarityFilterChips({ counts }: { counts: LeaderboardFacets["rarityCounts"] }) {
   const { filters, setFilters } = useLeaderboardSearch()
-  const rarities = RARITIES.filter((rarity) => players.some((player) => player.rarity === rarity))
+  const rarities = RARITIES.filter((rarity) => counts[rarity] > 0)
   const selected = filters.rarities[0]
 
   const select = (rarity: Rarity | undefined) =>

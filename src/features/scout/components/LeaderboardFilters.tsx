@@ -14,14 +14,12 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { useLeaderboardSearch } from "@/features/scout/hooks/use-leaderboard-search"
-import { POSITIONS } from "@/features/scout/schemas/leaderboard-search.schema"
-import type { ListPlayer } from "@/features/scout/types/player.types"
+import type { LeaderboardFacets } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
 type LeaderboardFiltersProps = {
-  players: ListPlayer[]
+  facets: Pick<LeaderboardFacets, "positions" | "hasStars" | "hasVerified">
 }
 
 /** Radyo grubunda "hepsi" seçeneğinin değeri; filtreyi kaldırır. */
@@ -34,13 +32,9 @@ const KEEP_ICON_COLOR = "focus:**:text-inherit"
  * Mevki alt menüsü ile tek tıkla açılıp kapanan GitHub Star ve onaylı hesap filtreleri (kart türü ayrı
  * çiplerde); yalnızca tabloda gerçekten bulunan seçenekler listelenir.
  */
-export function LeaderboardFilters({ players }: LeaderboardFiltersProps) {
+export function LeaderboardFilters({ facets }: LeaderboardFiltersProps) {
   const { filters, setFilters } = useLeaderboardSearch()
-  const positions = POSITIONS.filter((position) =>
-    players.some((player) => player.position === position)
-  )
-  const hasStars = players.some((player) => isGithubStar(player.login))
-  const hasVerified = players.some((player) => player.verified === true)
+  const { positions, hasStars, hasVerified } = facets
   const activeCount = filters.positions.length + (filters.star ? 1 : 0) + (filters.verified ? 1 : 0)
 
   return (

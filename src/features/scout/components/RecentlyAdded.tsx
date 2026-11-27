@@ -8,31 +8,21 @@ import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-fl
 import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { countryName, playerCountry } from "@/features/scout/helpers/player-country"
 import { formatRelative } from "@/features/scout/helpers/relative-time"
-import type { ListPlayer } from "@/features/scout/types/player.types"
+import type { RecentEntry } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
-/** Geniş ekranda tek satıra sığan kart sayısı; ızgaranın `lg:grid-cols-8` sütunlarıyla aynı. */
-const RECENT_LIMIT = 8
-
 type RecentlyAddedProps = {
-  players: ListPlayer[]
-  latest: { login: string; addedAt: string }[]
+  /** Newest first; the server sends as many as the wide grid fits in one row. */
+  entries: RecentEntry[]
   lastDayCount: number
   /** Göreli zamanların hesaplandığı an; sunucu ile tarayıcı aynı metni üretsin diye veriyle gelir. */
   generatedAt: string
 }
 
 /** Ana sayfada son eklenen kartlar ve sitenin ne kadar güncel olduğu. */
-export function RecentlyAdded({ players, latest, lastDayCount, generatedAt }: RecentlyAddedProps) {
+export function RecentlyAdded({ entries, lastDayCount, generatedAt }: RecentlyAddedProps) {
   const locale = getLocale()
-  const byLogin = new Map(players.map((player) => [player.login.toLowerCase(), player]))
-  const entries = latest
-    .flatMap((entry) => {
-      const player = byLogin.get(entry.login.toLowerCase())
-      return player ? [{ player, addedAt: entry.addedAt }] : []
-    })
-    .slice(0, RECENT_LIMIT)
   if (entries.length === 0) return null
 
   const timeAgo = (addedAt: string) => formatRelative(addedAt, generatedAt, locale) ?? m.just_now()

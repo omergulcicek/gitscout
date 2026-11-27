@@ -59,12 +59,17 @@ export function countPlayerCountries(players: readonly CountryHolder[]): {
     if (country) counts.set(country, (counts.get(country) ?? 0) + 1)
     else unknown++
   }
-  const collator = new Intl.Collator(getLocale())
-  const countries = [...counts]
-    .map(([country, count]) => ({ country, count }))
-    .sort(
-      (a, b) =>
-        b.count - a.count || collator.compare(countryName(a.country), countryName(b.country))
-    )
+  const countries = sortCountryCounts([...counts].map(([country, count]) => ({ country, count })))
   return { countries, unknown }
+}
+
+/**
+ * Most players first, then by country name in the page language. Counts from the server are re-sorted in the
+ * browser because the server doesn't know the reader's language.
+ */
+export function sortCountryCounts(countries: readonly CountryCount[]): CountryCount[] {
+  const collator = new Intl.Collator(getLocale())
+  return [...countries].sort(
+    (a, b) => b.count - a.count || collator.compare(countryName(a.country), countryName(b.country))
+  )
 }

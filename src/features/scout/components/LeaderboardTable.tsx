@@ -31,7 +31,7 @@ import {
   leaderboardSearchDefaults
 } from "@/features/scout/schemas/leaderboard-search.schema"
 import type { LeaderboardSearch } from "@/features/scout/schemas/leaderboard-search.schema"
-import type { ListPlayer } from "@/features/scout/types/player.types"
+import type { ListPlayer, RankedPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
 const features = tableFeatures({
@@ -39,9 +39,6 @@ const features = tableFeatures({
   sortedRowModel: createSortedRowModel(),
   sortFns: { text: sortFn_text }
 })
-
-/** Sıra, seçili filtrelerin içindeki genel puan sırasıdır; isim aramasından ve sütun sıralamasından etkilenmez. */
-type RankedPlayer = ListPlayer & { rank: number }
 
 const helper = createColumnHelper<typeof features, RankedPlayer>()
 
@@ -214,27 +211,22 @@ function PlayerCell({ player }: { player: ListPlayer }) {
 }
 
 type LeaderboardTableProps = {
-  players: ListPlayer[]
-  /**
-   * Sıra numarasının sayıldığı liste: seçili filtrelerden geçen herkes, isim aramasından önce.
-   * Sunucudan genel puana göre sıralı gelir.
-   */
-  rankPool: ListPlayer[]
-  /** Sıralamadan sonra en fazla bu kadar satır çizilir; verilmezse hepsi. */
-  limit?: number
+  /** Rows with their rank already set; the rank stays the OVR rank whatever column the table is sorted by. */
+  players: RankedPlayer[]
+  /** Rows arrive sorted by the server; the table only shows the sort state and writes clicks to the URL. */
+  manualSorting?: boolean
 }
 
-export function LeaderboardTable({ players, rankPool, limit }: LeaderboardTableProps) {
-  const rankOf = new Map(rankPool.map((player, index) => [player.login, index + 1]))
-  const data = players.map((player) => ({ ...player, rank: rankOf.get(player.login) ?? 0 }))
+export function LeaderboardTable({ players, manualSorting = false }: LeaderboardTableProps) {
   const { search, update } = useLeaderboardSearch()
   const sorting: SortingState = [{ id: search.sort, desc: search.dir === "desc" }]
 
   const table = useTable({
     features,
     columns,
-    data,
+    data: players,
     state: { sorting },
+    manualSorting,
     // Sıralama hiç kalkmasın: üçüncü tıklamada boş tablo yerine yön değişir.
     enableSortingRemoval: false,
     onSortingChange: (updater) => {
@@ -304,38 +296,35 @@ export function LeaderboardTable({ players, rankPool, limit }: LeaderboardTableP
           ))}
         </thead>
         <tbody>
-          {table
-            .getRowModel()
-            .rows.slice(0, limit)
-            .map((row) => (
-              <tr
-                key={row.original.login}
-                className="border-b transition-colors last:border-0 hover:bg-muted/40"
-              >
-                {row.getAllCells().map((cell) => {
-                  const { align } = readMeta(cell.column.columnDef.meta)
-                  const isRank = cell.column.id === "rank"
-                  return (
-                    <td
-                      key={cell.id}
-                      className={cn(
-                        isRank
-                          ? "w-12 px-3 py-3 font-mono text-muted-foreground tabular-nums"
-                          : align === "center"
-                            ? "px-1 py-3 text-center font-mono tabular-nums"
-                            : "px-3 py-3",
-                        // Uzun adlar kesilir; tablo yana kaydığında isim sütunu tüm alanı yutmaz. Linkin tıklama
-                        // alanı hücreye bağlı: eski WebKit `tr` üzerindeki `relative`i yok sayar, satıra bağlı alan
-                        // sayfaya taşıp ana sayfadaki input'u son satırın linkiyle kaplıyordu.
-                        cell.column.id === "name" && "relative max-w-64"
-                      )}
-                    >
-                      <table.FlexRender cell={cell} />
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
+          {table.getRowModel().rows.map((row) => (
+            <tr
+              key={row.original.login}
+              className="border-b transition-colors last:border-0 hover:bg-muted/40"
+            >
+              {row.getAllCells().map((cell) => {
+                const { align } = readMeta(cell.column.columnDef.meta)
+                const isRank = cell.column.id === "rank"
+                return (
+                  <td
+                    key={cell.id}
+                    className={cn(
+                      isRank
+                        ? "w-12 px-3 py-3 font-mono text-muted-foreground tabular-nums"
+                        : align === "center"
+                          ? "px-1 py-3 text-center font-mono tabular-nums"
+                          : "px-3 py-3",
+                      // Uzun adlar kesilir; tablo yana kaydığında isim sütunu tüm alanı yutmaz. Linkin tıklama
+                      // alanı hücreye bağlı: eski WebKit `tr` üzerindeki `relative`i yok sayar, satıra bağlı alan
+                      // sayfaya taşıp ana sayfadaki input'u son satırın linkiyle kaplıyordu.
+                      cell.column.id === "name" && "relative max-w-64"
+                    )}
+                  >
+                    <table.FlexRender cell={cell} />
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
