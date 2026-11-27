@@ -4,6 +4,8 @@ import { Link } from "@tanstack/react-router"
 import { Download, FileText, ImageIcon, Link2, Share2, Smartphone, Swords } from "lucide-react"
 import { toast } from "sonner"
 
+import type { CARD_SHARE_TARGETS } from "@/schemas/analytics.schema"
+
 import { trackEvent } from "@/lib/analytics"
 import { getLangParam, localizedUrl } from "@/helpers/localized-url"
 
@@ -53,7 +55,8 @@ export function CardActions({
   shareTextsId
 }: CardActionsProps) {
   const canShareNatively = useCanShareNatively()
-  const track = (target: string) => trackEvent({ name: "card_shared", login: player.login, target })
+  const track = (target: (typeof CARD_SHARE_TARGETS)[number]) =>
+    trackEvent({ name: "card_shared", login: player.login, target })
 
   const handleDownload = () => {
     onDownload()
@@ -68,7 +71,7 @@ export function CardActions({
   // Canonical card URL: no query string, in the page's language.
   const cardUrl = () => localizedUrl(`/u/${player.login}`, getLocale())
 
-  const openUrl = (target: string, url: string) => {
+  const openUrl = (target: "x" | "linkedin", url: string) => {
     track(target)
     window.open(url, "_blank", "noopener,noreferrer")
   }

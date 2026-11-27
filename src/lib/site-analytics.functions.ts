@@ -5,6 +5,7 @@ import { z } from "zod"
 import { analyticsEventSchema, pagePathSchema } from "@/schemas/analytics.schema"
 
 import { getDb } from "@/lib/db"
+import { ipBucket } from "@/helpers/ip-bucket"
 import { isBot } from "@/helpers/is-bot"
 
 /**
@@ -24,7 +25,8 @@ function countableVisitor(): Visitor | null {
   const userAgent = getRequestHeader("user-agent")
   if (!userAgent || isBot(userAgent)) return null
   // Vercel X-Forwarded-For başlığını kendisi yazar; istemcinin gönderdiği değer kullanılmaz.
-  const ip = getRequestIP({ xForwardedFor: true }) ?? ""
+  // IPv6 is counted per /64 block: one connection can rotate freely inside it.
+  const ip = ipBucket(getRequestIP({ xForwardedFor: true }))
   return { ip, userAgent: userAgent.slice(0, 512) }
 }
 

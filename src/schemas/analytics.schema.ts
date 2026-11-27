@@ -13,7 +13,30 @@ const PAGE_PATH = new RegExp(
 
 export const pagePathSchema = z.string().max(2048).regex(PAGE_PATH)
 
-const login = z.string().max(64)
+// Only real GitHub logins; the database also drops events whose login isn't a registered player.
+const login = z.string().regex(new RegExp(`^${LOGIN}$`))
+
+/** Error codes a failed card request reports; anything else is sent as `other`. */
+export const CARD_FAILURE_REASONS = [
+  "github:not-found",
+  "github:rate-limit",
+  "github:missing-token",
+  "github:request",
+  "limit:too-many-requests",
+  "limit:ip-lookups",
+  "other"
+] as const
+
+/** Where a card was shared from: the card menu or a copied ready-made text. */
+export const CARD_SHARE_TARGETS = [
+  "native",
+  "x",
+  "linkedin",
+  "link",
+  "image",
+  "copy_x",
+  "copy_linkedin"
+] as const
 
 /**
  * Sitenin özel olayları. Çerez ve kişisel veri yok; yalnızca zaten herkese açık GitHub kullanıcı adları,
@@ -21,9 +44,9 @@ const login = z.string().max(64)
  */
 export const analyticsEventSchema = z.discriminatedUnion("name", [
   z.object({ name: z.literal("card_requested"), login }),
-  z.object({ name: z.literal("card_request_failed"), reason: z.string().max(64) }),
+  z.object({ name: z.literal("card_request_failed"), reason: z.enum(CARD_FAILURE_REASONS) }),
   z.object({ name: z.literal("card_downloaded"), login }),
-  z.object({ name: z.literal("card_shared"), login, target: z.string().max(32) }),
+  z.object({ name: z.literal("card_shared"), login, target: z.enum(CARD_SHARE_TARGETS) }),
   z.object({
     name: z.literal("duel_shared"),
     left: login,
