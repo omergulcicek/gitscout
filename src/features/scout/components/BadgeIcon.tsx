@@ -1,5 +1,6 @@
 import {
   Award,
+  BadgeCheck,
   CalendarCheck,
   CircleCheck,
   Earth,
@@ -11,6 +12,7 @@ import {
   GitPullRequest,
   Languages,
   Megaphone,
+  Milestone,
   Moon,
   Ruler,
   Star,
@@ -40,7 +42,9 @@ const BADGE_ICONS = {
   "team-player": Users,
   documenter: FileText,
   veteran: Award,
-  regular: CalendarCheck
+  regular: CalendarCheck,
+  "first-verified": BadgeCheck,
+  "milestone-card": Milestone
 } as const satisfies Record<BadgeId, LucideIcon>
 
 type BadgeIconProps = LucideProps & {

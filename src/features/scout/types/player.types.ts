@@ -203,6 +203,8 @@ export type BadgeId =
   | "documenter"
   | "veteran"
   | "regular"
+  | "first-verified"
+  | "milestone-card"
 
 /** Rozet açıklamalarındaki sayılar; yüzdeler 0-100 arası tam sayı. */
 type BadgeValues = {
@@ -224,6 +226,8 @@ type BadgeValues = {
   documenter: { total: number; documented: number }
   veteran: { years: number }
   regular: { weeks: number }
+  "first-verified": { order: number; total: number }
+  "milestone-card": { order: number }
 }
 
 export type Badge = { [K in BadgeId]: { id: K; values: BadgeValues[K] } }[BadgeId]

@@ -747,6 +747,14 @@
   [data-badge="regular"] {
     --badge-h: 160;
   }
+  /* Same blue as the verified tick, since the badge is about being verified. */
+  [data-badge="first-verified"] {
+    --badge-h: 240;
+  }
+  /* Gitscout's own milestone badge is gold so it reads apart from the GitHub ones. */
+  [data-badge="milestone-card"] {
+    --badge-h: 85;
+  }
 }
 
 @keyframes duel-fade {
