@@ -4,6 +4,7 @@ export const COUNTRIES = [
   "AR",
   "AT",
   "AU",
+  "BD",
   "BE",
   "BR",
   "CA",
@@ -342,6 +343,7 @@ const PLAYERS_BY_COUNTRY: Record<CountryCode, readonly string[]> = {
   AR: ["goncy", "pomber", "rauchg", "sergiodxa", "yabellini"],
   AT: ["mxstbr", "tkdodo"],
   AU: ["markdalgleish"],
+  BD: ["tareq1988"],
   BE: ["driesvints", "estruyf", "jandedobbeleer", "robinmalfait"],
   BR: [
     "beatrizmilz",

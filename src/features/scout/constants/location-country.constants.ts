@@ -66,6 +66,7 @@ export const LOCATION_ALIASES: Record<CountryCode, readonly string[]> = {
   AR: ["argentina", "buenos aires", "cordoba argentina"],
   AT: ["austria", "osterreich", "vienna", "wien", "graz", "salzburg"],
   AU: ["australia", "sydney", "melbourne", "brisbane", "perth", "canberra"],
+  BD: ["bangladesh", "dhaka", "chittagong", "chattogram", "sylhet", "khulna"],
   BE: ["belgium", "belgique", "belgie", "brussels", "bruxelles", "antwerp", "ghent"],
   BR: ["brazil", "brasil", "sao paulo", "rio de janeiro", "brasilia", "curitiba"],
   CA: ["canada", "toronto", "vancouver", "montreal", "ottawa", "calgary", "waterloo ontario"],
