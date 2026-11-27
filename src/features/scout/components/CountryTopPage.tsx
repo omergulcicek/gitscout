@@ -22,8 +22,11 @@ import * as m from "@/paraglide/messages.js"
 
 const routeApi = getRouteApi("/{-$lang}/top/$country")
 
-/** Cards shown big at the top; the rest are small cards with their rank. */
-const PODIUM_SIZE = 3
+/**
+ * Cards shown big at the top; the rest are small cards with their rank. Four, so the other 96 of a full
+ * top 100 fill every row at three, four, six and eight per row.
+ */
+const PODIUM_SIZE = 4
 
 /** One country's page: its top 100 once it has enough developers, otherwise how close it is and an invite. */
 export function CountryTopPage() {
@@ -47,8 +50,7 @@ export function CountryTopPage() {
         <ArrowLeft aria-hidden className="size-4" />
         {m.top_back()}
       </Link>
-      {/* The back link stays on the page edge; the ranking itself sits in a column as wide as the podium. */}
-      <div className={cn("flex flex-col gap-10", data.unlocked && "mx-auto w-full max-w-3xl")}>
+      <div className="flex flex-col gap-10">
         <PageHeader
           align={data.unlocked ? "center" : "start"}
           eyebrow={
@@ -94,14 +96,17 @@ function CountryIntro({ data }: { data: CountryTop }) {
 function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
   const lang = getLangParam()
   const { data: viewer } = useViewer()
-  // The podium already shows the top three big, so only cards from #4 on are marked.
+  // The podium already shows the top four big, so only cards from #5 on are marked.
   const isViewer = (login: string) => viewer?.login.toLowerCase() === login.toLowerCase()
   const podium = data.players.slice(0, PODIUM_SIZE)
   const rest = data.players.slice(PODIUM_SIZE)
 
   return (
     <>
-      <ol className="grid gap-4 sm:grid-cols-3" aria-label={m.top_podium()}>
+      <ol
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+        aria-label={m.top_podium({ count: PODIUM_SIZE })}
+      >
         {podium.map((player) => (
           <li key={player.login} className="flex flex-col items-center gap-2">
             <span className="font-mono text-sm font-bold text-muted-foreground">
@@ -122,7 +127,7 @@ function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
       {rest.length > 0 ? (
         <ol
           start={PODIUM_SIZE + 1}
-          className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6"
+          className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"
         >
           {rest.map((player) => {
             const mine = isViewer(player.login)

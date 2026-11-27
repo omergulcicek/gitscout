@@ -703,7 +703,7 @@
   "top_country_intro": "Bu ülkeden Gitscout'ta {count} geliştirici puanlandı: {icon} İkon, {gold} Altın, {silver} Gümüş ve {bronze} Bronz kart.",
   "top_country_intro_role": "En kalabalık rol {role}.",
   "top_country_full_table": "{country} tam tablosu ({count})",
-  "top_podium": "İlk üç",
+  "top_podium": "İlk {count}",
   "top_locked_title": "{country} · En iyi GitHub geliştiricileri",
   "top_locked_lead": "Bu sayfa, bu ülkeden {min} geliştirici Gitscout'a katılınca açılır. Şu an {count} kişi var.",
   "top_locked_members": "Şimdiye kadar katılanlar"

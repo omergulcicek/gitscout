@@ -731,7 +731,7 @@
   "top_country_intro": "Gitscout has scored {count} developers here: {icon} Icon, {gold} Gold, {silver} Silver and {bronze} Bronze cards.",
   "top_country_intro_role": "The most common role is {role}.",
   "top_country_full_table": "Full {country} table ({count})",
-  "top_podium": "Top three",
+  "top_podium": "Top {count}",
   "top_locked_title": "Top GitHub developers in {country}",
   "top_locked_lead": "This page opens once {min} developers from here join Gitscout. {count} so far.",
   "top_locked_members": "Here so far"
