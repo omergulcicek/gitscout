@@ -10,7 +10,7 @@ import { RarityChip } from "@/features/scout/components/RarityChip"
 import { SeasonPack } from "@/features/scout/components/SeasonPack"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { archetypeNote, number, titleText } from "@/features/scout/helpers/player-text"
-import { seasonGrowth } from "@/features/scout/helpers/season"
+import { careerRecord, seasonGrowth } from "@/features/scout/helpers/season"
 import type { Season, SeasonStanding } from "@/features/scout/helpers/season"
 import { useSeason } from "@/features/scout/hooks/use-season"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
@@ -72,12 +72,10 @@ export function SeasonPage({ username }: SeasonPageProps) {
 
           <SeasonStats season={season} />
           <FormChart season={season} />
+          <CareerChart season={season} career={data.career} />
           <div className="grid gap-6 lg:grid-cols-2">
-            <ScoutReport player={player} season={season} />
-            <div className="flex flex-col gap-6">
-              <SeasonCompare season={season} />
-              <Standing standing={data.standing} />
-            </div>
+            <ScoutReport player={player} season={season} career={data.career} />
+            <Standing standing={data.standing} />
           </div>
           <Rival report={data} />
         </div>
@@ -185,8 +183,17 @@ function FormChart({ season }: { season: Season }) {
   )
 }
 
-function ScoutReport({ player, season }: { player: ScoredPlayer; season: Season }) {
+function ScoutReport({
+  player,
+  season,
+  career
+}: {
+  player: ScoredPlayer
+  season: Season
+  career: SeasonReport["career"]
+}) {
   const growth = seasonGrowth(season)
+  const record = careerRecord(career, season.year)
   const advice = archetypeNote(player.archetype, player.stats).growth[0]
   const lines = [
     m.season_report_matches({ played: season.matches, total: season.rounds.length }),
@@ -203,7 +210,18 @@ function ScoutReport({ player, season }: { player: ScoredPlayer; season: Season 
       ? null
       : growth > 0
         ? m.season_report_growth_up({ pct: growth })
-        : m.season_report_growth_down({ pct: -growth })
+        : m.season_report_growth_down({ pct: -growth }),
+    record === null
+      ? null
+      : record.beaten
+        ? m.season_report_record({
+            year: record.previous.year,
+            count: number(record.previous.total)
+          })
+        : m.season_report_record_held({
+            year: record.previous.year,
+            count: number(record.previous.total)
+          })
   ].filter((line) => line !== null)
 
   return (
@@ -229,53 +247,73 @@ function ScoutReport({ player, season }: { player: ScoredPlayer; season: Season 
   )
 }
 
-function SeasonCompare({ season }: { season: Season }) {
-  if (season.previous === null) return null
+function CareerChart({ season, career }: { season: Season; career: SeasonReport["career"] }) {
+  if (career.length < 2) return null
   const growth = seasonGrowth(season)
-  const max = Math.max(season.previous, season.contributions, 1)
-  const rows = [
-    { year: season.year - 1, value: season.previous, current: false },
-    { year: season.year, value: season.contributions, current: true }
-  ]
+  const max = Math.max(1, ...career.map((entry) => entry.total))
+  const first = career[0]
+  const last = career.at(-1)
 
   return (
-    <section aria-labelledby="season-compare-heading" className="surface flex flex-col gap-3 p-4">
+    <section aria-labelledby="season-career-heading" className="surface flex flex-col gap-3 p-4">
       <div className="flex items-baseline justify-between gap-2">
-        <h2 id="season-compare-heading" className="text-sm font-medium">
-          {m.season_compare_title()}
-        </h2>
-        <span
-          className={cn(
-            "font-mono text-sm font-semibold tabular-nums",
-            growth !== null && growth > 0 && "text-chart-home"
-          )}
-        >
-          {growth === null || growth === 0
-            ? m.season_compare_same()
-            : growth > 0
-              ? m.season_compare_up({ pct: growth })
-              : m.season_compare_down({ pct: -growth })}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          <h2 id="season-career-heading" className="text-sm font-medium">
+            {m.season_career_title()}
+          </h2>
+          <p className="text-xs text-muted-foreground">{m.season_career_caption()}</p>
+        </div>
+        {growth === null ? null : (
+          <span
+            className={cn(
+              "shrink-0 font-mono text-sm font-semibold tabular-nums",
+              growth > 0 && "text-chart-home"
+            )}
+          >
+            {growth === 0
+              ? m.season_compare_same()
+              : growth > 0
+                ? m.season_compare_up({ pct: growth })
+                : m.season_compare_down({ pct: -growth })}
+          </span>
+        )}
       </div>
-      <ul className="flex flex-col gap-2">
-        {rows.map((row) => (
-          <li key={row.year} className="grid grid-cols-[3rem_1fr_4rem] items-center gap-3 text-sm">
-            <span className="font-mono text-muted-foreground tabular-nums">{row.year}</span>
-            <span aria-hidden className="h-2 rounded-full bg-muted">
+      <ol
+        aria-label={m.season_career_label({
+          from: first?.year ?? season.year,
+          to: last?.year ?? season.year,
+          max: number(max)
+        })}
+        className="flex h-36 items-end gap-1"
+      >
+        {career.map((entry) => {
+          const current = entry.year === season.year
+          return (
+            <li key={entry.year} className="flex h-full min-w-0 flex-1 flex-col items-center gap-1">
+              <span className="flex w-full flex-1 flex-col justify-end">
+                <span
+                  className={cn(
+                    "block min-h-px w-full rounded-t-[3px]",
+                    current ? "bg-chart-home" : "bg-muted-foreground/35"
+                  )}
+                  style={{ height: `${(entry.total / max) * 100}%` }}
+                />
+              </span>
               <span
                 className={cn(
-                  "block h-full rounded-full",
-                  row.current ? "bg-chart-home" : "bg-muted-foreground/50"
+                  "font-mono text-[10px] tabular-nums",
+                  current ? "font-semibold text-foreground" : "text-muted-foreground"
                 )}
-                style={{ width: `${(row.value / max) * 100}%` }}
-              />
-            </span>
-            <span className="text-end font-mono font-semibold tabular-nums">
-              {number(row.value)}
-            </span>
-          </li>
-        ))}
-      </ul>
+              >
+                {String(entry.year).slice(2)}
+              </span>
+              <span className="sr-only">
+                {entry.year}: {number(entry.total)}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
     </section>
   )
 }

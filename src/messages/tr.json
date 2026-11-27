@@ -696,7 +696,6 @@
   "season_best_week": "Sezonun en iyi haftası",
   "season_best_week_value": "{date} haftası · {count} katkı",
   "season_best_month": "En verimli ay",
-  "season_compare_title": "Geçen sezonla kıyas",
   "season_compare_up": "%{pct} artış",
   "season_compare_down": "%{pct} düşüş",
   "season_compare_same": "Aynı seviye",
@@ -713,5 +712,10 @@
   "season_rival_title": "Sezonun rakibi",
   "season_rival_caption": "Aynı mevkide puanı sana en yakın oyuncu",
   "season_rival_duel": "Düelloya çık",
-  "season_back": "Profile dön"
+  "season_back": "Profile dön",
+  "season_career_title": "Kariyer çizelgesi",
+  "season_career_caption": "Hesabın açıldığından bu yana yıllık katkılar",
+  "season_career_label": "{from}–{to} arası yıllık katkılar; en yüksek {max}",
+  "season_report_record": "Kariyerinin en iyi sezonu: önceki rekor {year} yılında {count} katkıydı.",
+  "season_report_record_held": "Kariyer rekorun hâlâ {year}: {count} katkı."
 }

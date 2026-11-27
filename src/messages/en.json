@@ -717,7 +717,6 @@
   "season_best_week": "Best week of the season",
   "season_best_week_value": "Week of {date} · {count} contributions",
   "season_best_month": "Best month",
-  "season_compare_title": "Against last season",
   "season_compare_up": "Up {pct}%",
   "season_compare_down": "Down {pct}%",
   "season_compare_same": "Level",
@@ -734,5 +733,10 @@
   "season_rival_title": "Rival of the season",
   "season_rival_caption": "The closest overall score in your position",
   "season_rival_duel": "Start the duel",
-  "season_back": "Back to the profile"
+  "season_back": "Back to the profile",
+  "season_career_title": "Career chart",
+  "season_career_caption": "Contributions per year since the account opened",
+  "season_career_label": "Contributions per year, {from}–{to}; highest {max}",
+  "season_report_record": "Your best season yet: the old record was {count} contributions in {year}.",
+  "season_report_record_held": "Your career record still stands from {year}: {count} contributions."
 }

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { computeSeason, seasonGrowth, seasonStanding } from "@/features/scout/helpers/season"
+import {
+  careerRecord,
+  computeSeason,
+  seasonGrowth,
+  seasonStanding
+} from "@/features/scout/helpers/season"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 
 const day = (date: string, count: number) => ({ date, count })
@@ -106,5 +111,38 @@ describe("seasonStanding", () => {
     const standing = seasonStanding(me, [me, player("x", 1, "Backend")])
     expect(standing.pool).toEqual({ scope: "all" })
     expect(standing.size).toBe(1)
+  })
+})
+
+describe("careerRecord", () => {
+  const career = [
+    { year: 2018, total: 348 },
+    { year: 2019, total: 252 },
+    { year: 2025, total: 851 },
+    { year: 2026, total: 600 }
+  ]
+
+  it("compares the season with the best earlier one", () => {
+    expect(careerRecord(career, 2026)).toEqual({
+      previous: { year: 2025, total: 851 },
+      beaten: false
+    })
+    expect(careerRecord(career, 2025)).toEqual({
+      previous: { year: 2018, total: 348 },
+      beaten: true
+    })
+  })
+
+  it("has no record for a first season", () => {
+    expect(careerRecord([{ year: 2026, total: 10 }], 2026)).toBeNull()
+    expect(
+      careerRecord(
+        [
+          { year: 2025, total: 0 },
+          { year: 2026, total: 10 }
+        ],
+        2026
+      )
+    ).toBeNull()
   })
 })

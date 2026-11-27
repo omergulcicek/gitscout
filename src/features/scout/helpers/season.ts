@@ -171,3 +171,24 @@ export function seasonStanding(player: ListPlayer, all: readonly ListPlayer[]): 
     aheadShare: size === 0 ? 0 : (below + equal / 2) / size
   }
 }
+
+type YearTotal = { year: number; total: number }
+
+/**
+ * The record season before `year` and whether `year` beat it. Null when no earlier year has a
+ * contribution, so a first season isn't called a record.
+ */
+export function careerRecord(
+  career: readonly YearTotal[],
+  year: number
+): { previous: YearTotal; beaten: boolean } | null {
+  const current = career.find((entry) => entry.year === year)
+  const previous = career
+    .filter((entry) => entry.year < year && entry.total > 0)
+    .reduce<YearTotal | null>(
+      (best, entry) => (entry.total > (best?.total ?? 0) ? entry : best),
+      null
+    )
+  if (!current || !previous) return null
+  return { previous, beaten: current.total > previous.total }
+}
