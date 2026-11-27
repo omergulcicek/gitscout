@@ -17,6 +17,7 @@ import { GithubStarBadge } from "@/features/scout/components/GithubStarBadge"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { PlayerRank } from "@/features/scout/components/PlayerRank"
 import { PositionBreakdown } from "@/features/scout/components/PositionBreakdown"
+import { RevealConfetti } from "@/features/scout/components/RevealConfetti"
 import { ScoutNote } from "@/features/scout/components/ScoutNote"
 import { ShareTextSection } from "@/features/scout/components/ShareTextSection"
 import { SimilarPlayers } from "@/features/scout/components/SimilarPlayers"
@@ -32,7 +33,7 @@ import { isProgrammersDay } from "@/features/scout/helpers/programmers-day"
 import { isHalloween, isNewYear, isRepublicDay } from "@/features/scout/helpers/special-days"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useCardReveal } from "@/features/scout/hooks/use-card-reveal"
-import { useCountUp } from "@/features/scout/hooks/use-count-up"
+import { useEasedCount } from "@/features/scout/hooks/use-eased-count"
 import { usePlayer } from "@/features/scout/hooks/use-player"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
@@ -41,8 +42,8 @@ import { getLocale } from "@/paraglide/runtime.js"
 const CELEBRATED_RARITIES = new Set(["gold", "icon"])
 /** The score starts counting once the card has turned past halfway… */
 const REVEAL_COUNT_DELAY_MS = 350
-/** …and reaches its value in about this long, whatever the number. */
-const REVEAL_COUNT_MS = 900
+/** …and winds up to its value over this long, slow at first and quicker towards the end. */
+const REVEAL_COUNT_MS = 2000
 
 /** Anchor for the share menu's "ready-made texts" item. */
 const SHARE_TEXTS_ID = "share-texts"
@@ -78,9 +79,9 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
     : player
   // Right after creation the card flips in, its score counts up and gold or better gets confetti.
   const revealing = useCardReveal()
-  const revealOvr = useCountUp(revealing ? cardPlayer.ovr : 0, {
+  const revealOvr = useEasedCount(revealing ? cardPlayer.ovr : 0, {
     delay: REVEAL_COUNT_DELAY_MS,
-    step: Math.max(8, Math.round(REVEAL_COUNT_MS / Math.max(1, cardPlayer.ovr)))
+    duration: REVEAL_COUNT_MS
   })
   const { cardRef, download, isDownloading, copy, isCopying } = useCardDownload(
     shownOccasion ? `gitscout-${username}-${shownOccasion}` : `gitscout-${username}`
@@ -107,13 +108,15 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
 
       <div className="grid gap-6 md:grid-cols-[20rem_1fr] md:items-start">
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
-          {birthday || (revealing && CELEBRATED_RARITIES.has(cardPlayer.rarity)) ? (
-            <BirthdayConfetti />
-          ) : null}
+          {birthday ? <BirthdayConfetti /> : null}
           <div
             data-rarity={cardPlayer.rarity}
             className="relative flex w-full max-w-80 justify-center"
           >
+            {/* Inside the rarity scope so the pieces pick up the card's own frame colours. */}
+            {revealing && !birthday && CELEBRATED_RARITIES.has(cardPlayer.rarity) ? (
+              <RevealConfetti />
+            ) : null}
             <div
               aria-hidden
               className={cn(

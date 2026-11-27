@@ -1174,3 +1174,49 @@
     transform: scale(1);
   }
 }
+
+/* Reveal confetti: bursts fired in from both sides, plus a light rain from the top. */
+.reveal-confetti-piece {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.8rem;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-confetti-piece {
+    animation-duration: 2.6s;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+}
+
+/* Up and inwards fast, then drifting down as gravity takes over. */
+@keyframes reveal-confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.15, 0.7, 0.35, 1);
+  }
+  40% {
+    opacity: 1;
+    transform: translate3d(calc(var(--dx) * 0.75), var(--rise), 0) rotate(calc(var(--spin) * 0.5));
+    animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), 40vh, 0) rotate(var(--spin));
+  }
+}
+
+@keyframes reveal-confetti-rain {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), 80vh, 0) rotate(var(--spin));
+  }
+}
