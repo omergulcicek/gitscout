@@ -370,6 +370,8 @@ export type HomeData = {
    */
   featured: { world: ListPlayer[]; tr: ListPlayer[] }
   recent: RecentEntry[]
+  /** The most common countries (most players first) and how many countries the leaderboard spans. */
+  countries: { top: CountryCode[]; total: number }
   lastDayCount: number
   /** When the data was built; relative times are written against it so server and browser agree. */
   generatedAt: string

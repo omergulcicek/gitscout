@@ -36,6 +36,14 @@
       "countPlural=other": "{count} cards created"
     }
   },
+  "home_proof_countries": {
+    "declarations": ["input count", "local countPlural = count: plural"],
+    "selectors": ["countPlural"],
+    "match": {
+      "countPlural=one": "from {count} country",
+      "countPlural=other": "from {count} countries"
+    }
+  },
   "home_proof_day": "{count} in the last 24 hours",
   "home_top": "Top {count}",
   "home_top_world": "World",
