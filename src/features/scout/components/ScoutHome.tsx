@@ -9,6 +9,7 @@ import { AddPlayerForm } from "@/features/scout/components/AddPlayerForm"
 import { EmptyLeaderboard } from "@/features/scout/components/EmptyLeaderboard"
 import { ExamplePlayers } from "@/features/scout/components/ExamplePlayers"
 import { FeaturedCard } from "@/features/scout/components/FeaturedCard"
+import { FeaturedStrip } from "@/features/scout/components/FeaturedStrip"
 import { HeroProof } from "@/features/scout/components/HeroProof"
 import { LeaderboardTable } from "@/features/scout/components/LeaderboardTable"
 import { RarityLegend } from "@/features/scout/components/RarityLegend"
@@ -33,6 +34,7 @@ export function ScoutHome() {
   const view: TopView = canSwitch && top !== "world" ? "tr" : "world"
   const players = data.top[view]
   const poolSize = data.totals[view]
+  const featured = data.featured[getLocale() === "tr" ? "tr" : "world"]
 
   return (
     <main
@@ -49,6 +51,7 @@ export function ScoutHome() {
             {m.home_lead()}
           </p>
           <AddPlayerForm variant="command" />
+          <FeaturedStrip players={featured} />
           <ExamplePlayers players={data.examples} />
           <HeroProof
             recent={data.recent}
@@ -59,7 +62,7 @@ export function ScoutHome() {
         </section>
         {/* Ödül önden görünsün: geniş ekranda vitrin kartı başlığın yanında. */}
         {/* The showcase follows the page language, not the top-list switch. */}
-        <FeaturedCard players={data.featured[getLocale() === "tr" ? "tr" : "world"]} />
+        <FeaturedCard players={featured} />
       </div>
 
       <RecentlyAdded

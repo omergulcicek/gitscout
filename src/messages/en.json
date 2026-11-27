@@ -54,6 +54,7 @@
   },
   "just_now": "just now",
   "featured_label": "Card of the hour",
+  "featured_strip_label": "This hour's cards · swipe to browse",
   "featured_label_next": "{name}'s card",
   "featured_next": "Another card",
   "cta_title": "What's your rating?",

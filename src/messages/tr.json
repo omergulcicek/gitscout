@@ -40,6 +40,7 @@
   "recent_last_day": "Son 24 saatte {count} geliştirici katıldı",
   "just_now": "az önce",
   "featured_label": "Saatin kartı",
+  "featured_strip_label": "Bu saatin kartları · kaydırarak gez",
   "featured_label_next": "{name} kartı",
   "featured_next": "Başka kart",
   "cta_title": "Senin kartın kaç puan?",

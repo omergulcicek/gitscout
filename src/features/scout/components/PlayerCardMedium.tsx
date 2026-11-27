@@ -10,13 +10,15 @@ import * as m from "@/paraglide/messages.js"
 type PlayerCardMediumProps = {
   player: ListPlayer
   className?: string
+  /** `lazy` for cards that may be hidden or off-screen, so their avatars don't load until shown. */
+  imageLoading?: "eager" | "lazy"
 }
 
 /**
  * Tam kartın sıkıştırılmış hâli: puan, avatar, ad ve altı stat. Dar alanda iki kart yan yana
  * sığacak genişlikte (~165px) tasarlandı; README'deki orta boy rozet de aynı düzeni çizer.
  */
-export function PlayerCardMedium({ player, className }: PlayerCardMediumProps) {
+export function PlayerCardMedium({ player, className, imageLoading }: PlayerCardMediumProps) {
   return (
     <figure
       data-rarity={player.rarity}
@@ -43,6 +45,7 @@ export function PlayerCardMedium({ player, className }: PlayerCardMediumProps) {
             alt=""
             width={56}
             height={56}
+            loading={imageLoading}
             className="scout-card-avatar size-12 shrink-0 rounded-full bg-muted object-cover min-[360px]:size-14"
           />
           <div className="flex flex-col items-end">
