@@ -1246,11 +1246,9 @@
 
 /*
  * Season pack: a sealed foil bag. Layers from the bottom: foil, a faint holographic film that shifts with
- * the pointer, a glare under the pointer and a slow light sweep; crimped seals top and bottom; a tear strip.
- * Pointer position arrives as --mx/--my/--px/--rx/--ry from the component. Opening: the top tears off along
- * a ragged line (a flap drawn from the same layers flies away while the body takes the torn outline), the
- * card is drawn up out of the opening face down, its back glows in the tier's colour, then it turns over.
- * Every light stays within a few px sideways: the page clips anything past its gutter.
+ * the pointer, a glare under the pointer and a slow light sweep; crimped seals top and bottom. Pointer
+ * position arrives as --mx/--my/--px/--rx/--ry from the component. Opened, it trembles like an egg about to
+ * hatch while cracks lit in the tier's colour run across it, then breaks into pieces that fly off.
  */
 .season-pack-shadow {
   filter: drop-shadow(0 24px 32px rgb(0 0 0 / 0.45));
@@ -1335,89 +1333,16 @@
   -webkit-text-stroke: 1px rgb(255 255 255 / 0.55);
 }
 
-/* The torn opening: a shadow just under the ragged edge, and cold light coming out of it. */
-.season-pack-mouth {
-  background: linear-gradient(180deg, rgb(0 0 0 / 0.55), transparent);
-  opacity: 0;
-}
-
-.season-pack-leak {
-  background: radial-gradient(closest-side, #e8f4ff, transparent);
-  filter: blur(12px);
-  opacity: 0;
-}
-
-.season-pack-root:is([data-peeling], [data-pack="tear"], [data-pack="open"])
-  :is(.season-pack-mouth, .season-pack-leak) {
-  opacity: 0.8;
-  transition: opacity 300ms var(--ease-out);
-}
-
-/*
- * The torn-off top follows the drag: its animation stays paused at --tear (0–1) of the way through, then
- * runs on from there once the tear goes through. Lifts from the right, hangs on its last fibres, flies off.
- */
-.season-pack-flap {
-  transform-origin: 0 50px;
-  animation: season-pack-flap 650ms cubic-bezier(0.5, 0, 0.75, 0.2) both paused;
-  animation-delay: calc(var(--tear, 0) * -650ms);
-}
-
-.season-pack-root[data-pack="tear"] .season-pack-flap {
-  animation-play-state: running;
-}
-
-/* The card's back, as it comes out of the pack. Just before it turns, its frame heats up in the tier's colour. */
-.season-card-back {
-  --back-light: #bfe3ff;
-  background:
-    radial-gradient(90% 55% at 50% 0%, rgb(255 255 255 / 0.12), transparent 60%),
-    linear-gradient(160deg, #26305a, #141731 60%, #1d2448);
-  box-shadow:
-    inset 0 0 0 2px color-mix(in oklab, var(--back-light) 55%, transparent),
-    inset 0 0 0 8px #161a35,
-    inset 0 0 0 9px color-mix(in oklab, var(--back-light) 25%, transparent),
-    0 24px 48px -16px rgb(0 0 0 / 0.6);
-  transition: box-shadow 300ms var(--ease-out);
-}
-
-.season-ceremony:is([data-stage="charge"], [data-stage="flip"]) .season-card-back {
-  --back-light: var(--frame-1);
-  box-shadow:
-    inset 0 0 0 3px var(--back-light),
-    inset 0 0 0 8px #161a35,
-    inset 0 0 0 10px color-mix(in oklab, var(--back-light) 70%, transparent),
-    inset 0 0 60px -4px color-mix(in oklab, var(--back-light) 60%, transparent),
-    0 0 60px -6px color-mix(in oklab, var(--frame-2) 80%, transparent);
-  transition: box-shadow 2000ms ease-in;
-}
-
-.season-card-flipper {
-  transform-style: preserve-3d;
-}
-
-.season-card-face {
-  backface-visibility: hidden;
-}
-
-.season-card-front {
-  transform: rotateY(180deg);
-}
-
-.season-ceremony:is([data-stage="facts"], [data-stage="fly"]) .season-card-flipper {
-  transform: rotateY(180deg);
-}
-
-.season-card-shine {
-  border-radius: 28px;
-  background: linear-gradient(
-    105deg,
-    transparent 30%,
-    rgb(255 255 255 / 0.7) 46%,
-    rgb(255 255 255 / 0.15) 54%,
-    transparent 68%
-  );
-  opacity: 0;
+/* A crack, drawn in from one end, glowing with the light inside. */
+.season-pack-crack {
+  fill: none;
+  stroke: var(--frame-1);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 4px var(--frame-1)) drop-shadow(0 0 10px var(--frame-2));
 }
 
 /* The ceremony's own light: free to spread, the overlay covers the whole screen. */
@@ -1449,18 +1374,6 @@
   transition: opacity 250ms var(--ease-out);
 }
 
-.season-tier-label {
-  border-radius: 9999px;
-  padding: 0.25rem 0.875rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--foreground);
-  background: color-mix(in oklab, var(--frame-2) 22%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--frame-2) 60%, transparent);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .season-pack {
     transition: transform 200ms var(--ease-out);
@@ -1470,7 +1383,7 @@
     transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(0.98);
   }
 
-  .season-pack-root[data-pack="sealed"]:not([data-peeling]) .season-pack-shadow {
+  .season-pack-root[data-pack="sealed"] .season-pack-shadow {
     animation: season-pack-breathe 4s ease-in-out infinite;
   }
 
@@ -1478,39 +1391,28 @@
     animation: season-pack-sweep 6s ease-in-out 1.2s infinite;
   }
 
-  /* The notch keeps nudging towards the tear while the pack waits. */
-  .season-pack-root[data-pack="sealed"]:not([data-peeling]) .season-pack-notch {
-    animation: season-pack-notch 1.4s ease-in-out infinite;
-  }
-
-  .season-pack-root[data-pack="tear"] .season-pack {
-    animation: season-pack-jolt 260ms var(--ease-out);
-  }
-
-  .season-ceremony[data-stage="draw"] .season-ceremony-pack {
-    animation: season-pack-drop 900ms cubic-bezier(0.5, 0, 0.75, 0) both;
-  }
-
-  .season-ceremony[data-stage="draw"] .season-card-draw {
-    animation: season-card-draw 900ms cubic-bezier(0.3, 0, 0.2, 1) both;
-  }
-
   /* Like an egg about to hatch: it rocks on its base, steadily for a second, then faster and faster. */
-  .season-ceremony[data-stage="charge"] .season-card-flipper {
+  .season-pack-root[data-pack="charge"] .season-pack-shadow {
     transform-origin: 50% 100%;
     animation: season-card-hatch 2000ms linear both;
   }
 
-  .season-ceremony[data-stage="flip"] .season-card-flipper {
-    animation: season-card-flip 700ms cubic-bezier(0.45, 0, 0.2, 1) both;
+  /* The cracks spread one after another through the second half. */
+  .season-pack-root[data-pack="charge"] .season-pack-crack {
+    animation: season-pack-crack 260ms ease-out both;
+    animation-delay: calc(900ms + var(--i, 0) * 70ms);
   }
 
-  .season-ceremony[data-stage="flip"] .season-card-shine {
-    animation: season-card-shine 700ms var(--ease-out) 350ms both;
+  .season-pack-shard {
+    animation: season-pack-shard 850ms cubic-bezier(0.2, 0.6, 0.35, 1) var(--delay, 0ms) both;
   }
 
-  .season-ceremony[data-stage="flip"] .season-ceremony-burst {
-    animation: season-ceremony-burst 1100ms var(--ease-out) 250ms both;
+  .season-ceremony[data-stage="shatter"] .season-card-emerge {
+    animation: season-card-emerge 700ms var(--ease-out) both;
+  }
+
+  .season-ceremony[data-stage="shatter"] .season-ceremony-burst {
+    animation: season-ceremony-burst 1100ms var(--ease-out) both;
   }
 
   .season-fact {
@@ -1544,62 +1446,64 @@
   }
 }
 
-@keyframes season-pack-notch {
-  0%,
-  100% {
-    transform: translateX(0);
+@keyframes season-pack-crack {
+  0% {
+    stroke-dashoffset: 1;
   }
-  50% {
-    transform: translateX(-4px);
+  100% {
+    stroke-dashoffset: 0;
   }
 }
 
-@keyframes season-pack-flap {
+@keyframes season-pack-shard {
   0% {
     transform: none;
     opacity: 1;
   }
-  40% {
-    transform: translateY(-4px) rotate(-10deg);
-    opacity: 1;
-  }
-  55% {
-    transform: translateY(-6px) rotate(-12deg);
+  70% {
     opacity: 1;
   }
   100% {
-    transform: translate(90px, -180px) rotate(-40deg);
+    transform: translate(var(--dx), var(--dy)) rotate(var(--spin)) scale(0.85);
     opacity: 0;
   }
 }
 
-@keyframes season-pack-jolt {
-  30% {
-    transform: perspective(900px) translateY(3px) rotate(0.6deg);
-  }
-}
-
-@keyframes season-pack-drop {
-  0%,
-  35% {
-    transform: none;
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(60%);
-    opacity: 0;
-  }
-}
-
-@keyframes season-card-draw {
+@keyframes season-card-emerge {
   0% {
-    transform: translateY(14%) scale(0.86);
-  }
-  50% {
-    transform: translateY(-14%) scale(0.88);
+    transform: scale(0.88);
+    filter: brightness(2.2) blur(2px);
   }
   100% {
     transform: none;
+    filter: none;
+  }
+}
+
+@keyframes season-ceremony-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+@keyframes season-fact-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+}
+
+@keyframes season-card-glow-in {
+  0% {
+    opacity: 0;
   }
 }
 
@@ -1687,53 +1591,6 @@
   }
   100.0% {
     transform: none;
-  }
-}
-
-@keyframes season-card-flip {
-  0% {
-    transform: none;
-  }
-  100% {
-    transform: rotateY(180deg);
-  }
-}
-
-@keyframes season-card-shine {
-  0% {
-    opacity: 1;
-    transform: translateX(-70%);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(70%);
-  }
-}
-
-@keyframes season-ceremony-burst {
-  0% {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  35% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2);
-  }
-}
-
-@keyframes season-fact-in {
-  0% {
-    opacity: 0;
-    transform: translateY(10px) scale(0.92);
-  }
-}
-
-@keyframes season-card-glow-in {
-  0% {
-    opacity: 0;
   }
 }
 

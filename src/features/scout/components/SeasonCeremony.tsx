@@ -4,13 +4,13 @@ import type { KeyboardEvent, RefObject } from "react"
 import { X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { SeasonPack, SnowSeal } from "@/features/scout/components/SeasonPack"
+import { SeasonPack } from "@/features/scout/components/SeasonPack"
 import { SnowyCard } from "@/features/scout/components/SnowyCard"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
-type Stage = "sealed" | "tear" | "draw" | "charge" | "flip" | "facts" | "fly"
+type Stage = "sealed" | "charge" | "shatter" | "facts" | "fly"
 
 /** Card size in px; the ceremony scales it to the screen. */
 const CARD_W = 320
@@ -20,10 +20,9 @@ const MAX_SCALE = 1.4
 const CHROME_WIDE = 56 + 150
 const CHROME_NARROW = 56 + 200
 
-const TEAR_MS = 650
-const DRAW_MS = 900
+/** The pack trembles, faster and faster, while it cracks; then it breaks and the card comes out. */
 const CHARGE_MS = 2000
-const FLIP_MS = 700
+const SHATTER_MS = 900
 /** How long the numbers stay before the card flies home on its own. */
 const FACTS_MS = 3200
 const FLY_MS = 700
@@ -59,11 +58,12 @@ function fitScale(): number {
 }
 
 /**
- * The season pack, opened full screen over the report, with one action: drag the strip (or tap) to tear the
- * top off. The rest plays by itself: the card comes out face down, its frame heats up in the tier's colour,
- * it turns over, the season's headline numbers count up under it, and it flies to its place on the page as
- * the report shows. "Skip" and Esc end it at any point; the page itself skips it for reduced motion and for
- * packs already opened in this browser.
+ * The season pack, opened full screen over the report, with one action: a tap on the pack. The rest plays by
+ * itself: the pack trembles like an egg about to hatch, faster and faster while cracks run across it, then
+ * breaks into pieces that fly off in every direction and the card comes out from inside. The season's
+ * headline numbers count up under it, and it flies to its place on the page as the report shows. "Skip" and
+ * Esc end it at any point; the page itself skips it for reduced motion and for packs already opened in this
+ * browser.
  */
 export function SeasonCeremony({
   player,
@@ -76,7 +76,6 @@ export function SeasonCeremony({
   const [stage, setStage] = useState<Stage>("sealed")
   // Unknown on the server; the stage fades in once the browser has measured the screen.
   const [scale, setScale] = useState<number | null>(null)
-  const [tornAt, setTornAt] = useState(0)
   const rootRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const continueRef = useRef<HTMLButtonElement>(null)
@@ -107,36 +106,31 @@ export function SeasonCeremony({
 
   const fly = () => setStage("fly")
 
-  // Everything after the tear plays on timers; a stage change (a skip included) clears the running one.
+  // Everything after the tap plays on timers; a stage change (a skip included) clears the running one.
   useEffect(() => {
     const steps: Partial<Record<Stage, [() => void, number]>> = {
-      tear: [() => setStage("draw"), TEAR_MS * (1 - tornAt)],
-      draw: [() => setStage("charge"), DRAW_MS],
       charge: [
         () => {
-          setStage("flip")
+          setStage("shatter")
           // A short buzz on phones that have one.
-          if ("vibrate" in navigator) navigator.vibrate(20)
+          if ("vibrate" in navigator) navigator.vibrate(30)
         },
         CHARGE_MS
       ],
-      flip: [() => setStage("facts"), FLIP_MS],
+      shatter: [() => setStage("facts"), SHATTER_MS],
       facts: [() => setStage("fly"), FACTS_MS]
     }
     const step = steps[stage]
     if (!step) return
     const timer = window.setTimeout(step[0], step[1])
     return () => window.clearTimeout(timer)
-  }, [stage, tornAt])
+  }, [stage])
 
   useEffect(() => {
     if (stage === "facts") continueRef.current?.focus()
   }, [stage])
 
-  const open = (torn: number) => {
-    setTornAt(torn)
-    setStage("tear")
-  }
+  const open = () => setStage("charge")
 
   // A modal: Esc skips, and Tab stays inside.
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -161,8 +155,7 @@ export function SeasonCeremony({
     }
   }
 
-  const packState = stage === "sealed" ? "sealed" : stage === "tear" ? "tear" : "open"
-  const showPack = stage === "sealed" || stage === "tear" || stage === "draw"
+  const showPack = stage === "sealed" || stage === "charge" || stage === "shatter"
   const turned = stage === "facts" || stage === "fly"
 
   return (
@@ -198,37 +191,13 @@ export function SeasonCeremony({
               className="season-ceremony-burst pointer-events-none absolute -inset-24"
             />
 
-            {stage === "sealed" || stage === "tear" ? null : (
-              <div ref={cardRef} className="season-card-draw absolute inset-0">
-                <div className="relative size-full [perspective:1400px]">
-                  <div className="season-card-flipper relative size-full">
-                    <div
-                      aria-hidden={!turned}
-                      className="season-card-face season-card-front absolute inset-0 flex justify-center"
-                    >
-                      <SnowyCard player={player} bare={!turned} reveal={turned} />
-                      <span
-                        aria-hidden
-                        className="season-card-shine pointer-events-none absolute inset-0"
-                      />
-                    </div>
-                    <div
-                      aria-hidden
-                      className="season-card-face season-card-back absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-[28px] text-white"
-                    >
-                      <SnowSeal className="size-16 text-white/75" />
-                      <span
-                        lang="en"
-                        className="font-mono text-xs tracking-[0.45em] text-white/70 uppercase"
-                      >
-                        Gitscout
-                      </span>
-                      <span className="season-pack-year font-mono text-5xl font-bold tabular-nums">
-                        {year}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {stage === "sealed" || stage === "charge" ? null : (
+              // The card inside, coming out as the pack breaks around it.
+              <div
+                ref={cardRef}
+                className="season-card-emerge absolute inset-0 flex justify-center"
+              >
+                <SnowyCard player={player} bare={!turned} reveal={turned} />
               </div>
             )}
 
@@ -238,7 +207,7 @@ export function SeasonCeremony({
                   login={player.login}
                   year={year}
                   voice={voice}
-                  state={packState}
+                  state={stage === "sealed" ? "sealed" : stage === "charge" ? "charge" : "shatter"}
                   onOpen={open}
                 />
               </div>
@@ -250,8 +219,8 @@ export function SeasonCeremony({
       <div className="season-ceremony-chrome flex min-h-36 w-full max-w-2xl shrink-0 flex-col items-center justify-start gap-4 px-4 pt-4 pb-6 text-center max-sm:min-h-48">
         {stage === "sealed" ? (
           <>
-            <p className="text-sm text-muted-foreground">{m.season_ceremony_tear_hint()}</p>
-            <Button variant="outline" onClick={() => open(0)}>
+            <p className="text-sm text-muted-foreground">{m.season_ceremony_open_hint()}</p>
+            <Button variant="outline" onClick={open}>
               {m.season_pack_open()}
             </Button>
           </>

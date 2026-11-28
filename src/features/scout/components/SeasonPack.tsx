@@ -1,19 +1,12 @@
-import { useRef, useState } from "react"
-import type { MouseEvent, PointerEvent } from "react"
+import type { PointerEvent } from "react"
 
 import * as m from "@/paraglide/messages.js"
 
-/** Pack size in px (w-80 × h-120), the crimp's tooth width and depth, and where the top tears off. */
+/** Pack size in px (w-80 × h-120), and the crimp's tooth width and depth. */
 const PACK_W = 320
 const PACK_H = 480
 const TOOTH = 8
 const TOOTH_DEPTH = 5
-const TEAR_Y = 52
-
-/** How far along the strip a drag must go before the tear carries on by itself. */
-const TEAR_COMMIT = 0.55
-/** A drag this many px or less counts as a click. */
-const DRAG_SLOP = 6
 
 /** The crimped top and bottom edges, left to right, as polygon points. */
 const crimp = (edge: "top" | "bottom") => {
@@ -25,22 +18,93 @@ const crimp = (edge: "top" | "bottom") => {
   return points
 }
 
-/** The ragged tear, left to right: a fixed pattern so the server and the browser draw the same line. */
-const TEAR_POINTS = (() => {
-  const offsets = [0, -3, 2, -1, 4, -2, 1, 3, -4, 2, -1, 3, -3, 1, 4, -2, 0, 2, -3, 1, 3, -1, -4, 2]
-  const step = PACK_W / (offsets.length - 1)
-  return offsets.map((offset, index) => [Math.round(index * step), TEAR_Y + offset] as const)
-})()
-const TEAR_LINE = TEAR_POINTS.map(([x, y]) => `${x}px ${y}px`)
-
 const polygon = (points: string[]) => `polygon(${points.join(", ")})`
 
 /** The sealed pack: straight sides, zigzag crimped edges top and bottom like a foil bag. */
 const SEALED_CLIP = polygon([...crimp("top"), ...crimp("bottom").reverse()])
-/** The pack once torn: the ragged line on top. */
-const TORN_CLIP = polygon([...TEAR_LINE, ...crimp("bottom").reverse()])
-/** The strip that tears away: the crimped top down to the ragged line. */
-const FLAP_CLIP = polygon([...crimp("top"), ...[...TEAR_LINE].reverse()])
+
+type Point = readonly [number, number]
+
+/** A fixed wobble in −1…1, so the server and the browser cut the same pieces. */
+const wobble = (seed: number) => {
+  const value = Math.sin(seed * 12.9898) * 43758.5453
+  return (value - Math.floor(value)) * 2 - 1
+}
+
+/**
+ * The pieces the pack breaks into, like an eggshell: a 3 × 4 grid whose inner corners are pushed about and
+ * whose edges kink in the middle, so no two pieces are the same shape. Neighbours share their edges exactly.
+ */
+const SHATTER = (() => {
+  const xs = [0, 107, 213, 320] as const
+  const ys = [0, 120, 240, 360, 480] as const
+  const inner = (index: number, length: number) => index > 0 && index < length - 1
+  const corner = (row: number, col: number): Point => [
+    (xs[col] ?? 0) + (inner(col, xs.length) ? wobble(row * 7 + col) * 26 : 0),
+    (ys[row] ?? 0) + (inner(row, ys.length) ? wobble(row * 11 + col * 3 + 1) * 22 : 0)
+  ]
+  // The kink in the middle of an edge, pushed sideways; edges on the pack's outline stay straight.
+  const kink = (a: Point, b: Point, seed: number, straight: boolean): Point => {
+    const mid: Point = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+    if (straight) return mid
+    const length = Math.hypot(b[0] - a[0], b[1] - a[1])
+    const push = wobble(seed) * 14
+    return [mid[0] + ((b[1] - a[1]) / length) * push, mid[1] - ((b[0] - a[0]) / length) * push]
+  }
+  const across = (row: number, col: number) =>
+    kink(corner(row, col), corner(row, col + 1), row * 13 + col + 50, !inner(row, ys.length))
+  const down = (row: number, col: number) =>
+    kink(corner(row, col), corner(row + 1, col), row * 17 + col + 90, !inner(col, xs.length))
+
+  const pieces: { points: Point[]; center: Point }[] = []
+  const cracks: Point[][] = []
+  for (let row = 0; row < ys.length - 1; row++) {
+    for (let col = 0; col < xs.length - 1; col++) {
+      const points = [
+        corner(row, col),
+        across(row, col),
+        corner(row, col + 1),
+        down(row, col + 1),
+        corner(row + 1, col + 1),
+        across(row + 1, col),
+        corner(row + 1, col),
+        down(row, col)
+      ]
+      const center: Point = [
+        points.reduce((sum, point) => sum + point[0], 0) / points.length,
+        points.reduce((sum, point) => sum + point[1], 0) / points.length
+      ]
+      pieces.push({ points, center })
+      // Each inner edge once: the piece's bottom and right edges, where they aren't the outline.
+      if (inner(row + 1, ys.length)) {
+        cracks.push([corner(row + 1, col), across(row + 1, col), corner(row + 1, col + 1)])
+      }
+      if (inner(col + 1, xs.length)) {
+        cracks.push([corner(row, col + 1), down(row, col + 1), corner(row + 1, col + 1)])
+      }
+    }
+  }
+
+  return {
+    pieces: pieces.map(({ points, center }, index) => {
+      // Outwards from the middle of the pack, a little downwards as if falling, each its own spin.
+      const dx = center[0] - PACK_W / 2
+      const dy = center[1] - PACK_H / 2
+      const length = Math.hypot(dx, dy) || 1
+      const distance = 320 + ((index * 53) % 180)
+      return {
+        clip: polygon(points.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)),
+        style: {
+          "--dx": `${((dx / length) * distance).toFixed(0)}px`,
+          "--dy": `${((dy / length) * distance + 80).toFixed(0)}px`,
+          "--spin": `${(wobble(index + 200) * 160).toFixed(0)}deg`,
+          "--delay": `${(index % 4) * 25}ms`
+        }
+      }
+    }),
+    cracks: cracks.map((line) => line.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" "))
+  }
+})()
 
 /** A stable six-digit "serial number" for the print on the pack, the same for a login every time. */
 function serialNumber(login: string): string {
@@ -56,87 +120,21 @@ type SeasonPackProps = {
   year: number
   /** The owner reads "your card", anyone else "their card". */
   voice: "own" | "other"
-  /** "tear" plays the rest of the tear from wherever the drag left it; "open" is the torn, empty pack. */
-  state: "sealed" | "tear" | "open"
-  /** Asks to open, with how far the top is already torn (0 when clicked). */
-  onOpen: (torn: number) => void
+  /** "charge": trembling and cracking; "shatter": breaking apart, its pieces flying off. */
+  state: "sealed" | "charge" | "shatter"
+  onOpen: () => void
 }
 
 /**
- * A sealed foil pack that tilts and catches the light under the pointer. Its top tears off along a ragged
- * line: drag along the strip and the flap follows the pointer, let go early and it settles back, go past
- * the middle and it tears off. A click, a tap or the keyboard opens it in one go.
+ * A sealed foil pack that tilts and catches the light under the pointer. Opened, it trembles like an egg
+ * about to hatch while cracks run across it, then breaks into pieces that fly off in every direction.
  */
 export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProps) {
-  const rootRef = useRef<HTMLDivElement>(null)
-  const packRef = useRef<HTMLButtonElement>(null)
-  const drag = useRef<{ x: number; width: number; moved: boolean; torn: number } | null>(null)
-  // A drag ends in a click on the pack; that click must not open it a second time.
-  const swallowClick = useRef(false)
-  const [peeling, setPeeling] = useState(false)
   const sealed = state === "sealed"
-  const torn = !sealed || peeling
-
-  const setTear = (value: number) => rootRef.current?.style.setProperty("--tear", String(value))
-
-  const open = (amount: number) => {
-    const style = packRef.current?.style
-    for (const name of POINTER_VARS) style?.removeProperty(name)
-    onOpen(amount)
-  }
-
-  const startDrag = (event: PointerEvent<HTMLSpanElement>) => {
-    if (!sealed || event.button !== 0) return
-    event.currentTarget.setPointerCapture(event.pointerId)
-    const width = packRef.current?.getBoundingClientRect().width ?? PACK_W
-    drag.current = { x: event.clientX, width, moved: false, torn: 0 }
-  }
-
-  const moveDrag = (event: PointerEvent<HTMLSpanElement>) => {
-    const current = drag.current
-    if (!current) return
-    const distance = Math.abs(event.clientX - current.x)
-    if (!current.moved && distance <= DRAG_SLOP) return
-    if (!current.moved) {
-      current.moved = true
-      setPeeling(true)
-    }
-    current.torn = Math.min(1, distance / (current.width * 0.8))
-    setTear(current.torn)
-  }
-
-  const endDrag = () => {
-    const current = drag.current
-    drag.current = null
-    if (!current?.moved) return
-    swallowClick.current = true
-    if (current.torn >= TEAR_COMMIT) {
-      open(current.torn)
-      return
-    }
-    // Not far enough: the flap settles back onto the pack.
-    rootRef.current?.setAttribute("data-settling", "")
-    setTear(0)
-    window.setTimeout(() => {
-      rootRef.current?.removeAttribute("data-settling")
-      setPeeling(false)
-    }, 250)
-  }
-
-  const click = (event: MouseEvent<HTMLButtonElement>) => {
-    if (swallowClick.current) {
-      swallowClick.current = false
-      return
-    }
-    if (sealed && !peeling) {
-      event.currentTarget.blur()
-      open(0)
-    }
-  }
 
   // Pointer position as CSS variables: the light and the tilt follow it without a re-render.
   const track = (event: PointerEvent<HTMLButtonElement>) => {
-    if (!sealed || peeling) return
+    if (!sealed) return
     const rect = event.currentTarget.getBoundingClientRect()
     const x = (event.clientX - rect.left) / rect.width
     const y = (event.clientY - rect.top) / rect.height
@@ -152,134 +150,70 @@ export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProp
     for (const name of POINTER_VARS) style.removeProperty(name)
   }
 
+  const face = <PackFace login={login} year={year} voice={voice} />
+
+  if (state === "shatter") {
+    return (
+      <div aria-hidden data-pack={state} className="season-pack-root relative h-120 w-80">
+        {SHATTER.pieces.map((piece, index) => (
+          <span
+            key={index}
+            className="season-pack-shard absolute inset-0"
+            style={{ ...piece.style, clipPath: piece.clip }}
+          >
+            <span className="absolute inset-0" style={{ clipPath: SEALED_CLIP }}>
+              {face}
+            </span>
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div
-      ref={rootRef}
-      data-pack={state}
-      data-peeling={peeling ? "" : undefined}
-      className="season-pack-root relative h-120 w-80"
-    >
+    <div data-pack={state} className="season-pack-root relative h-120 w-80">
       {/* The shadow lives on a wrapper: the crimp's clip-path would cut it off the pack itself. */}
       <div className="season-pack-shadow absolute inset-0">
         <button
-          ref={packRef}
           type="button"
-          onClick={click}
+          onClick={(event) => {
+            for (const name of POINTER_VARS) event.currentTarget.style.removeProperty(name)
+            onOpen()
+          }}
           onPointerMove={track}
           onPointerLeave={untrack}
           disabled={!sealed}
           aria-label={m.season_pack_open_label({ year })}
-          style={{ clipPath: torn ? TORN_CLIP : SEALED_CLIP }}
+          style={{ clipPath: SEALED_CLIP }}
           className="season-pack relative block size-full text-start text-white outline-none disabled:cursor-default"
         >
-          <PackSkin />
-          <span aria-hidden className="season-pack-crimp absolute inset-x-0 bottom-0 h-[22px]" />
-          {/* The grip: the whole top band can be dragged; the tear starts from the notch. */}
-          <span
-            aria-hidden
-            onPointerDown={startDrag}
-            onPointerMove={moveDrag}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            className="season-pack-grip absolute inset-x-0 top-0 h-[56px] cursor-grab touch-none active:cursor-grabbing"
-          >
-            {torn ? null : <TearStrip />}
-          </span>
-          {torn ? (
-            // The torn foil's pale fibres along the ragged edge.
+          {face}
+          {sealed ? null : (
+            // The cracks spreading across the pack, lit from inside.
             <svg
               aria-hidden
               viewBox={`0 0 ${PACK_W} ${PACK_H}`}
               className="pointer-events-none absolute inset-0 size-full"
             >
-              <polyline
-                points={TEAR_POINTS.map(([x, y]) => `${x},${y + 1}`).join(" ")}
-                fill="none"
-                stroke="rgb(232 242 255 / 0.75)"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-              />
+              {SHATTER.cracks.map((points, index) => (
+                <polyline
+                  key={points}
+                  points={points}
+                  pathLength={1}
+                  className="season-pack-crack"
+                  style={{ "--i": index }}
+                />
+              ))}
             </svg>
-          ) : null}
-          <span
-            aria-hidden
-            className="season-pack-mouth absolute inset-x-0 h-7"
-            style={{ top: TEAR_Y - 4 }}
-          />
-          <span
-            aria-hidden
-            className="season-pack-leak absolute inset-x-6 h-6"
-            style={{ top: TEAR_Y - 10 }}
-          />
-
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-[62px] flex items-center justify-between px-5"
-          >
-            {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
-            <span
-              lang="en"
-              className="font-mono text-[11px] tracking-[0.4em] text-white/70 uppercase"
-            >
-              Gitscout
-            </span>
-            <SnowSeal className="size-5 text-white/60" />
-          </span>
-
-          {/* The card waiting inside, as a raised shape. */}
-          <span
-            aria-hidden
-            className="season-pack-silhouette pointer-events-none absolute top-[98px] left-1/2 flex h-[290px] w-[200px] -translate-x-1/2 items-center justify-center rounded-[14px]"
-          >
-            <span className="season-pack-year font-mono text-7xl font-bold tabular-nums">
-              {year}
-            </span>
-          </span>
-
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-[30px] flex flex-col items-center gap-1 px-5 text-center"
-          >
-            <span className="text-xs text-white/75">
-              {voice === "own" ? m.season_pack_hint_own() : m.season_pack_hint_other()}
-            </span>
-            <span className="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
-              {m.season_pack_print({ year, serial: serialNumber(login) })}
-            </span>
-          </span>
+          )}
         </button>
-        {torn && state !== "open" ? (
-          // The torn-off top: the same foil, cut along the ragged line. It follows the drag (paused at
-          // --tear), then plays the rest on its own once the tear goes through.
-          <span
-            aria-hidden
-            className="season-pack-flap pointer-events-none absolute inset-0 overflow-hidden rounded-[10px]"
-            style={{ clipPath: FLAP_CLIP }}
-          >
-            <PackSkin />
-            <TearStrip />
-          </span>
-        ) : null}
       </div>
     </div>
   )
 }
 
-/** The dashed line and the notch showing where the top comes off. */
-function TearStrip() {
-  return (
-    <span className="absolute inset-x-0 top-[22px] flex h-[26px] items-center gap-2 px-4">
-      <span className="h-px flex-1 border-t border-dashed border-white/30" />
-      <span className="font-mono text-[9px] tracking-[0.2em] text-white/55 uppercase">
-        {m.season_pack_tear()}
-      </span>
-      <span className="season-pack-notch size-0 border-y-[5px] border-e-[7px] border-y-transparent border-e-white/50" />
-    </span>
-  )
-}
-
-/** The foil and its lights, shared by the pack and the strip torn off its top so the two match. */
-function PackSkin() {
+/** Everything printed on the pack: drawn on the pack itself and again on each of its pieces. */
+function PackFace({ login, year, voice }: { login: string; year: number; voice: "own" | "other" }) {
   return (
     <>
       <span aria-hidden className="season-pack-foil absolute inset-0" />
@@ -290,12 +224,44 @@ function PackSkin() {
         aria-hidden
         className="season-pack-crimp season-pack-crimp-top absolute inset-x-0 top-0 h-[22px]"
       />
+      <span aria-hidden className="season-pack-crimp absolute inset-x-0 bottom-0 h-[22px]" />
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-[40px] flex items-center justify-between px-5"
+      >
+        {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
+        <span lang="en" className="font-mono text-[11px] tracking-[0.4em] text-white/70 uppercase">
+          Gitscout
+        </span>
+        <SnowSeal className="size-5 text-white/60" />
+      </span>
+
+      {/* The card waiting inside, as a raised shape. */}
+      <span
+        aria-hidden
+        className="season-pack-silhouette pointer-events-none absolute top-[80px] left-1/2 flex h-[300px] w-[210px] -translate-x-1/2 items-center justify-center rounded-[14px]"
+      >
+        <span className="season-pack-year font-mono text-7xl font-bold tabular-nums">{year}</span>
+      </span>
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-[30px] flex flex-col items-center gap-1 px-5 text-center"
+      >
+        <span className="text-xs text-white/75">
+          {voice === "own" ? m.season_pack_hint_own() : m.season_pack_hint_other()}
+        </span>
+        <span className="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
+          {m.season_pack_print({ year, serial: serialNumber(login) })}
+        </span>
+      </span>
     </>
   )
 }
 
-/** A six-armed snowflake stamped on the pack and the card's back like a seal. */
-export function SnowSeal({ className }: { className: string }) {
+/** A six-armed snowflake stamped on the pack like a seal. */
+function SnowSeal({ className }: { className: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor">
       {[0, 60, 120].map((angle) => (

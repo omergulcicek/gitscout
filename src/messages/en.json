@@ -770,7 +770,7 @@
   "season_standing_basis": "by active days in the last 12 months",
   "season_pack_open_label": "Open the {year} season pack",
   "season_ceremony_label": "{year} season pack",
-  "season_ceremony_tear_hint": "Drag along the strip to tear the pack open, or tap it.",
+  "season_ceremony_open_hint": "Tap the pack to open it.",
   "season_ceremony_continue": "Go to the season report",
   "season_ceremony_reopen": "Open the pack again",
   "season_download": "Download",
@@ -779,6 +779,5 @@
   "season_download_portrait": "For mobile (9:16)",
   "season_pack_skip": "Skip",
   "season_pack_revealed": "Card revealed: {rarity}, {ovr} rating",
-  "season_pack_tear": "tear here",
   "season_pack_print": "1 card · {year} season · № {serial}"
 }

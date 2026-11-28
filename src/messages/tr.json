@@ -749,7 +749,7 @@
   "season_standing_basis": "son 12 ayın aktif günlerine göre",
   "season_pack_open_label": "{year} sezon paketini aç",
   "season_ceremony_label": "{year} sezon paketi",
-  "season_ceremony_tear_hint": "Şeridi sürükleyerek paketi yırt ya da pakete dokun.",
+  "season_ceremony_open_hint": "Açmak için pakete dokun.",
   "season_ceremony_continue": "Sezon raporuna geç",
   "season_ceremony_reopen": "Paketi tekrar aç",
   "season_download": "İndir",
@@ -758,6 +758,5 @@
   "season_download_portrait": "Mobil için (9:16)",
   "season_pack_skip": "Atla",
   "season_pack_revealed": "Kart açıldı: {rarity}, {ovr} puan",
-  "season_pack_tear": "buradan yırt",
   "season_pack_print": "1 kart · {year} sezonu · № {serial}"
 }
