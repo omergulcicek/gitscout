@@ -37,6 +37,10 @@ export function SiteFooter() {
             <Link to="/{-$lang}/top" params={{ lang }} className={navLinkClass}>
               {m.footer_top()}
             </Link>
+            {/* Kept here until the season is announced; it then moves back to the header. */}
+            <Link to="/{-$lang}/season" params={{ lang }} className={navLinkClass}>
+              {m.nav_season()}
+            </Link>
             <Link to="/{-$lang}/special-cards" params={{ lang }} className={navLinkClass}>
               {m.nav_special_cards()}
             </Link>

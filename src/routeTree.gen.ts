@@ -21,6 +21,7 @@ import { Route as Char123LangChar125IndexRouteImport } from './routes/{-$lang}/i
 import { Route as Char123LangChar125AboutRouteImport } from './routes/{-$lang}/about'
 import { Route as Char123LangChar125LeaderboardRouteImport } from './routes/{-$lang}/leaderboard'
 import { Route as Char123LangChar125LoginRouteImport } from './routes/{-$lang}/login'
+import { Route as Char123LangChar125SeasonRouteImport } from './routes/{-$lang}/season'
 import { Route as Char123LangChar125SettingsRouteImport } from './routes/{-$lang}/settings'
 import { Route as Char123LangChar125SpecialCardsRouteImport } from './routes/{-$lang}/special-cards'
 import { Route as ApiCronRefreshRouteImport } from './routes/api/cron/refresh'
@@ -30,6 +31,7 @@ import { Route as Char123LangChar125TopCountryRouteImport } from './routes/{-$la
 import { Route as Char123LangChar125UUsernameRouteImport } from './routes/{-$lang}/u/$username'
 import { Route as Char123LangChar125VsIndexRouteImport } from './routes/{-$lang}/vs/index'
 import { Route as Char123LangChar125OgTopCountryRouteImport } from './routes/{-$lang}/og/top/$country'
+import { Route as Char123LangChar125UUsernameSeasonRouteImport } from './routes/{-$lang}/u/$username_.season'
 import { Route as Char123LangChar125VsLeftRightRouteImport } from './routes/{-$lang}/vs/$left.$right'
 import { Route as Char123LangChar125OgVsLeftRightRouteImport } from './routes/{-$lang}/og/vs/$left.$right'
 
@@ -96,6 +98,12 @@ const Char123LangChar125LoginRoute = Char123LangChar125LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => Char123LangChar125Route,
 } as any)
+const Char123LangChar125SeasonRoute =
+  Char123LangChar125SeasonRouteImport.update({
+    id: '/season',
+    path: '/season',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
 const Char123LangChar125SettingsRoute =
   Char123LangChar125SettingsRouteImport.update({
     id: '/settings',
@@ -149,6 +157,12 @@ const Char123LangChar125OgTopCountryRoute =
     path: '/og/top/$country',
     getParentRoute: () => Char123LangChar125Route,
   } as any)
+const Char123LangChar125UUsernameSeasonRoute =
+  Char123LangChar125UUsernameSeasonRouteImport.update({
+    id: '/u/$username_/season',
+    path: '/u/$username/season',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
 const Char123LangChar125VsLeftRightRoute =
   Char123LangChar125VsLeftRightRouteImport.update({
     id: '/vs/$left/$right',
@@ -174,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/{-$lang}/about': typeof Char123LangChar125AboutRoute
   '/{-$lang}/leaderboard': typeof Char123LangChar125LeaderboardRoute
   '/{-$lang}/login': typeof Char123LangChar125LoginRoute
+  '/{-$lang}/season': typeof Char123LangChar125SeasonRoute
   '/{-$lang}/settings': typeof Char123LangChar125SettingsRoute
   '/{-$lang}/special-cards': typeof Char123LangChar125SpecialCardsRoute
   '/{-$lang}/': typeof Char123LangChar125IndexRoute
@@ -184,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/{-$lang}/top/': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
   '/{-$lang}/og/top/$country': typeof Char123LangChar125OgTopCountryRoute
+  '/{-$lang}/u/$username/season': typeof Char123LangChar125UUsernameSeasonRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -198,6 +214,7 @@ export interface FileRoutesByTo {
   '/{-$lang}/about': typeof Char123LangChar125AboutRoute
   '/{-$lang}/leaderboard': typeof Char123LangChar125LeaderboardRoute
   '/{-$lang}/login': typeof Char123LangChar125LoginRoute
+  '/{-$lang}/season': typeof Char123LangChar125SeasonRoute
   '/{-$lang}/settings': typeof Char123LangChar125SettingsRoute
   '/{-$lang}/special-cards': typeof Char123LangChar125SpecialCardsRoute
   '/{-$lang}': typeof Char123LangChar125IndexRoute
@@ -208,6 +225,7 @@ export interface FileRoutesByTo {
   '/{-$lang}/top': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs': typeof Char123LangChar125VsIndexRoute
   '/{-$lang}/og/top/$country': typeof Char123LangChar125OgTopCountryRoute
+  '/{-$lang}/u/$username/season': typeof Char123LangChar125UUsernameSeasonRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -224,6 +242,7 @@ export interface FileRoutesById {
   '/{-$lang}/about': typeof Char123LangChar125AboutRoute
   '/{-$lang}/leaderboard': typeof Char123LangChar125LeaderboardRoute
   '/{-$lang}/login': typeof Char123LangChar125LoginRoute
+  '/{-$lang}/season': typeof Char123LangChar125SeasonRoute
   '/{-$lang}/settings': typeof Char123LangChar125SettingsRoute
   '/{-$lang}/special-cards': typeof Char123LangChar125SpecialCardsRoute
   '/{-$lang}/': typeof Char123LangChar125IndexRoute
@@ -234,6 +253,7 @@ export interface FileRoutesById {
   '/{-$lang}/top/': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
   '/{-$lang}/og/top/$country': typeof Char123LangChar125OgTopCountryRoute
+  '/{-$lang}/u/$username_/season': typeof Char123LangChar125UUsernameSeasonRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -251,6 +271,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/about'
     | '/{-$lang}/leaderboard'
     | '/{-$lang}/login'
+    | '/{-$lang}/season'
     | '/{-$lang}/settings'
     | '/{-$lang}/special-cards'
     | '/{-$lang}/'
@@ -261,6 +282,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/top/'
     | '/{-$lang}/vs/'
     | '/{-$lang}/og/top/$country'
+    | '/{-$lang}/u/$username/season'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   fileRoutesByTo: FileRoutesByTo
@@ -275,6 +297,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/about'
     | '/{-$lang}/leaderboard'
     | '/{-$lang}/login'
+    | '/{-$lang}/season'
     | '/{-$lang}/settings'
     | '/{-$lang}/special-cards'
     | '/{-$lang}'
@@ -285,6 +308,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/top'
     | '/{-$lang}/vs'
     | '/{-$lang}/og/top/$country'
+    | '/{-$lang}/u/$username/season'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   id:
@@ -300,6 +324,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/about'
     | '/{-$lang}/leaderboard'
     | '/{-$lang}/login'
+    | '/{-$lang}/season'
     | '/{-$lang}/settings'
     | '/{-$lang}/special-cards'
     | '/{-$lang}/'
@@ -310,6 +335,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/top/'
     | '/{-$lang}/vs/'
     | '/{-$lang}/og/top/$country'
+    | '/{-$lang}/u/$username_/season'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   fileRoutesById: FileRoutesById
@@ -412,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LangChar125LoginRouteImport
       parentRoute: typeof Char123LangChar125Route
     }
+    '/{-$lang}/season': {
+      id: '/{-$lang}/season'
+      path: '/season'
+      fullPath: '/{-$lang}/season'
+      preLoaderRoute: typeof Char123LangChar125SeasonRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
     '/{-$lang}/settings': {
       id: '/{-$lang}/settings'
       path: '/settings'
@@ -475,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LangChar125OgTopCountryRouteImport
       parentRoute: typeof Char123LangChar125Route
     }
+    '/{-$lang}/u/$username_/season': {
+      id: '/{-$lang}/u/$username_/season'
+      path: '/u/$username/season'
+      fullPath: '/{-$lang}/u/$username/season'
+      preLoaderRoute: typeof Char123LangChar125UUsernameSeasonRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
     '/{-$lang}/vs/$left/$right': {
       id: '/{-$lang}/vs/$left/$right'
       path: '/vs/$left/$right'
@@ -496,6 +536,7 @@ interface Char123LangChar125RouteChildren {
   Char123LangChar125AboutRoute: typeof Char123LangChar125AboutRoute
   Char123LangChar125LeaderboardRoute: typeof Char123LangChar125LeaderboardRoute
   Char123LangChar125LoginRoute: typeof Char123LangChar125LoginRoute
+  Char123LangChar125SeasonRoute: typeof Char123LangChar125SeasonRoute
   Char123LangChar125SettingsRoute: typeof Char123LangChar125SettingsRoute
   Char123LangChar125SpecialCardsRoute: typeof Char123LangChar125SpecialCardsRoute
   Char123LangChar125IndexRoute: typeof Char123LangChar125IndexRoute
@@ -505,6 +546,7 @@ interface Char123LangChar125RouteChildren {
   Char123LangChar125TopIndexRoute: typeof Char123LangChar125TopIndexRoute
   Char123LangChar125VsIndexRoute: typeof Char123LangChar125VsIndexRoute
   Char123LangChar125OgTopCountryRoute: typeof Char123LangChar125OgTopCountryRoute
+  Char123LangChar125UUsernameSeasonRoute: typeof Char123LangChar125UUsernameSeasonRoute
   Char123LangChar125VsLeftRightRoute: typeof Char123LangChar125VsLeftRightRoute
   Char123LangChar125OgVsLeftRightRoute: typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -513,6 +555,7 @@ const Char123LangChar125RouteChildren: Char123LangChar125RouteChildren = {
   Char123LangChar125AboutRoute: Char123LangChar125AboutRoute,
   Char123LangChar125LeaderboardRoute: Char123LangChar125LeaderboardRoute,
   Char123LangChar125LoginRoute: Char123LangChar125LoginRoute,
+  Char123LangChar125SeasonRoute: Char123LangChar125SeasonRoute,
   Char123LangChar125SettingsRoute: Char123LangChar125SettingsRoute,
   Char123LangChar125SpecialCardsRoute: Char123LangChar125SpecialCardsRoute,
   Char123LangChar125IndexRoute: Char123LangChar125IndexRoute,
@@ -522,6 +565,8 @@ const Char123LangChar125RouteChildren: Char123LangChar125RouteChildren = {
   Char123LangChar125TopIndexRoute: Char123LangChar125TopIndexRoute,
   Char123LangChar125VsIndexRoute: Char123LangChar125VsIndexRoute,
   Char123LangChar125OgTopCountryRoute: Char123LangChar125OgTopCountryRoute,
+  Char123LangChar125UUsernameSeasonRoute:
+    Char123LangChar125UUsernameSeasonRoute,
   Char123LangChar125VsLeftRightRoute: Char123LangChar125VsLeftRightRoute,
   Char123LangChar125OgVsLeftRightRoute: Char123LangChar125OgVsLeftRightRoute,
 }

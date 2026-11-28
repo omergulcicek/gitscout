@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
+import type { LoginReturn } from "@/constants/account.constants"
+
 import { logout, startGithubLogin } from "@/lib/auth.functions"
 import { viewerKeys, viewerQueryOptions } from "@/lib/auth.queries"
 
@@ -11,10 +13,11 @@ export function useViewer() {
 }
 
 /** GitHub girişini başlatır; sunucunun verdiği yetkilendirme adresine gider. */
-export function useStartGithubLogin() {
+/** `returnTo` brings the person back to that page after sign-in instead of their profile. */
+export function useStartGithubLogin(returnTo?: LoginReturn) {
   return useMutation({
     // Dönüşte aynı dilde açılsın diye sayfanın dili gönderilir.
-    mutationFn: () => startGithubLogin({ data: { locale: getLocale() } }),
+    mutationFn: () => startGithubLogin({ data: { locale: getLocale(), returnTo } }),
     onSuccess: ({ url }) => {
       window.location.assign(url)
     }

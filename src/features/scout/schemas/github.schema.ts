@@ -143,6 +143,27 @@ export const yearlyResponseSchema = z.object({
   )
 })
 
+export const seasonCalendarResponseSchema = z.object({
+  user: z
+    .object({
+      databaseId: z.number(),
+      contributionsCollection: z.object({
+        totalPullRequestReviewContributions: z.number(),
+        contributionCalendar: z.object({
+          totalContributions: z.number(),
+          weeks: z.array(
+            z.object({
+              contributionDays: z.array(
+                z.object({ date: z.string(), contributionCount: z.number() })
+              )
+            })
+          )
+        })
+      })
+    })
+    .nullable()
+})
+
 export const starredPageSchema = z.object({
   user: z.object({
     repositories: z.object({

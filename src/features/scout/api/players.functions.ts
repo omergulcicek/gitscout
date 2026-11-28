@@ -13,17 +13,21 @@ import type { LookupFailure } from "@/features/scout/api/lookup-guard"
 import {
   countRecentPlayers,
   getDreamTeamLogins,
+  getFrozenSeason,
+  getFrozenSeasonYears,
   getLatestAdditions,
   getListPlayers,
   getRecentLogins,
   getRecentProfileViews,
   getScoredPlayer,
+  getSeasonFacts,
   insertPlayer,
   takeLookup,
   updateAccountBirthDate,
   updateAccountCountry,
   updateAccountProfileDetails
 } from "@/features/scout/api/player-store"
+import { freezeSeason } from "@/features/scout/api/season-freeze.api"
 import {
   COUNTRY_PAGE_MIN,
   COUNTRY_TOP_LIMIT,
@@ -53,9 +57,16 @@ import type { DuelPreset } from "@/features/scout/helpers/duel-presets"
 import { featuredOrder } from "@/features/scout/helpers/featured-players"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { leaderboardFacets, queryLeaderboard } from "@/features/scout/helpers/leaderboard-query"
+import { toListPlayer } from "@/features/scout/helpers/list-player"
 import { countPlayerCountries, playerCountry } from "@/features/scout/helpers/player-country"
 import { computeRanking } from "@/features/scout/helpers/score-player"
 import { matchesPlayer } from "@/features/scout/helpers/search-text"
+import { computeSeason, SEASON_YEAR, seasonStanding } from "@/features/scout/helpers/season"
+import {
+  frozenSeasonFacts,
+  isFreezeWindow,
+  isSeasonClosed
+} from "@/features/scout/helpers/season-freeze"
 import { similarPlayers } from "@/features/scout/helpers/similar-players"
 import { leaderboardSearchSchema } from "@/features/scout/schemas/leaderboard-search.schema"
 import { addPlayerSchema, usernameSchema } from "@/features/scout/schemas/player.schema"
@@ -71,6 +82,7 @@ import type {
   ScoredPlayer,
   TopCountries
 } from "@/features/scout/types/player.types"
+import type { SeasonReport } from "@/features/scout/types/season.types"
 import { locales } from "@/paraglide/runtime.js"
 
 type LatestAddition = { login: string; addedAt: string }
@@ -165,9 +177,10 @@ export const getPlayer = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<PlayerDetail> => {
     const username = usernameSchema.safeParse(data.username)
     if (!username.success) throw notFound()
-    const [player, dreamTeamLogins] = await Promise.all([
+    const [player, dreamTeamLogins, seasons] = await Promise.all([
       getScoredPlayer(username.data),
-      getDreamTeamLogins(username.data)
+      getDreamTeamLogins(username.data),
+      getFrozenSeasonYears(username.data)
     ])
     if (!player) throw notFound()
     const all = await cachedPlayers()
@@ -177,7 +190,59 @@ export const getPlayer = createServerFn({ method: "GET" })
       ranking: computeRanking(player, all),
       benchmarks: computeBenchmarks(player, all),
       dreamTeam: dreamTeamLogins.flatMap((login) => byLogin.get(login.toLowerCase()) ?? []),
-      similar: similarPlayers(player, all)
+      similar: similarPlayers(player, all),
+      seasons
+    }
+  })
+
+/**
+ * The season page. A closed season is read from its frozen row (frozen on first view if the hourly job
+ * hasn't reached the player yet); an open one is computed from the card's rolling calendar.
+ */
+export const getSeason = createServerFn({ method: "GET" })
+  .validator(z.object({ username: z.string(), year: z.number().int().optional() }))
+  .handler(async ({ data }): Promise<SeasonReport> => {
+    const username = usernameSchema.safeParse(data.username)
+    if (!username.success) throw notFound()
+    const year = data.year ?? SEASON_YEAR
+    const now = new Date()
+    const closed = isSeasonClosed(year, now)
+    // A past season exists only as a frozen row; only the current season can be shown live.
+    if (year !== SEASON_YEAR && !closed) throw notFound()
+    const [player, facts, stored] = await Promise.all([
+      getScoredPlayer(username.data),
+      year === SEASON_YEAR ? getSeasonFacts(username.data) : null,
+      closed ? getFrozenSeason(username.data, year) : null
+    ])
+    if (!player) throw notFound()
+    let frozen = stored
+    if (closed && !frozen) {
+      try {
+        frozen = await freezeSeason(player.login, year, { now, db: "app" })
+      } catch (error) {
+        // The page still opens from the rolling calendar; the hourly job freezes the season later.
+        console.error("[season] freeze on view failed", player.login, error)
+      }
+    }
+    // Once the freezing window has passed, a season without a row stays unknown.
+    const source = frozen
+      ? frozenSeasonFacts(frozen)
+      : isFreezeWindow(year, now) || !closed
+        ? facts
+        : null
+    const season = source ? computeSeason(source, year) : null
+    if (!source || !season) throw notFound()
+    const all = await cachedPlayers()
+    const self = all.find((entry) => entry.login.toLowerCase() === player.login.toLowerCase())
+    return {
+      player,
+      card: frozen?.card ?? toListPlayer(player),
+      season,
+      final: frozen !== null,
+      generatedAt: now.toISOString(),
+      career: source.yearly.filter((entry) => entry.year <= year).sort((a, b) => a.year - b.year),
+      standing: seasonStanding(self ?? player, all),
+      rival: similarPlayers(player, all, 1)[0] ?? null
     }
   })
 

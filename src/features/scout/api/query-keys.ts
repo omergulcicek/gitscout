@@ -9,6 +9,8 @@ export const playerKeys = {
   byLogin: (logins: readonly string[]) => [...playerKeys.all, "by-login", logins] as const,
   presets: (seed: number | undefined) => [...playerKeys.all, "presets", seed ?? "hour"] as const,
   specialSample: () => [...playerKeys.all, "special-sample"] as const,
+  season: (login: string, year?: number) =>
+    [...playerKeys.all, "season", login.toLowerCase(), year ?? "current"] as const,
   details: () => [...playerKeys.all, "detail"] as const,
   detail: (login: string) => [...playerKeys.details(), login.toLowerCase()] as const
 }

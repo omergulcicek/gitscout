@@ -1251,3 +1251,406 @@
     rotate: -2deg;
   }
 }
+
+/*
+ * Season pack: a sealed foil bag. Layers from the bottom: foil, a faint holographic film that shifts with
+ * the pointer, a glare under the pointer and a slow light sweep; crimped seals top and bottom. Pointer
+ * position arrives as --mx/--my/--px/--rx/--ry from the component. Opened, it trembles like an egg about to
+ * hatch while cracks lit in the tier's colour run across it, then breaks into pieces that fly off.
+ */
+.season-pack-shadow {
+  filter: drop-shadow(0 24px 32px rgb(0 0 0 / 0.45));
+}
+
+.season-pack {
+  border-radius: 10px;
+  isolation: isolate;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+
+.season-pack-foil {
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgb(255 255 255 / 0.1), transparent 60%),
+    linear-gradient(105deg, #1b1f3a 0%, #3a4470 38%, #141731 55%, #2c3560 80%, #171a35 100%);
+}
+
+.season-pack-holo {
+  background: conic-gradient(
+    from calc(var(--px, 0.5) * 360deg) at 50% 120%,
+    #7dd3fc,
+    #c4b5fd,
+    #f0abfc,
+    #a7f3d0,
+    #7dd3fc
+  );
+  mix-blend-mode: color-dodge;
+  opacity: 0.16;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.season-pack:hover:enabled .season-pack-holo {
+  opacity: 0.3;
+}
+
+.season-pack-glare {
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 30%),
+    rgb(255 255 255 / 0.22),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.season-pack:hover:enabled .season-pack-glare {
+  opacity: 1;
+}
+
+.season-pack-sweep {
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.16) 48%,
+    rgb(255 255 255 / 0.04) 55%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+}
+
+/* The crimped seals: fine vertical ridges, a little frost on the top one. */
+.season-pack-crimp {
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.13) 0 1px, rgb(0 0 0 / 0.22) 1px 4px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(0 0 0 / 0.2));
+}
+
+.season-pack-crimp-top {
+  box-shadow: 0 3px 6px -2px rgb(224 242 255 / 0.5);
+}
+
+.season-pack-silhouette {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.015));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.14),
+    inset 0 18px 30px -18px rgb(255 255 255 / 0.25),
+    inset 0 -20px 30px -20px rgb(0 0 0 / 0.5);
+}
+
+.season-pack-year {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 255 255 / 0.55);
+}
+
+/* A crack, drawn in from one end, glowing with the light inside. */
+.season-pack-crack {
+  fill: none;
+  stroke: var(--frame-1);
+  stroke-width: 0.9;
+  stroke-opacity: 0.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 3px var(--frame-2));
+}
+
+/* The ceremony's own light: free to spread, the overlay covers the whole screen. */
+.season-ceremony-burst {
+  background: radial-gradient(closest-side, var(--frame-1), transparent 72%);
+  opacity: 0;
+}
+
+.season-ceremony-stage {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.season-ceremony-stage[data-ready] {
+  opacity: 1;
+}
+
+.season-ceremony {
+  transition: background-color 600ms var(--ease-out);
+}
+
+/* The card flies home over the report as the curtain lifts. */
+.season-ceremony[data-stage="fly"] {
+  background-color: transparent;
+}
+
+.season-ceremony[data-stage="fly"]
+  :is(.season-ceremony-chrome, .season-ceremony-burst, .season-ceremony-pack) {
+  opacity: 0;
+  transition: opacity 250ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .season-pack {
+    transition: transform 200ms var(--ease-out);
+  }
+
+  .season-pack:active:enabled {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(0.98);
+  }
+
+  .season-pack-root[data-pack="sealed"] .season-pack-shadow {
+    animation: season-pack-breathe 4s ease-in-out infinite;
+  }
+
+  .season-pack-root[data-pack="sealed"] .season-pack-sweep {
+    animation: season-pack-sweep 6s ease-in-out 1.2s infinite;
+  }
+
+  /* Like an egg about to hatch: it rocks on its base, steadily for a second, then faster and faster. */
+  .season-pack-root[data-pack="charge"] .season-pack-shadow {
+    transform-origin: 50% 100%;
+    animation: season-card-hatch 2000ms linear both;
+  }
+
+  /* The cracks spread out from the impact, one after another, through the second half. */
+  .season-pack-root[data-pack="charge"] .season-pack-crack {
+    animation: season-pack-crack 260ms ease-out both;
+    animation-delay: calc(700ms + var(--i, 0) * 9ms);
+  }
+
+  .season-ceremony[data-stage="shatter"] .season-card-emerge {
+    animation: season-card-emerge 700ms var(--ease-out) both;
+  }
+
+  /* The blast jolts the whole scene for a moment. */
+  .season-ceremony[data-stage="shatter"] .season-ceremony-stage {
+    animation: season-ceremony-jolt 380ms var(--ease-out);
+  }
+
+  .season-ceremony[data-stage="shatter"] .season-ceremony-burst {
+    animation: season-ceremony-burst 1100ms var(--ease-out) both;
+  }
+
+  .season-fact {
+    animation: season-fact-in 450ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 180ms + 150ms);
+  }
+
+  .season-card-glow-in {
+    animation: season-card-glow-in 900ms var(--ease-out) both;
+  }
+}
+
+@keyframes season-pack-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 24px 32px rgb(0 0 0 / 0.45)) drop-shadow(0 0 18px rgb(125 211 252 / 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 24px 32px rgb(0 0 0 / 0.45)) drop-shadow(0 0 28px rgb(125 211 252 / 0.4));
+  }
+}
+
+@keyframes season-pack-sweep {
+  0%,
+  70% {
+    transform: translateX(-120%);
+  }
+  85%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes season-pack-crack {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes season-card-emerge {
+  0% {
+    transform: scale(0.88);
+    filter: brightness(2.2) blur(2px);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes season-ceremony-jolt {
+  0% {
+    transform: scale(1.04);
+  }
+  20% {
+    transform: translate(-6px, 4px) scale(1.02);
+  }
+  45% {
+    transform: translate(5px, -3px);
+  }
+  70% {
+    transform: translate(-2px, 1px);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes season-ceremony-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+@keyframes season-fact-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+}
+
+@keyframes season-card-glow-in {
+  0% {
+    opacity: 0;
+  }
+}
+
+@keyframes season-card-hatch {
+  0.0% {
+    transform: none;
+  }
+  6.25% {
+    transform: rotate(-1.2deg);
+  }
+  12.5% {
+    transform: rotate(1.2deg);
+  }
+  18.75% {
+    transform: rotate(-1.2deg);
+  }
+  25.0% {
+    transform: rotate(1.2deg);
+  }
+  31.25% {
+    transform: rotate(-1.2deg);
+  }
+  37.5% {
+    transform: rotate(1.2deg);
+  }
+  43.75% {
+    transform: rotate(-1.2deg);
+  }
+  50.0% {
+    transform: rotate(1.2deg);
+  }
+  55.5% {
+    transform: rotate(-1.31deg);
+  }
+  60.17% {
+    transform: rotate(1.4deg);
+  }
+  64.15% {
+    transform: rotate(-1.48deg);
+  }
+  67.53% {
+    transform: rotate(1.55deg);
+  }
+  70.4% {
+    transform: rotate(-1.61deg);
+  }
+  72.84% {
+    transform: rotate(1.66deg);
+  }
+  74.91% {
+    transform: rotate(-1.7deg);
+  }
+  76.91% {
+    transform: rotate(1.74deg);
+  }
+  78.91% {
+    transform: rotate(-1.78deg);
+  }
+  80.91% {
+    transform: rotate(1.82deg);
+  }
+  82.91% {
+    transform: rotate(-1.86deg);
+  }
+  84.91% {
+    transform: rotate(1.9deg);
+  }
+  86.91% {
+    transform: rotate(-1.94deg);
+  }
+  88.91% {
+    transform: rotate(1.98deg);
+  }
+  90.91% {
+    transform: rotate(-2.02deg);
+  }
+  92.91% {
+    transform: rotate(2.06deg);
+  }
+  94.91% {
+    transform: rotate(-2.1deg);
+  }
+  96.91% {
+    transform: rotate(2.14deg);
+  }
+  100.0% {
+    transform: none;
+  }
+}
+
+/* Season poster: fixed colours so a shared poster looks the same in either site theme. */
+.season-poster {
+  background:
+    radial-gradient(90% 55% at 15% 0%, oklch(0.42 0.12 280 / 0.85), transparent 70%),
+    linear-gradient(165deg, oklch(0.2 0.05 275), oklch(0.12 0.03 260));
+}
+
+.season-poster-accent {
+  background: #3f8fd8;
+}
+
+/* Season card ice: frosted corners on the New Year card. */
+.season-frost::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 40% at 0% 100%, rgb(235 245 255 / 0.55), transparent 70%),
+    radial-gradient(45% 30% at 100% 100%, rgb(235 245 255 / 0.4), transparent 70%),
+    radial-gradient(30% 18% at 100% 0%, rgb(235 245 255 / 0.35), transparent 70%);
+  box-shadow:
+    inset 0 0 0 1.5px rgb(200 228 255 / 0.55),
+    inset 0 -10px 24px -12px rgb(190 225 255 / 0.7);
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .season-snow-cap {
+    animation: season-snow-cap 700ms var(--ease-out) 150ms both;
+  }
+}
+
+@keyframes season-snow-cap {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scaleY(0.4);
+    transform-origin: top;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}

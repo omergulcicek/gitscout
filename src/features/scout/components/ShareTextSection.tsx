@@ -29,7 +29,7 @@ const TAB_LABELS = {
 } as const satisfies Record<ShareTab, () => string>
 
 /** Sekme logosu; X ve GitHub'ın koyu logoları koyu temada beyaza döner. */
-function TabLogo({ tab }: { tab: ShareTab }) {
+export function TabLogo({ tab }: { tab: ShareTab }) {
   if (tab === "linkedin") return <Linkedin aria-hidden className="size-3.5" />
   if (tab === "readme") return <GithubLight aria-hidden className="size-3.5 dark:invert" />
   return (
@@ -83,26 +83,33 @@ export function ShareTextSection({ id, player }: { id?: string; player: PlayerDe
       {tab === "readme" ? (
         <ReadmeBadgeContent player={player} />
       ) : (
-        <SharePost player={player} platform={tab} locale={locale} onLocaleChange={setLocale} />
+        <SharePost
+          login={player.login}
+          text={shareText(player, tab, locale)}
+          platform={tab}
+          locale={locale}
+          onLocaleChange={setLocale}
+        />
       )}
     </section>
   )
 }
 
 type SharePostProps = {
-  player: PlayerDetail
+  /** Whose card is shared, for the analytics event. */
+  login: string
+  text: string
   platform: SharePlatform
   locale: ShareLocale
   onLocaleChange: (locale: ShareLocale) => void
 }
 
 /** Seçilen platformun hazır metni, sağ üstünde dil seçimi ve kopyalama butonu. */
-function SharePost({ player, platform, locale, onLocaleChange }: SharePostProps) {
+export function SharePost({ login, text, platform, locale, onLocaleChange }: SharePostProps) {
   const [copied, setCopied] = useState(false)
-  const text = shareText(player, platform, locale)
 
   const copy = () => {
-    trackEvent({ name: "card_shared", login: player.login, target: `copy_${platform}` })
+    trackEvent({ name: "card_shared", login, target: `copy_${platform}` })
     navigator.clipboard
       .writeText(text)
       .then(() => {

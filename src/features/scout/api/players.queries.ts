@@ -7,6 +7,7 @@ import {
   getLeaderboardSlice,
   getPlayer,
   getPlayersByLogin,
+  getSeason,
   getSpecialCardsSample,
   getTopCountries,
   searchPlayers
@@ -92,5 +93,12 @@ export const specialCardsSampleQueryOptions = () =>
   queryOptions({
     queryKey: playerKeys.specialSample(),
     queryFn: ({ signal }) => getSpecialCardsSample({ signal }),
+    staleTime: DAY_MS
+  })
+
+export const seasonQueryOptions = (username: string, year?: number) =>
+  queryOptions({
+    queryKey: playerKeys.season(username, year),
+    queryFn: ({ signal }) => getSeason({ data: { username, year }, signal }),
     staleTime: DAY_MS
   })

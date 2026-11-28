@@ -4,7 +4,6 @@ import { cn } from "cn"
 
 import { getLangParam } from "@/helpers/localized-url"
 
-import { GithubStarCta } from "@/components/shared/GithubStarCta"
 import { buttonVariants } from "@/components/ui/button"
 import { BadgeList } from "@/features/scout/components/BadgeList"
 import { Benchmarks } from "@/features/scout/components/Benchmarks"
@@ -19,6 +18,7 @@ import { PlayerRank } from "@/features/scout/components/PlayerRank"
 import { PositionBreakdown } from "@/features/scout/components/PositionBreakdown"
 import { RevealConfetti } from "@/features/scout/components/RevealConfetti"
 import { ScoutNote } from "@/features/scout/components/ScoutNote"
+import { SeasonLinks } from "@/features/scout/components/SeasonLinks"
 import { ShareTextSection } from "@/features/scout/components/ShareTextSection"
 import { SimilarPlayers } from "@/features/scout/components/SimilarPlayers"
 import { StatRadar } from "@/features/scout/components/StatRadar"
@@ -146,7 +146,7 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
             isCopying={isCopying}
             shareTextsId={SHARE_TEXTS_ID}
           />
-          <GithubStarCta />
+          <SeasonLinks login={player.login} seasons={player.seasons} />
           <div className="flex flex-col items-center gap-1">
             <span className="inline-flex items-center gap-1">
               <a
