@@ -24,7 +24,7 @@ const CHROME_NARROW = 56 + 200
 const CHARGE_MS = 2000
 const SHATTER_MS = 1000
 /** How long the numbers stay before the card flies home on its own. */
-const FACTS_MS = 1600
+const FACTS_MS = 2100
 const FLY_MS = 700
 const COUNT_MS = 700
 

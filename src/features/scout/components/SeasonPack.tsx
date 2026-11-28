@@ -130,7 +130,11 @@ const SHATTER = (() => {
         center,
         radius,
         drops,
-        vx: (dx / length) * speed,
+        // A dropping piece is thrown hard to its own side, so it lands by the screen's edge and leaves the
+        // middle, where the numbers are, clear.
+        vx: drops
+          ? Math.sign(dx || 1) * (0.75 + Math.abs(wobble(index + 800)) * 0.35)
+          : (dx / length) * speed,
         vy: (dy / length) * speed - (drops ? 1.1 : 0.2),
         spin: wobble(index + 200) * (drops ? 0.5 : 1.2),
         gravity: drops ? 0.0034 : 0.0006,
