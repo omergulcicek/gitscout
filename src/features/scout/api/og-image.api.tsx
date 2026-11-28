@@ -10,6 +10,7 @@ import {
 import { OgDuelImage } from "@/features/scout/components/OgDuelImage"
 import { OgImage } from "@/features/scout/components/OgImage"
 import { canonicalUrl } from "@/features/scout/helpers/canonical-url"
+import { ogVersion } from "@/features/scout/helpers/og-version"
 import { usernameSchema } from "@/features/scout/schemas/player.schema"
 
 /** A 280px avatar is ~30 KB; anything far bigger isn't an avatar and would bloat the render. */
@@ -66,8 +67,6 @@ export function redirectTo(location: string): Response {
   })
 }
 
-const version = (fetchedAt: string) => String(Date.parse(fetchedAt))
-
 /** `url`'s path with its last `count` segments replaced by the stored logins (their real casing). */
 function withLogins(url: URL, logins: string[]): string {
   const segments = url.pathname.split("/")
@@ -85,7 +84,7 @@ export async function playerOgResponse(username: string, url: URL): Promise<Resp
   if (!player) return notFound()
   const canonical = canonicalUrl(
     url,
-    { v: version(player.fetchedAt) },
+    { v: ogVersion(Date.parse(player.fetchedAt)) },
     withLogins(url, [player.login])
   )
   if (canonical) return redirectTo(canonical)
@@ -111,10 +110,9 @@ export async function duelOgResponse(
   ])
   if (!left || !right) return notFound()
   // Same version as the duel page's og:image: the newer of the two cards.
-  const latest = Math.max(Date.parse(left.fetchedAt), Date.parse(right.fetchedAt))
   const canonical = canonicalUrl(
     url,
-    { v: String(latest) },
+    { v: ogVersion(Date.parse(left.fetchedAt), Date.parse(right.fetchedAt)) },
     withLogins(url, [left.login, right.login])
   )
   if (canonical) return redirectTo(canonical)
@@ -138,7 +136,7 @@ export async function countryOgResponse(slug: string, url: URL): Promise<Respons
   if (!top) return notFound()
   const segments = url.pathname.split("/")
   const path = [...segments.slice(0, -1), top.slug].join("/")
-  const canonical = canonicalUrl(url, { v: String(top.total) }, path)
+  const canonical = canonicalUrl(url, { v: ogVersion(top.total) }, path)
   if (canonical) return redirectTo(canonical)
 
   const shown = top.players.slice(0, OG_COUNTRY_FACES)

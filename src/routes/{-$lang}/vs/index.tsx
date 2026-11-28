@@ -11,6 +11,7 @@ import {
 } from "@/features/scout/api/players.queries"
 import { DuelPicker } from "@/features/scout/components/DuelPicker"
 import { DuelPickerSkeleton } from "@/features/scout/components/DuelPickerSkeleton"
+import { ogVersion } from "@/features/scout/helpers/og-version"
 import { duelSearchSchema } from "@/features/scout/schemas/duel-search.schema"
 import * as m from "@/paraglide/messages.js"
 
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/{-$lang}/vs/")({
     if (!challenger)
       return { meta: pageMeta(m.meta_duel(), m.meta_duel_description(), "vs"), links }
     const prefix = params.lang ? `/${params.lang}` : ""
-    const image = `${siteConfig.url}${prefix}/og/${challenger.login}?v=${Date.parse(challenger.fetchedAt)}`
+    const image = `${siteConfig.url}${prefix}/og/${challenger.login}?v=${ogVersion(Date.parse(challenger.fetchedAt))}`
     return {
       meta: [
         ...pageMeta(
