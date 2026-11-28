@@ -1337,7 +1337,7 @@
 .season-pack-crack {
   fill: none;
   stroke: var(--frame-1);
-  stroke-width: 2.5;
+  stroke-width: 1.8;
   stroke-linejoin: round;
   stroke-linecap: round;
   stroke-dasharray: 1;
@@ -1397,14 +1397,14 @@
     animation: season-card-hatch 2000ms linear both;
   }
 
-  /* The cracks spread one after another through the second half. */
+  /* The cracks spread out from the impact, one after another, through the second half. */
   .season-pack-root[data-pack="charge"] .season-pack-crack {
     animation: season-pack-crack 260ms ease-out both;
-    animation-delay: calc(900ms + var(--i, 0) * 70ms);
+    animation-delay: calc(700ms + var(--i, 0) * 9ms);
   }
 
   .season-pack-shard {
-    animation: season-pack-shard 850ms cubic-bezier(0.2, 0.6, 0.35, 1) var(--delay, 0ms) both;
+    animation: season-pack-shard 1000ms cubic-bezier(0.15, 0.7, 0.3, 1) var(--delay, 0ms) both;
   }
 
   .season-ceremony[data-stage="shatter"] .season-card-emerge {

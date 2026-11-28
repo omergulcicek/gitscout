@@ -32,77 +32,96 @@ const wobble = (seed: number) => {
 }
 
 /**
- * The pieces the pack breaks into, like an eggshell: a 3 × 4 grid whose inner corners are pushed about and
- * whose edges kink in the middle, so no two pieces are the same shape. Neighbours share their edges exactly.
+ * The pieces the pack breaks into, like a shell struck just above its middle: cracks run out from the
+ * impact at uneven angles and rings of cracks cross them at uneven distances, so the pieces are small and
+ * many near the impact and larger towards the edges, no two the same. Neighbours share their edges exactly;
+ * the outer ring lies past the pack's outline, which trims it.
  */
 const SHATTER = (() => {
-  const xs = [0, 107, 213, 320] as const
-  const ys = [0, 120, 240, 360, 480] as const
-  const inner = (index: number, length: number) => index > 0 && index < length - 1
-  const corner = (row: number, col: number): Point => [
-    (xs[col] ?? 0) + (inner(col, xs.length) ? wobble(row * 7 + col) * 26 : 0),
-    (ys[row] ?? 0) + (inner(row, ys.length) ? wobble(row * 11 + col * 3 + 1) * 22 : 0)
-  ]
-  // The kink in the middle of an edge, pushed sideways; edges on the pack's outline stay straight.
-  const kink = (a: Point, b: Point, seed: number, straight: boolean): Point => {
-    const mid: Point = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
-    if (straight) return mid
-    const length = Math.hypot(b[0] - a[0], b[1] - a[1])
-    const push = wobble(seed) * 14
-    return [mid[0] + ((b[1] - a[1]) / length) * push, mid[1] - ((b[0] - a[0]) / length) * push]
+  const impact: Point = [PACK_W * 0.47, PACK_H * 0.42]
+  const spokes = 13
+  // Crack angles: evenly spread, then each nudged so the slices differ in width.
+  const angles = Array.from(
+    { length: spokes },
+    (_, index) => ((index + wobble(index + 300) * 0.38) / spokes) * Math.PI * 2
+  )
+  // Ring distances from the impact; each crack crosses them a little nearer or farther.
+  const rings = [0, 34, 82, 150, 240, 700]
+  const vertex = (spoke: number, ring: number): Point => {
+    const angle = angles[spoke % spokes] ?? 0
+    const base = rings[ring] ?? 0
+    const radius =
+      ring === 0 || ring === rings.length - 1
+        ? base
+        : base * (1 + wobble(spoke * 7 + ring * 31) * 0.22)
+    return [impact[0] + Math.cos(angle) * radius, impact[1] + Math.sin(angle) * radius]
   }
-  const across = (row: number, col: number) =>
-    kink(corner(row, col), corner(row, col + 1), row * 13 + col + 50, !inner(row, ys.length))
-  const down = (row: number, col: number) =>
-    kink(corner(row, col), corner(row + 1, col), row * 17 + col + 90, !inner(col, xs.length))
+  // A kink in the middle of a ring's segment, so its cracks aren't straight lines.
+  const ringKink = (spoke: number, ring: number): Point => {
+    const a = vertex(spoke, ring)
+    const b = vertex(spoke + 1, ring)
+    const mid: Point = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
+    const out = Math.hypot(mid[0] - impact[0], mid[1] - impact[1]) || 1
+    const push = wobble(spoke * 13 + ring * 5 + 700) * Math.min(10, (rings[ring] ?? 0) * 0.12)
+    return [
+      mid[0] + ((mid[0] - impact[0]) / out) * push,
+      mid[1] + ((mid[1] - impact[1]) / out) * push
+    ]
+  }
 
-  const pieces: { points: Point[]; center: Point }[] = []
-  const cracks: Point[][] = []
-  for (let row = 0; row < ys.length - 1; row++) {
-    for (let col = 0; col < xs.length - 1; col++) {
-      const points = [
-        corner(row, col),
-        across(row, col),
-        corner(row, col + 1),
-        down(row, col + 1),
-        corner(row + 1, col + 1),
-        across(row + 1, col),
-        corner(row + 1, col),
-        down(row, col)
-      ]
+  const pieces: { points: Point[]; center: Point; size: number }[] = []
+  const cracks: { points: Point[]; order: number }[] = []
+  for (let ring = 0; ring < rings.length - 1; ring++) {
+    for (let spoke = 0; spoke < spokes; spoke++) {
+      const points: Point[] =
+        ring === 0
+          ? [impact, vertex(spoke, 1), ringKink(spoke, 1), vertex(spoke + 1, 1)]
+          : [
+              vertex(spoke, ring),
+              vertex(spoke, ring + 1),
+              ...(ring + 1 < rings.length - 1 ? [ringKink(spoke, ring + 1)] : []),
+              vertex(spoke + 1, ring + 1),
+              vertex(spoke + 1, ring),
+              ringKink(spoke, ring)
+            ]
       const center: Point = [
         points.reduce((sum, point) => sum + point[0], 0) / points.length,
         points.reduce((sum, point) => sum + point[1], 0) / points.length
       ]
-      pieces.push({ points, center })
-      // Each inner edge once: the piece's bottom and right edges, where they aren't the outline.
-      if (inner(row + 1, ys.length)) {
-        cracks.push([corner(row + 1, col), across(row + 1, col), corner(row + 1, col + 1)])
-      }
-      if (inner(col + 1, xs.length)) {
-        cracks.push([corner(row, col + 1), down(row, col + 1), corner(row + 1, col + 1)])
+      pieces.push({ points, center, size: rings[ring + 1] ?? 0 })
+      // The crack running out along this spoke, and the ring crack closing the piece from outside.
+      cracks.push({ points: [vertex(spoke, ring), vertex(spoke, ring + 1)], order: ring * 2 })
+      if (ring + 1 < rings.length - 1) {
+        cracks.push({
+          points: [vertex(spoke, ring + 1), ringKink(spoke, ring + 1), vertex(spoke + 1, ring + 1)],
+          order: ring * 2 + 1
+        })
       }
     }
   }
 
   return {
-    pieces: pieces.map(({ points, center }, index) => {
-      // Outwards from the middle of the pack, a little downwards as if falling, each its own spin.
-      const dx = center[0] - PACK_W / 2
-      const dy = center[1] - PACK_H / 2
+    pieces: pieces.map(({ points, center, size }, index) => {
+      // Outwards from the impact, a little downwards as if falling; the small pieces near it fly farthest
+      // and spin fastest.
+      const dx = center[0] - impact[0]
+      const dy = center[1] - impact[1]
       const length = Math.hypot(dx, dy) || 1
-      const distance = 320 + ((index * 53) % 180)
+      const near = size <= 82
+      const distance = (near ? 520 : 340) + Math.abs(wobble(index + 500)) * 260
       return {
         clip: polygon(points.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)),
         style: {
           "--dx": `${((dx / length) * distance).toFixed(0)}px`,
-          "--dy": `${((dy / length) * distance + 80).toFixed(0)}px`,
-          "--spin": `${(wobble(index + 200) * 160).toFixed(0)}deg`,
-          "--delay": `${(index % 4) * 25}ms`
+          "--dy": `${((dy / length) * distance + 90).toFixed(0)}px`,
+          "--spin": `${(wobble(index + 200) * (near ? 540 : 220)).toFixed(0)}deg`,
+          "--delay": `${Math.round(Math.abs(wobble(index + 900)) * 70)}ms`
         }
       }
     }),
-    cracks: cracks.map((line) => line.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" "))
+    cracks: cracks
+      .sort((a, b) => a.order - b.order)
+      .map(({ points }) => points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" "))
   }
 })()
 
@@ -162,7 +181,7 @@ export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProp
             style={{ ...piece.style, clipPath: piece.clip }}
           >
             <span className="absolute inset-0" style={{ clipPath: SEALED_CLIP }}>
-              {face}
+              <PackFace login={login} year={year} voice={voice} lite />
             </span>
           </span>
         ))}
@@ -213,13 +232,28 @@ export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProp
 }
 
 /** Everything printed on the pack: drawn on the pack itself and again on each of its pieces. */
-function PackFace({ login, year, voice }: { login: string; year: number; voice: "own" | "other" }) {
+function PackFace({
+  login,
+  year,
+  voice,
+  lite = false
+}: {
+  login: string
+  year: number
+  voice: "own" | "other"
+  /** Without the moving lights: the pieces are many and only on screen for a moment. */
+  lite?: boolean
+}) {
   return (
     <>
       <span aria-hidden className="season-pack-foil absolute inset-0" />
-      <span aria-hidden className="season-pack-holo absolute inset-0" />
-      <span aria-hidden className="season-pack-glare absolute inset-0" />
-      <span aria-hidden className="season-pack-sweep absolute inset-0" />
+      {lite ? null : (
+        <>
+          <span aria-hidden className="season-pack-holo absolute inset-0" />
+          <span aria-hidden className="season-pack-glare absolute inset-0" />
+          <span aria-hidden className="season-pack-sweep absolute inset-0" />
+        </>
+      )}
       <span
         aria-hidden
         className="season-pack-crimp season-pack-crimp-top absolute inset-x-0 top-0 h-[22px]"

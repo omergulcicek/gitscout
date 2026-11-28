@@ -22,7 +22,7 @@ const CHROME_NARROW = 56 + 200
 
 /** The pack trembles, faster and faster, while it cracks; then it breaks and the card comes out. */
 const CHARGE_MS = 2000
-const SHATTER_MS = 900
+const SHATTER_MS = 1000
 /** How long the numbers stay before the card flies home on its own. */
 const FACTS_MS = 3200
 const FLY_MS = 700
