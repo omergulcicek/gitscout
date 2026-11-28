@@ -22,17 +22,20 @@ const MUTED = "#a3a3a3"
 /**
  * Rows of faces from the top of the ranking down: how many fit in each row and how big they are.
  * The first row also shows ratings and names. Satori adds the ring to the size, so the counts are
- * worked out with it to stay inside the 1056px between the safe margins.
+ * worked out with it to stay inside the 1008px between the safe margins.
  */
 const TIERS = [
-  { count: 4, size: 112, gap: 12 },
-  { count: 14, size: 60, gap: 10 },
-  { count: 17, size: 48, gap: 10 },
-  { count: 21, size: 38, gap: 8 }
+  { count: 4, size: 104, gap: 12 },
+  { count: 13, size: 60, gap: 10 },
+  { count: 16, size: 48, gap: 10 },
+  { count: 20, size: 38, gap: 8 }
 ] as const
 
+/** Side margin kept clear: platforms crop previews at the edges, some to a square. */
+const SAFE_X = 96
+
 /** Width of one of the top four: the face, its ring and room for a name next to it. */
-const LEADER_WIDTH = 255
+const LEADER_WIDTH = 243
 
 /** How many faces the preview draws. */
 export const OG_COUNTRY_FACES = TIERS.reduce((sum, tier) => sum + tier.count, 0)
@@ -62,7 +65,7 @@ export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
         flexDirection: "column",
         justifyContent: "center",
         gap: 22,
-        padding: "0 72px",
+        padding: `0 ${SAFE_X}px`,
         backgroundColor: "#0b0b0c",
         backgroundImage: "radial-gradient(circle at 600px 330px, #1c1c22, #0b0b0c 560px)",
         color: "#fafafa",
@@ -140,7 +143,7 @@ function Leader({ player, avatar }: { player: RankedPlayer; avatar: string | nul
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: LEADER_WIDTH }}>
       <Face player={player} avatar={avatar} size={TIERS[0].size} />
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 123 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 119 }}>
         {/* Built like the site's rating chip: the card's frame around its face, so the ink always contrasts. */}
         <div
           style={{
