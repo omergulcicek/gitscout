@@ -6,6 +6,7 @@ import { Shuffle } from "lucide-react"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { Button } from "@/components/ui/button"
+import { CardTilt } from "@/features/scout/components/CardTilt"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -35,7 +36,9 @@ export function FeaturedCard({ players }: FeaturedCardProps) {
       >
         {/* `key` her değişimde animasyonu yeniden başlatır; ilk yüklemede animasyon yok, LCP etkilenmez. */}
         <div key={offset} className={offset > 0 ? "card-swap" : undefined}>
-          <PlayerCard player={player} />
+          <CardTilt>
+            <PlayerCard player={player} />
+          </CardTilt>
         </div>
       </Link>
       <div className="flex items-center justify-between gap-3">

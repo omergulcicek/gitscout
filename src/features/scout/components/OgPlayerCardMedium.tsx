@@ -1,4 +1,8 @@
-import { ogStatColor, RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
+import {
+  OgStatPips,
+  ogStatValueColor,
+  RARITY_COLORS
+} from "@/features/scout/components/OgPlayerCard"
 import { BADGE_CARD_SIZES, BADGE_SIGNATURE } from "@/features/scout/constants/badge.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { drawableName, fitCardName } from "@/features/scout/helpers/card-name"
@@ -120,6 +124,7 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
             display: "block",
             width: TEXT_WIDTH,
             marginTop: 2,
+            flexShrink: 0,
             fontSize: 11,
             color: colors.muted,
             whiteSpace: "nowrap",
@@ -134,13 +139,15 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
           style={{
             display: "flex",
             height: 1,
+            flexShrink: 0,
             backgroundColor: colors.muted,
-            margin: "10px 0 8px",
+            margin: "8px 0 6px",
             opacity: 0.4
           }}
         />
 
-        <div style={{ display: "flex", flexWrap: "wrap", rowGap: 8 }}>
+        {/* Tighter rows than before: the tier pips under each value need the room in the fixed 262px badge. */}
+        <div style={{ display: "flex", flexWrap: "wrap", rowGap: 4 }}>
           {STAT_ORDER.map((key) => {
             const value = player.stats[key].value
             return (
@@ -160,11 +167,12 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
                   style={{
                     fontSize: 17,
                     fontWeight: 700,
-                    color: ogStatColor(player.rarity, value)
+                    color: ogStatValueColor(player.rarity, value)
                   }}
                 >
                   {String(value)}
                 </div>
+                <OgStatPips rarity={player.rarity} value={value} />
               </div>
             )
           })}
@@ -174,7 +182,7 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
           style={{
             display: "flex",
             justifyContent: "center",
-            marginTop: 10,
+            marginTop: 6,
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: 1,

@@ -9,6 +9,7 @@ import { BadgeList } from "@/features/scout/components/BadgeList"
 import { Benchmarks } from "@/features/scout/components/Benchmarks"
 import { BirthdayConfetti } from "@/features/scout/components/BirthdayConfetti"
 import { CardActions } from "@/features/scout/components/CardActions"
+import { CardTilt } from "@/features/scout/components/CardTilt"
 import { CountryLink } from "@/features/scout/components/CountryLink"
 import { DreamTeamSection } from "@/features/scout/components/DreamTeamSection"
 import { GetYourCard } from "@/features/scout/components/GetYourCard"
@@ -132,7 +133,9 @@ export function PlayerDetail({ username }: PlayerDetailProps) {
             />
             <div className="card-lift relative">
               <div className={revealing ? "card-reveal" : undefined}>
-                <PlayerCard player={shownCard} ref={cardRef} occasion={shownOccasion} />
+                <CardTilt>
+                  <PlayerCard player={shownCard} ref={cardRef} occasion={shownOccasion} />
+                </CardTilt>
               </div>
             </div>
           </div>

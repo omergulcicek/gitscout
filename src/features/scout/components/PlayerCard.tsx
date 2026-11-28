@@ -8,10 +8,10 @@ import type { Team } from "@/constants/team.constants"
 import { avatarSrc } from "@/helpers/avatar-src"
 
 import { BadgeIcon } from "@/features/scout/components/BadgeIcon"
+import { StatPips } from "@/features/scout/components/StatPips"
 import { CARD_OCCASIONS } from "@/features/scout/constants/card-occasion.constants"
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
-import { STAT_TIER_TEXT } from "@/features/scout/constants/stat-tier.constants"
 import { TEAM_THEMES } from "@/features/scout/constants/team-theme.constants"
 import { fitCardName } from "@/features/scout/helpers/card-name"
 import { countryName, playerCountry } from "@/features/scout/helpers/player-country"
@@ -102,11 +102,22 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
         })}
       </figcaption>
 
+      {/* Finish on the frame (the Icon card's foil); the face sits above it. */}
+      <div
+        aria-hidden
+        className="scout-card-foil pointer-events-none absolute inset-0 rounded-[28px]"
+      />
+
       {/* İç çerçeve: dış radius = iç radius (20px) + padding (8px). */}
       <div className="scout-card-inner relative flex min-h-0 flex-1 flex-col rounded-[20px] px-5 pt-5 pb-4">
         <div
           aria-hidden
           className="scout-card-texture pointer-events-none absolute inset-0 rounded-[20px]"
+        />
+        {/* Rarity finish on the face: brushed silver, the Icon card's foil. Under the text. */}
+        <div
+          aria-hidden
+          className="scout-card-finish pointer-events-none absolute inset-0 rounded-[20px]"
         />
         {Decorations ? <Decorations /> : null}
         {team ? <TeamDecorations team={team} /> : null}
@@ -149,15 +160,15 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           )}
         </div>
 
-        {/* The avatar keeps one size on every card; the name below always has room for two lines. */}
-        <div className="relative mt-3 flex h-31 shrink-0 justify-center">
+        {/* The portrait keeps one size on every card (124px photo inside its ring); the name always has room for two lines. */}
+        <div className="relative mt-3 flex h-33.5 shrink-0 justify-center">
           <img
             src={avatarSrc(player.avatarUrl, 152)}
             alt={m.avatar_alt({ name: player.name })}
             crossOrigin="anonymous"
             width={152}
             height={152}
-            className="scout-card-avatar aspect-square h-full w-auto rounded-full object-cover"
+            className="scout-card-portrait aspect-square h-full w-auto rounded-full object-cover"
           />
         </div>
 
@@ -189,18 +200,19 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           {STAT_ORDER.map((key) => {
             const stat = player.stats[key]
             return (
-              <div key={key} className="flex flex-col items-center gap-0.5 py-1">
+              <div key={key} className="flex flex-col items-center gap-1 py-0.5">
                 <dt className="scout-card-muted text-[10px] font-semibold tracking-wider">
                   {statShort(key)}
                 </dt>
                 <dd
                   className={cn(
                     "font-mono text-xl leading-none font-bold tabular-nums",
-                    STAT_TIER_TEXT[statTier(stat.value)]
+                    statTier(stat.value) === "elite" && "scout-card-accent"
                   )}
                 >
                   {stat.value}
                 </dd>
+                <StatPips value={stat.value} />
               </div>
             )
           })}
@@ -230,6 +242,11 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
             </ul>
           ) : null}
         </div>
+        {/* Light that follows the pointer on showcase cards; hidden at rest and in downloads. */}
+        <div
+          aria-hidden
+          className="scout-card-glare pointer-events-none absolute inset-0 rounded-[20px]"
+        />
       </div>
     </figure>
   )

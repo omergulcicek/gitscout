@@ -1,5 +1,6 @@
 import { BADGE_CARD_SIZES } from "@/features/scout/constants/badge.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
+import { STAT_PIP_COUNT, STAT_TIER_PIPS } from "@/features/scout/constants/stat-tier.constants"
 import { drawableName, drawableText, fitCardName } from "@/features/scout/helpers/card-name"
 import { clubLabel, rarityLabel, statShort, titleText } from "@/features/scout/helpers/player-text"
 import { statTier } from "@/features/scout/helpers/stat-tier"
@@ -55,25 +56,32 @@ export const RARITY_COLORS: Record<
   }
 }
 
-/** Kart üzerindeki istatistik renkleri: koyu (ikon) ve metal zemin için ayrı tonlar. */
-const TIER_ON_DARK = {
-  elite: "#4ade80",
-  great: "#a3e635",
-  good: "#facc15",
-  fair: "#fb923c",
-  poor: "#f87171"
-}
-const TIER_ON_METAL = {
-  elite: "#14532d",
-  great: "#365314",
-  good: "#713f12",
-  fair: "#7c2d12",
-  poor: "#7f1d1d"
+/** Stat values in the card's ink; a 90+ stat takes the rating's accent, as on the site card. */
+export function ogStatValueColor(rarity: Rarity, value: number): string {
+  const colors = RARITY_COLORS[rarity]
+  return statTier(value) === "elite" ? colors.accent : colors.ink
 }
 
-/** Stat değerinin kart zeminine göre rengi; orta boy README kartı da aynı tonları kullanır. */
-export function ogStatColor(rarity: Rarity, value: number): string {
-  return (rarity === "icon" ? TIER_ON_DARK : TIER_ON_METAL)[statTier(value)]
+/** Satori twin of the site's `StatPips`: five bars under a stat, the filled ones show its tier. */
+export function OgStatPips({ rarity, value }: { rarity: Rarity; value: number }) {
+  const filled = STAT_TIER_PIPS[statTier(value)]
+  const ink = RARITY_COLORS[rarity].ink
+  return (
+    <div style={{ display: "flex", gap: 2, marginTop: 4 }}>
+      {Array.from({ length: STAT_PIP_COUNT }, (_, index) => (
+        <div
+          key={index}
+          style={{
+            width: 6,
+            height: 3,
+            borderRadius: 2,
+            backgroundColor: ink,
+            opacity: index < filled ? 1 : 0.2
+          }}
+        />
+      ))}
+    </div>
+  )
 }
 
 type OgPlayerCardProps = {
@@ -151,20 +159,34 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
           </div>
         </div>
 
-        {/* Same 124px avatar as the site card, ring included. */}
+        {/* Same portrait as the site card: a 124px photo inside a 134px ring. */}
         <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
           {avatar ? (
-            <img
-              src={avatar}
-              width={114}
-              height={114}
-              style={{ borderRadius: 999, border: `5px solid ${colors.frame[1]}` }}
-            />
+            // A gap in the face colour, then a ring in the frame's metal, like the site's portrait.
+            <div
+              style={{
+                display: "flex",
+                padding: 2,
+                borderRadius: 999,
+                backgroundImage: `linear-gradient(145deg, ${colors.frame[0]}, ${colors.frame[1]})`
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  padding: 3,
+                  borderRadius: 999,
+                  backgroundColor: colors.face[0]
+                }}
+              >
+                <img src={avatar} width={124} height={124} style={{ borderRadius: 999 }} />
+              </div>
+            </div>
           ) : (
             <div
               style={{
-                width: 124,
-                height: 124,
+                width: 134,
+                height: 134,
                 borderRadius: 999,
                 backgroundColor: colors.muted
               }}
@@ -232,11 +254,12 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
                 style={{
                   fontSize: 19,
                   fontWeight: 700,
-                  color: ogStatColor(player.rarity, player.stats[key].value)
+                  color: ogStatValueColor(player.rarity, player.stats[key].value)
                 }}
               >
                 {String(player.stats[key].value)}
               </div>
+              <OgStatPips rarity={player.rarity} value={player.stats[key].value} />
             </div>
           ))}
         </div>
