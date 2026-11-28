@@ -734,6 +734,5 @@
   "top_podium": "Top {count}",
   "top_locked_title": "Top GitHub developers in {country}",
   "top_locked_lead": "This page opens once {min} developers from here join Gitscout. {count} so far.",
-  "top_locked_members": "Here so far",
-  "og_top_country_title": "{country} – Top developers"
+  "top_locked_members": "Here so far"
 }

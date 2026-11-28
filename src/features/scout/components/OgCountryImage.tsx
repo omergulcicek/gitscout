@@ -1,6 +1,8 @@
+import type { ReactNode } from "react"
+
 import * as FLAG_SVGS from "country-flag-icons/string/3x2"
 
-import { OG_FONT_FAMILY } from "@/lib/og-image"
+import { OG_FONT_FAMILY, OG_SIZE } from "@/lib/og-image"
 
 import { OgLink } from "@/features/scout/components/OgLink"
 import { RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
@@ -11,9 +13,10 @@ import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
 /**
- * Link preview for a country page (1200×630): the country's developers as faces, biggest at the top of
- * the ranking and smaller further down, so "top 100" reads as a crowd rather than four cards. The same
- * layout serves open and locked countries. Drawn with Satori: flex layout and inline styles only.
+ * Link preview for a country page (1200×630), centered: the brand line, the flag and country name, then
+ * the country's developers as faces, biggest at the top of the ranking and smaller further down, so
+ * "top 100" reads as a crowd. The same layout serves open and locked countries. Drawn with Satori:
+ * flex layout and inline styles only.
  */
 
 const GOLD = "#f6d77c"
@@ -22,7 +25,8 @@ const MUTED = "#a3a3a3"
 /**
  * Rows of faces from the top of the ranking down: how many fit in each row and how big they are.
  * The first row also shows ratings and names. Satori adds the ring to the size, so the counts are
- * worked out with it to stay inside the 1008px between the safe margins.
+ * worked out with it to keep every row within 1008px: a 96px margin on each side, since platforms crop
+ * previews at the edges.
  */
 const TIERS = [
   { count: 4, size: 104, gap: 12 },
@@ -30,9 +34,6 @@ const TIERS = [
   { count: 16, size: 48, gap: 10 },
   { count: 20, size: 38, gap: 8 }
 ] as const
-
-/** Side margin kept clear: platforms crop previews at the edges, some to a square. */
-const SAFE_X = 96
 
 /** Width of one of the top four: the face, its ring and room for a name next to it. */
 const LEADER_WIDTH = 243
@@ -51,7 +52,6 @@ type OgCountryImageProps = {
 
 export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
   const name = countryName(top.country)
-  const title = m.og_top_country_title({ country: name })
   const rows = splitIntoTiers(top.players)
 
   return (
@@ -63,62 +63,71 @@ export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
         flexDirection: "column",
         justifyContent: "center",
         gap: 22,
-        padding: `0 ${SAFE_X}px`,
         backgroundColor: "#0b0b0c",
         backgroundImage: "radial-gradient(circle at 600px 330px, #1c1c22, #0b0b0c 560px)",
         color: "#fafafa",
         fontFamily: OG_FONT_FAMILY
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <Brand />
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Flag country={top.country} />
-          <div
-            style={{
-              display: "flex",
-              fontSize: titleSize(title),
-              fontWeight: 800,
-              letterSpacing: -0.5
-            }}
-          >
-            {title}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <Centered>
+          <Brand />
+        </Centered>
+        <Centered>
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <Flag country={top.country} />
+            <div style={{ display: "flex", fontSize: titleSize(name), fontWeight: 800 }}>
+              {name}
+            </div>
           </div>
-        </div>
+        </Centered>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {rows.map(({ players, size, gap, offset }, tier) => (
-          <div key={offset} style={{ display: "flex", gap, marginBottom: tier === 0 ? 8 : 0 }}>
-            {players.map((player, index) =>
-              tier === 0 ? (
-                <Leader key={player.login} player={player} avatar={avatars[index] ?? null} />
-              ) : (
-                <Face
-                  key={player.login}
-                  player={player}
-                  avatar={avatars[offset + index] ?? null}
-                  size={size}
-                />
-              )
-            )}
-          </div>
+          <Centered key={offset}>
+            <div style={{ display: "flex", gap, marginBottom: tier === 0 ? 8 : 0 }}>
+              {players.map((player, index) =>
+                tier === 0 ? (
+                  <Leader key={player.login} player={player} avatar={avatars[index] ?? null} />
+                ) : (
+                  <Face
+                    key={player.login}
+                    player={player}
+                    avatar={avatars[offset + index] ?? null}
+                    size={size}
+                  />
+                )
+              )}
+            </div>
+          </Centered>
         ))}
       </div>
 
-      {/* An explicit width: Satori otherwise sizes this row from its widest sibling and the link drifts right. */}
-      <div style={{ display: "flex", justifyContent: "center", width: 1200 - SAFE_X * 2 }}>
+      <Centered>
         <OgLink />
-      </div>
+      </Centered>
     </div>
   )
 }
 
-/** Long country names step the title down so it stays on one line next to the flag. */
-function titleSize(title: string): number {
-  if (title.length <= 40) return 36
-  if (title.length <= 48) return 32
-  return 28
+/**
+ * A full-width row that centers its content. Every row sets its own width: Satori otherwise sizes a
+ * row from its widest sibling, and centered content drifts off the middle.
+ */
+function Centered({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", width: OG_SIZE.width }}>
+      {children}
+    </div>
+  )
+}
+
+/** Long country names step down so they stay on one line next to the flag. */
+function titleSize(name: string): number {
+  if (name.length <= 24) return 44
+  if (name.length <= 34) return 36
+  return 30
 }
 
 type TierRow = { players: RankedPlayer[]; size: number; gap: number; offset: number }
