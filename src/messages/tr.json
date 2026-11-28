@@ -751,10 +751,9 @@
   "season_pack_hint_own": "Sezon kartın bu paketin içinde.",
   "season_pack_hint_other": "Sezon kartı bu paketin içinde.",
   "season_standing_basis": "son 12 ayın aktif günlerine göre",
-  "season_pack_clue_flag": "Ülke: {country}",
-  "season_pack_clue_position": "Alan: {position}",
-  "season_pack_clue_rarity": "Kademe: {rarity}",
   "season_pack_open_label": "{year} sezon paketini aç",
+  "season_pack_skip": "Atla",
+  "season_pack_revealed": "Kart açıldı: {rarity}, {ovr} puan",
   "season_pack_tear": "buradan yırt",
   "season_pack_print": "1 kart · {year} sezonu · № {serial}"
 }
