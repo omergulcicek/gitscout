@@ -51,9 +51,7 @@ type OgCountryImageProps = {
 
 export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
   const name = countryName(top.country)
-  const title = top.unlocked
-    ? m.top_country_title({ country: name, count: top.players.length })
-    : m.top_locked_title({ country: name })
+  const title = m.og_top_country_title({ country: name })
   const rows = splitIntoTiers(top.players)
 
   return (
