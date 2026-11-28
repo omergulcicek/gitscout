@@ -22,7 +22,7 @@ const CHROME_NARROW = 56 + 200
 
 const TEAR_MS = 650
 const DRAW_MS = 900
-const CHARGE_MS = 900
+const CHARGE_MS = 2000
 const FLIP_MS = 700
 /** How long the numbers stay before the card flies home on its own. */
 const FACTS_MS = 3200

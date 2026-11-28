@@ -1389,7 +1389,7 @@
     inset 0 0 0 10px color-mix(in oklab, var(--back-light) 70%, transparent),
     inset 0 0 60px -4px color-mix(in oklab, var(--back-light) 60%, transparent),
     0 0 60px -6px color-mix(in oklab, var(--frame-2) 80%, transparent);
-  transition: box-shadow 900ms ease-in;
+  transition: box-shadow 2000ms ease-in;
 }
 
 .season-card-flipper {
@@ -1495,9 +1495,15 @@
     animation: season-card-draw 900ms cubic-bezier(0.3, 0, 0.2, 1) both;
   }
 
-  /* The card trembles faster as it heats up. */
+  /* The card starts to tremble and shakes harder and harder as it heats up, swelling a little. */
   .season-ceremony[data-stage="charge"] .season-card-flipper {
-    animation: season-card-rumble 140ms linear 300ms infinite;
+    animation:
+      season-card-rumble 110ms linear infinite,
+      season-card-shake-build 2000ms ease-in both;
+  }
+
+  .season-ceremony[data-stage="charge"] .season-card-draw {
+    animation: season-card-swell 2000ms ease-in both;
   }
 
   .season-ceremony[data-stage="flip"] .season-card-flipper {
@@ -1602,16 +1608,43 @@
   }
 }
 
+/* How hard the card shakes, 0–1; registered so it can be animated. */
+@property --shake {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 @keyframes season-card-rumble {
   0%,
   100% {
     transform: none;
   }
   25% {
-    transform: translate(1px, -1px) rotate(0.4deg);
+    transform: translate(calc(var(--shake) * 3px), calc(var(--shake) * -2px))
+      rotate(calc(var(--shake) * 1.4deg));
   }
   75% {
-    transform: translate(-1px, 1px) rotate(-0.4deg);
+    transform: translate(calc(var(--shake) * -3px), calc(var(--shake) * 2px))
+      rotate(calc(var(--shake) * -1.4deg));
+  }
+}
+
+@keyframes season-card-shake-build {
+  0% {
+    --shake: 0.1;
+  }
+  100% {
+    --shake: 1;
+  }
+}
+
+@keyframes season-card-swell {
+  0% {
+    transform: none;
+  }
+  100% {
+    transform: scale(1.04);
   }
 }
 
