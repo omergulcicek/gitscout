@@ -106,8 +106,8 @@ export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
         ))}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22 }}>
-        <span>{m.cta_title()}</span>
+      {/* An explicit width: Satori otherwise sizes this row from its widest sibling and the link drifts right. */}
+      <div style={{ display: "flex", justifyContent: "center", width: 1200 - SAFE_X * 2 }}>
         <OgLink />
       </div>
     </div>
