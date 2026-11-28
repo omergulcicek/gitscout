@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import type { ReactNode } from "react"
+import type { PointerEvent, ReactNode } from "react"
 
 import { Download } from "lucide-react"
-import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
 import { SnowyCard } from "@/features/scout/components/SnowyCard"
@@ -13,12 +12,42 @@ import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
-/** How long each clue (flag, position, tier) stays before the next one. */
-const STEP_MS = 850
+type Stage = "sealed" | "tear" | "flag" | "position" | "rarity" | "burst" | "card"
 
-type Stage = "sealed" | "flag" | "position" | "rarity" | "card"
+/** How long each step of the opening lasts; the whole opening takes about three and a half seconds. */
+const STAGE_MS: Record<Exclude<Stage, "sealed" | "card">, number> = {
+  tear: 500,
+  flag: 700,
+  position: 700,
+  rarity: 800,
+  burst: 450
+}
 
-const SEQUENCE: Stage[] = ["flag", "position", "rarity", "card"]
+const SEQUENCE: Stage[] = ["tear", "flag", "position", "rarity", "burst", "card"]
+
+/** Pack size in px (w-80 × h-120) and the crimp's tooth width and depth. */
+const PACK_W = 320
+const PACK_H = 480
+const TOOTH = 8
+const TOOTH_DEPTH = 5
+
+/** The pack's outline: straight sides, zigzag crimped edges top and bottom like a sealed foil bag. */
+const CRIMP_CLIP = (() => {
+  const top: string[] = []
+  const bottom: string[] = []
+  for (let x = 0, up = true; x <= PACK_W; x += TOOTH / 2, up = !up) {
+    top.push(`${x}px ${up ? 0 : TOOTH_DEPTH}px`)
+    bottom.push(`${PACK_W - x}px ${up ? PACK_H : PACK_H - TOOTH_DEPTH}px`)
+  }
+  return `polygon(${[...top, ...bottom].join(", ")})`
+})()
+
+/** A stable six-digit "serial number" for the print on the pack, the same for a login every time. */
+function serialNumber(login: string): string {
+  let hash = 0
+  for (const char of login.toLowerCase()) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  return String(hash % 1_000_000).padStart(6, "0")
+}
 
 type SeasonPackProps = {
   player: ListPlayer
@@ -32,8 +61,10 @@ type SeasonPackProps = {
 }
 
 /**
- * A sealed pack that opens like a collectible card pack: the flag, then the position, then the tier, then the
- * card itself. With reduced motion the card shows straight away.
+ * A sealed foil pack: tilts and catches the light under the pointer, tears open along the top, shows the
+ * flag, the field and the tier, then bursts in the tier's colour and the card flips in. The tier's colour
+ * appears only at the last clue so nothing gives the card away early. With reduced motion the card shows
+ * straight away.
  */
 export function SeasonPack({ player, year, voice, onOpen, actions }: SeasonPackProps) {
   const [stage, setStage] = useState<Stage>("sealed")
@@ -41,7 +72,7 @@ export function SeasonPack({ player, year, voice, onOpen, actions }: SeasonPackP
   const country = playerCountry(player)
   const Flag = country ? COUNTRY_FLAGS[country] : undefined
   const firstAction = useRef<HTMLButtonElement>(null)
-  // The open button leaves the page with the pack; keyboard focus moves to the card's first download.
+  // The pack leaves the page when it opens; keyboard focus moves to the card's first download.
   const [focusOnReveal, setFocusOnReveal] = useState(false)
 
   useEffect(() => {
@@ -50,17 +81,36 @@ export function SeasonPack({ player, year, voice, onOpen, actions }: SeasonPackP
 
   useEffect(() => {
     if (stage === "sealed" || stage === "card") return
-    const next = SEQUENCE[SEQUENCE.indexOf(stage) + 1] ?? "card"
-    const timer = window.setTimeout(() => setStage(next), STEP_MS)
+    let next = SEQUENCE[SEQUENCE.indexOf(stage) + 1] ?? "card"
+    // A player without a known country skips the flag clue.
+    if (next === "flag" && !Flag) next = "position"
+    const timer = window.setTimeout(() => setStage(next), STAGE_MS[stage])
     return () => window.clearTimeout(timer)
-  }, [stage])
+  }, [stage, Flag])
 
   const open = () => {
+    if (stage !== "sealed") return
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    // A player without a known country skips the flag clue.
-    setStage(reduce ? "card" : Flag ? "flag" : "position")
+    setStage(reduce ? "card" : "tear")
     setFocusOnReveal(true)
     onOpen?.()
+  }
+
+  // Pointer position as CSS variables: the light and the tilt follow it without a re-render.
+  const track = (event: PointerEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = (event.clientX - rect.left) / rect.width
+    const y = (event.clientY - rect.top) / rect.height
+    const style = event.currentTarget.style
+    style.setProperty("--mx", `${x * 100}%`)
+    style.setProperty("--my", `${y * 100}%`)
+    style.setProperty("--px", String(x))
+    style.setProperty("--rx", `${(0.5 - y) * 12}deg`)
+    style.setProperty("--ry", `${(x - 0.5) * 12}deg`)
+  }
+  const untrack = (event: PointerEvent<HTMLButtonElement>) => {
+    const style = event.currentTarget.style
+    for (const name of ["--mx", "--my", "--px", "--rx", "--ry"]) style.removeProperty(name)
   }
 
   if (stage === "card") {
@@ -85,52 +135,110 @@ export function SeasonPack({ player, year, voice, onOpen, actions }: SeasonPackP
   }
 
   const sealed = stage === "sealed"
+  const clue = stage === "flag" || stage === "position" || stage === "rarity"
+  const tinted = stage === "rarity" || stage === "burst"
+
   return (
     <div className="flex flex-col items-center gap-4">
       <div
-        role="img"
-        aria-label={m.season_pack_label({ year })}
-        data-rarity={stage === "rarity" ? player.rarity : undefined}
-        className={cn(
-          "season-pack relative flex h-120 w-80 flex-col items-center justify-center gap-4 overflow-hidden rounded-[28px] p-6 text-center",
-          !sealed && "season-pack-shake"
-        )}
+        data-rarity={tinted ? player.rarity : undefined}
+        data-stage={stage}
+        className="season-pack-stage relative h-120 w-80 max-[351px]:[zoom:0.9]"
       >
-        {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
-        <span lang="en" className="font-mono text-xs tracking-[0.4em] text-white/60 uppercase">
-          Gitscout
-        </span>
-        {sealed ? (
-          <>
-            <span className="font-mono text-7xl font-bold tracking-tight text-white tabular-nums">
-              {year}
-            </span>
-            <span className="text-sm text-white/70">
-              {voice === "own" ? m.season_pack_hint_own() : m.season_pack_hint_other()}
-            </span>
-          </>
-        ) : (
-          // Keyed by stage so each clue plays its entrance again.
-          <span
-            key={stage}
-            className="season-pack-clue flex flex-col items-center gap-3 text-white"
+        {/* The light inside: cold while sealed, the tier's colour only from the last clue on. */}
+        <span aria-hidden className="season-pack-burst pointer-events-none absolute -inset-16" />
+        {/* The shadow lives on a wrapper: the crimp's clip-path would cut it off the pack itself. */}
+        <div className="season-pack-shadow size-full">
+          <button
+            type="button"
+            onClick={open}
+            onPointerMove={track}
+            onPointerLeave={untrack}
+            disabled={!sealed}
+            aria-label={m.season_pack_open_label({ year })}
+            style={{ clipPath: CRIMP_CLIP }}
+            className="season-pack relative block size-full text-start text-white outline-none disabled:cursor-default"
           >
-            {stage === "flag" && Flag ? (
-              <Flag aria-hidden className="h-16 w-auto rounded-md shadow-lg" />
-            ) : null}
-            {stage === "position" ? (
-              <span className="text-4xl font-bold tracking-tight">{player.position}</span>
-            ) : null}
-            {stage === "rarity" ? (
-              <span className="season-pack-tier text-4xl font-bold tracking-tight">
-                {rarityLabel(player.rarity)}
+            <span aria-hidden className="season-pack-foil absolute inset-0" />
+            <span aria-hidden className="season-pack-holo absolute inset-0" />
+            <span aria-hidden className="season-pack-glare absolute inset-0" />
+            <span aria-hidden className="season-pack-sweep absolute inset-0" />
+            <span aria-hidden className="season-pack-crimp absolute inset-x-0 top-0 h-[22px]" />
+            <span aria-hidden className="season-pack-crimp absolute inset-x-0 bottom-0 h-[22px]" />
+
+            {/* Tear strip: flies off first when the pack opens. */}
+            <span
+              aria-hidden
+              className="season-pack-strip absolute inset-x-0 top-[22px] flex h-[26px] items-center gap-2 px-4"
+            >
+              <span className="h-px flex-1 border-t border-dashed border-white/30" />
+              <span className="font-mono text-[9px] tracking-[0.2em] text-white/55 uppercase">
+                {m.season_pack_tear()}
               </span>
-            ) : null}
-          </span>
-        )}
+              <span className="season-pack-notch size-0 border-y-[5px] border-e-[7px] border-y-transparent border-e-white/50" />
+            </span>
+            <span aria-hidden className="season-pack-leak absolute inset-x-6 top-[30px] h-6" />
+
+            <span
+              aria-hidden
+              className="absolute inset-x-0 top-[58px] flex items-center justify-between px-5"
+            >
+              {/* The brand uppercases as English: in Turkish its "i" would turn into "İ". */}
+              <span
+                lang="en"
+                className="font-mono text-[11px] tracking-[0.4em] text-white/70 uppercase"
+              >
+                Gitscout
+              </span>
+              <SnowSeal />
+            </span>
+
+            {/* The card waiting inside, as a raised shape: no colour, so the tier stays a secret. */}
+            <span
+              aria-hidden
+              className="season-pack-silhouette absolute top-[96px] left-1/2 flex h-[290px] w-[200px] -translate-x-1/2 items-center justify-center rounded-[14px]"
+            >
+              {sealed || stage === "tear" ? (
+                <span className="season-pack-year font-mono text-7xl font-bold tabular-nums">
+                  {year}
+                </span>
+              ) : null}
+              {clue ? (
+                // Keyed by stage so each clue plays its entrance again.
+                <span key={stage} className="season-pack-clue flex flex-col items-center gap-3">
+                  {stage === "flag" && Flag ? (
+                    <Flag className="h-14 w-auto rounded-md shadow-lg" />
+                  ) : null}
+                  {stage === "position" ? (
+                    <span className="text-3xl font-bold tracking-tight">{player.position}</span>
+                  ) : null}
+                  {stage === "rarity" ? (
+                    <span className="season-pack-tier text-3xl font-bold tracking-tight">
+                      {rarityLabel(player.rarity)}
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
+            </span>
+
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-[30px] flex flex-col items-center gap-1 px-5 text-center"
+            >
+              <span className="text-xs text-white/75">
+                {voice === "own" ? m.season_pack_hint_own() : m.season_pack_hint_other()}
+              </span>
+              <span className="font-mono text-[9px] tracking-[0.18em] text-white/45 uppercase">
+                {m.season_pack_print({ year, serial: serialNumber(player.login) })}
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
       {sealed ? (
-        <Button onClick={open}>{m.season_pack_open()}</Button>
+        <Button variant="outline" onClick={open}>
+          {m.season_pack_open()}
+        </Button>
       ) : (
         <p role="status" className="text-sm text-muted-foreground">
           {m.season_pack_opening()}
@@ -148,5 +256,19 @@ export function SeasonPack({ player, year, voice, onOpen, actions }: SeasonPackP
         </p>
       )}
     </div>
+  )
+}
+
+/** A small six-armed snowflake stamped on the pack like a seal. */
+function SnowSeal() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5 text-white/60" fill="none" stroke="currentColor">
+      {[0, 60, 120].map((angle) => (
+        <g key={angle} transform={`rotate(${angle} 12 12)`} strokeWidth="1.3" strokeLinecap="round">
+          <path d="M12 2v20" />
+          <path d="M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5" />
+        </g>
+      ))}
+    </svg>
   )
 }

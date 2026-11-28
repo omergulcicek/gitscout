@@ -674,7 +674,6 @@
   "season_eyebrow": "Sezon raporu",
   "season_heading": "{year} sezonu",
   "season_through": "Veriler {date} tarihine kadar; sezon 31 Aralık'ta kapanır.",
-  "season_pack_label": "{year} sezon paketi",
   "season_pack_open": "Paketi aç",
   "season_pack_opening": "Paket açılıyor",
   "season_stats_title": "Sezon istatistikleri",
@@ -754,5 +753,8 @@
   "season_standing_basis": "son 12 ayın aktif günlerine göre",
   "season_pack_clue_flag": "Ülke: {country}",
   "season_pack_clue_position": "Alan: {position}",
-  "season_pack_clue_rarity": "Kademe: {rarity}"
+  "season_pack_clue_rarity": "Kademe: {rarity}",
+  "season_pack_open_label": "{year} sezon paketini aç",
+  "season_pack_tear": "buradan yırt",
+  "season_pack_print": "1 kart · {year} sezonu · № {serial}"
 }

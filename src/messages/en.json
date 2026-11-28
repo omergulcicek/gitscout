@@ -695,7 +695,6 @@
   "season_eyebrow": "Season report",
   "season_heading": "{year} season",
   "season_through": "Data up to {date}; the season closes on 31 December.",
-  "season_pack_label": "{year} season pack",
   "season_pack_open": "Open the pack",
   "season_pack_opening": "Opening the pack",
   "season_stats_title": "Season stats",
@@ -775,5 +774,8 @@
   "season_standing_basis": "by active days in the last 12 months",
   "season_pack_clue_flag": "Country: {country}",
   "season_pack_clue_position": "Field: {position}",
-  "season_pack_clue_rarity": "Tier: {rarity}"
+  "season_pack_clue_rarity": "Tier: {rarity}",
+  "season_pack_open_label": "Open the {year} season pack",
+  "season_pack_tear": "tear here",
+  "season_pack_print": "1 card · {year} season · № {serial}"
 }
