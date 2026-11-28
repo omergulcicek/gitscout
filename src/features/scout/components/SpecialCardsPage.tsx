@@ -112,14 +112,14 @@ export function SpecialCardsPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-4 pt-6 pb-20 outline-none sm:px-6"
+      className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 overflow-x-clip px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       {/* Üç sütunlu kart ızgarası 5xl'a sığmadığı için sayfa geniş; başlık yine logoyla aynı hizada. */}
       <div className="mx-auto w-full max-w-5xl">
         <PageHeader title={m.special_cards_title()} className="max-w-3xl">
           <p className="font-mono text-pretty text-muted-foreground">{m.special_cards_lead()}</p>
           {sample ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-balance text-muted-foreground">
               {own ? m.special_cards_sample_own() : m.special_cards_sample({ name: sample.name })}
             </p>
           ) : null}

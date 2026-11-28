@@ -400,7 +400,7 @@ export function ProfileForm({
                 </span>
               }
             />
-            <p className="-mt-1 text-xs text-muted-foreground">
+            <p className="-mt-1 text-xs text-balance text-muted-foreground">
               {m.dream_team_hint({ size: DREAM_TEAM_SIZE })}
             </p>
             <DreamTeamField

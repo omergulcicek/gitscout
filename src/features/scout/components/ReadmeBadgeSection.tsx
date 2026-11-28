@@ -44,7 +44,7 @@ export function ReadmeBadgeSection({ player }: ReadmeBadgeSectionProps) {
         <h2 id="readme-heading" className="text-sm font-semibold">
           {m.readme_badge()}
         </h2>
-        <p className="text-xs text-muted-foreground">{m.readme_badge_hint()}</p>
+        <p className="text-xs text-balance text-muted-foreground">{m.readme_badge_hint()}</p>
       </div>
       <ReadmeBadgeContent player={player} />
     </section>

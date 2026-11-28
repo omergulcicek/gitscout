@@ -24,7 +24,7 @@ export function BadgeList({ badges }: BadgeListProps) {
         {m.badges_heading()}
       </h2>
       {badges.length === 0 ? (
-        <p className="surface px-4 py-6 text-center text-sm text-muted-foreground">
+        <p className="surface px-4 py-6 text-center text-sm text-balance text-muted-foreground">
           {m.badges_empty()}
         </p>
       ) : (

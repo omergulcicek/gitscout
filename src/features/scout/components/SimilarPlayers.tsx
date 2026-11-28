@@ -28,7 +28,7 @@ export function SimilarPlayers({ login, players }: SimilarPlayersProps) {
       <h2 id="similar-heading" className="text-lg font-semibold">
         {m.similar_title()}
       </h2>
-      <ul className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0">
+      <ul className="relative -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0">
         {players.map((player) => (
           <li
             key={player.login}

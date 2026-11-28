@@ -22,7 +22,9 @@ export function TopRepos({ repos }: TopReposProps) {
         {m.top_repos()}
       </h2>
       {repos.length === 0 ? (
-        <p className="px-4 pb-4 text-sm text-muted-foreground">{m.top_repos_empty()}</p>
+        <p className="px-4 pb-4 text-sm text-balance text-muted-foreground">
+          {m.top_repos_empty()}
+        </p>
       ) : (
         // Geniş ekranda radar yüksekliği üçe bölünür: az repoda satırlar uzamaz, alt boş kalır.
         <ul className="flex flex-1 flex-col divide-y border-t lg:grid lg:grid-rows-3">

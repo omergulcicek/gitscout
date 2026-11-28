@@ -82,7 +82,7 @@ export function DreamTeamField({
       ) : null}
 
       {full ? (
-        <p className="text-xs text-muted-foreground">{m.dream_team_full()}</p>
+        <p className="text-xs text-balance text-muted-foreground">{m.dream_team_full()}</p>
       ) : (
         // Arama kutusu formun içinde: Enter oyuncu seçer ya da hiçbir şey yapmaz, formu göndermez.
         // Kutunun kendi tuş işleyicisi önce çalıştığı için seçim bozulmaz.

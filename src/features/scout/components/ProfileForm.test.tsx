@@ -132,7 +132,7 @@ describe("ProfileForm", () => {
     const user = renderForm()
 
     await user.click(screen.getByRole("button", { name: /^Your favorite team/ }))
-    await user.click(await screen.findByRole("menuitem", { name: "Turkey" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Türkiye" }))
     // Alt menü açıkken Base UI üst menüye geçici olarak pointer-events: none verir; jsdom'da bu kontrol kapatılır.
     await userEvent
       .setup({ pointerEventsCheck: 0 })

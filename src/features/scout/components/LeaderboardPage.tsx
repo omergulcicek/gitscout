@@ -101,7 +101,7 @@ export function LeaderboardPage() {
       {facets.total === 0 ? (
         <EmptyLeaderboard />
       ) : slice.matched === 0 ? (
-        <p className="surface px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="surface px-4 py-8 text-center text-sm text-balance text-muted-foreground">
           {m.filter_empty()}
         </p>
       ) : (
@@ -121,7 +121,7 @@ export function LeaderboardPage() {
               >
                 {m.leaderboard_show_more({ count: Math.min(remaining, LEADERBOARD_PAGE_SIZE) })}
               </Button>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-balance text-muted-foreground">
                 {m.leaderboard_shown({ shown: slice.players.length, total: slice.matched })}
               </p>
             </div>

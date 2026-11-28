@@ -24,7 +24,7 @@ export function TopCountriesPage() {
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       <PageHeader title={m.top_title()}>
-        <p className="max-w-2xl font-mono text-pretty text-muted-foreground">
+        <p className="max-w-2xl font-mono text-balance text-muted-foreground">
           {m.top_lead({ min: data.min })}
         </p>
       </PageHeader>
