@@ -141,19 +141,29 @@ function Leader({ player, avatar }: { player: RankedPlayer; avatar: string | nul
     <div style={{ display: "flex", alignItems: "center", gap: 12, width: LEADER_WIDTH }}>
       <Face player={player} avatar={avatar} size={TIERS[0].size} />
       <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 123 }}>
+        {/* Built like the site's rating chip: the card's frame around its face, so the ink always contrasts. */}
         <div
           style={{
             display: "flex",
             alignSelf: "flex-start",
-            padding: "3px 8px",
-            borderRadius: 8,
-            fontSize: 18,
-            fontWeight: 800,
-            color: colors.ink,
-            backgroundImage: `linear-gradient(135deg, ${colors.frame[0]}, ${colors.frame[1]})`
+            padding: 2,
+            borderRadius: 9,
+            backgroundImage: `linear-gradient(145deg, ${colors.frame[0]}, ${colors.frame[1]})`
           }}
         >
-          {String(player.ovr)}
+          <div
+            style={{
+              display: "flex",
+              padding: "2px 8px",
+              borderRadius: 7,
+              fontSize: 18,
+              fontWeight: 800,
+              color: colors.ink,
+              backgroundImage: `linear-gradient(135deg, ${colors.face[0]}, ${colors.face[1]})`
+            }}
+          >
+            {String(player.ovr)}
+          </div>
         </div>
         <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: MUTED }}>
           #{player.rank}
