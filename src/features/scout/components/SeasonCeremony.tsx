@@ -155,7 +155,6 @@ export function SeasonCeremony({
     }
   }
 
-  const showPack = stage === "sealed" || stage === "charge" || stage === "shatter"
   const turned = stage === "facts" || stage === "fly"
 
   return (
@@ -169,7 +168,7 @@ export function SeasonCeremony({
       onKeyDown={keyDown}
       className="season-ceremony fixed inset-0 z-30 flex flex-col items-center overflow-hidden bg-background"
     >
-      <div className="season-ceremony-chrome flex h-14 w-full shrink-0 items-center justify-end px-4">
+      <div className="season-ceremony-chrome relative z-10 flex h-14 w-full shrink-0 items-center justify-end px-4">
         <Button variant="ghost" size="sm" onClick={() => onClose("skipped")}>
           <X aria-hidden />
           {m.season_pack_skip()}
@@ -201,22 +200,21 @@ export function SeasonCeremony({
               </div>
             )}
 
-            {showPack ? (
-              <div className="season-ceremony-pack absolute inset-0">
-                <SeasonPack
-                  login={player.login}
-                  year={year}
-                  voice={voice}
-                  state={stage === "sealed" ? "sealed" : stage === "charge" ? "charge" : "shatter"}
-                  onOpen={open}
-                />
-              </div>
-            ) : null}
+            {/* The pack, then its pieces, which stay on the floor until the card flies home. */}
+            <div className="season-ceremony-pack absolute inset-0">
+              <SeasonPack
+                login={player.login}
+                year={year}
+                voice={voice}
+                state={stage === "sealed" ? "sealed" : stage === "charge" ? "charge" : "shatter"}
+                onOpen={open}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="season-ceremony-chrome flex min-h-36 w-full max-w-2xl shrink-0 flex-col items-center justify-start gap-4 px-4 pt-4 pb-6 text-center max-sm:min-h-48">
+      <div className="season-ceremony-chrome relative z-10 flex min-h-36 w-full max-w-2xl shrink-0 flex-col items-center justify-start gap-4 px-4 pt-4 pb-6 text-center max-sm:min-h-48">
         {stage === "sealed" ? (
           <>
             <p className="text-sm text-muted-foreground">{m.season_ceremony_open_hint()}</p>

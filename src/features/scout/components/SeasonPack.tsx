@@ -1,5 +1,7 @@
+import { useEffect, useRef } from "react"
 import type { PointerEvent } from "react"
 
+import { simulateShard } from "@/features/scout/helpers/shard-physics"
 import * as m from "@/paraglide/messages.js"
 
 /** Pack size in px (w-80 × h-120), and the crimp's tooth width and depth. */
@@ -101,22 +103,37 @@ const SHATTER = (() => {
   }
 
   return {
-    pieces: pieces.map(({ points, center, size }, index) => {
-      // Outwards from the impact, a little downwards as if falling; the small pieces near it fly farthest
-      // and spin fastest.
+    pieces: pieces.map(({ points, size }, index) => {
+      // The part of the piece inside the pack's outline: its middle is where it turns, and its size how
+      // high it lies on the floor.
+      const inside = points.map(([x, y]): Point => [
+        Math.min(PACK_W, Math.max(0, x)),
+        Math.min(PACK_H, Math.max(0, y))
+      ])
+      const center: Point = [
+        inside.reduce((sum, point) => sum + point[0], 0) / inside.length,
+        inside.reduce((sum, point) => sum + point[1], 0) / inside.length
+      ]
+      const radius = Math.max(...inside.map(([x, y]) => Math.hypot(x - center[0], y - center[1])))
+      // Most pieces are flung off the screen in every direction, barely pulled down; a few of the larger
+      // ones only break loose and drop to the floor, where they stay.
       const dx = center[0] - impact[0]
       const dy = center[1] - impact[1]
       const length = Math.hypot(dx, dy) || 1
-      const near = size <= 82
-      const distance = (near ? 520 : 340) + Math.abs(wobble(index + 500)) * 260
+      const drops = size >= 150 && wobble(index + 600) > 0.35
+      const speed = drops
+        ? 0.18 + Math.abs(wobble(index + 500)) * 0.15
+        : 1.1 + Math.abs(wobble(index + 500)) * 0.9
       return {
         clip: polygon(points.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)),
-        style: {
-          "--dx": `${((dx / length) * distance).toFixed(0)}px`,
-          "--dy": `${((dy / length) * distance + 90).toFixed(0)}px`,
-          "--spin": `${(wobble(index + 200) * (near ? 540 : 220)).toFixed(0)}deg`,
-          "--delay": `${Math.round(Math.abs(wobble(index + 900)) * 70)}ms`
-        }
+        center,
+        radius,
+        drops,
+        vx: (dx / length) * speed,
+        vy: (dy / length) * speed - (drops ? 0.35 : 0),
+        spin: wobble(index + 200) * (drops ? 0.3 : 0.9),
+        gravity: drops ? 0.0034 : 0.0009,
+        delay: Math.round(Math.abs(wobble(index + 900)) * 60)
       }
     }),
     cracks: cracks
@@ -146,7 +163,8 @@ type SeasonPackProps = {
 
 /**
  * A sealed foil pack that tilts and catches the light under the pointer. Opened, it trembles like an egg
- * about to hatch while cracks run across it, then breaks into pieces that fly off in every direction.
+ * about to hatch while cracks run across it, then breaks into pieces flung in every direction, a few of
+ * them dropping to the floor.
  */
 export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProps) {
   const sealed = state === "sealed"
@@ -171,23 +189,7 @@ export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProp
 
   const face = <PackFace login={login} year={year} voice={voice} />
 
-  if (state === "shatter") {
-    return (
-      <div aria-hidden data-pack={state} className="season-pack-root relative h-120 w-80">
-        {SHATTER.pieces.map((piece, index) => (
-          <span
-            key={index}
-            className="season-pack-shard absolute inset-0"
-            style={{ ...piece.style, clipPath: piece.clip }}
-          >
-            <span className="absolute inset-0" style={{ clipPath: SEALED_CLIP }}>
-              <PackFace login={login} year={year} voice={voice} lite />
-            </span>
-          </span>
-        ))}
-      </div>
-    )
-  }
+  if (state === "shatter") return <Shards login={login} year={year} voice={voice} />
 
   return (
     <div data-pack={state} className="season-pack-root relative h-120 w-80">
@@ -227,6 +229,77 @@ export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProp
           )}
         </button>
       </div>
+    </div>
+  )
+}
+
+/** How long the pieces are followed, and how often their path is sampled for the animation. */
+const FALL_MS = 3000
+const FALL_FRAME_MS = 32
+
+/**
+ * The broken pack: each piece is the whole pack cut to its shape. Most are flung off the screen in every
+ * direction; a few drop to the bottom of the screen, where they bounce, slide and stay. The paths come from `simulateShard`, played as Web
+ * Animations so they keep going without re-rendering.
+ */
+function Shards({ login, year, voice }: { login: string; year: number; voice: "own" | "other" }) {
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    // The pack is scaled to the screen: the floor and walls are measured in its own, unscaled pixels.
+    const rect = root.getBoundingClientRect()
+    const scale = rect.width / PACK_W || 1
+    const bounds = {
+      floor: (window.innerHeight - rect.top) / scale - 4,
+      left: -rect.left / scale,
+      right: (window.innerWidth - rect.left) / scale
+    }
+    const free = { floor: Infinity, left: -Infinity, right: Infinity }
+    const animations = Array.from(root.children).map((element, index) => {
+      const piece = SHATTER.pieces[index]
+      if (!piece) return undefined
+      const frames = simulateShard(
+        { ...piece, ...(piece.drops ? bounds : free) },
+        FALL_MS,
+        FALL_FRAME_MS
+      )
+      return element.animate(
+        frames.map((frame, at) => ({
+          transform: `translate(${frame.x}px, ${frame.y}px) rotate(${frame.angle}deg)`,
+          // A flung piece fades as it goes, in case it ends up still on screen.
+          opacity: piece.drops ? 1 : Math.max(0, 1 - Math.max(0, at / frames.length - 0.35) * 2.5)
+        })),
+        { duration: FALL_MS, delay: piece.delay, fill: "forwards" }
+      )
+    })
+    return () => {
+      for (const animation of animations) animation?.cancel()
+    }
+  }, [])
+
+  return (
+    <div
+      ref={rootRef}
+      aria-hidden
+      data-pack="shatter"
+      className="season-pack-root relative h-120 w-80"
+    >
+      {SHATTER.pieces.map((piece, index) => (
+        <span
+          key={index}
+          className="season-pack-shard absolute inset-0"
+          style={{
+            clipPath: piece.clip,
+            transformOrigin: `${piece.center[0]}px ${piece.center[1]}px`
+          }}
+        >
+          <span className="absolute inset-0" style={{ clipPath: SEALED_CLIP }}>
+            <PackFace login={login} year={year} voice={voice} lite />
+          </span>
+        </span>
+      ))}
     </div>
   )
 }
