@@ -760,7 +760,8 @@
   "season_pack_revealed": "Kart açıldı: {rarity}, {ovr} puan",
   "season_pack_print": "1 kart · {year} sezonu · № {serial}",
   "season_share_heading": "Sezon kartını paylaş",
-  "season_share_hint": "Yıl sonuna özel hazır metin. Kopyala, istersen düzenle; sezon kartını görsel olarak eklemeyi unutma.",
+  "season_share_image_reminder": "Sezon kartını görsel olarak eklemeyi unutma: görselsiz paylaşım kartını göstermez.",
+  "season_share_hint": "Yıl sonuna özel hazır metin. Kopyala, istersen düzenle.",
   "season_share_intro_live": "{year} bitmeden GitHub'daki yılımın sezon kartını açtım! ❄️",
   "season_share_intro_final": "{year} sezonumu GitHub'da kapattım, işte yıl sonu kartım! 🎆",
   "season_share_line_card": "⭐ Sezon kartı: {ovr} · {rarity} · {role}",
@@ -769,7 +770,7 @@
   "season_share_line_growth": "📈 Geçen yıla göre %{pct} artış",
   "season_share_line_streak": "⚡ En uzun seri: {days} gün art arda",
   "season_share_line_standing": "🏆 {pool} içinde ilk %{pct}",
-  "season_share_outro": "Senin {year} sezonun nasıl geçti? Paketini aç, kartını yorumlara bırak.",
+  "season_share_outro": "Senin {year} sezonun nasıl geçti?",
   "season_share_tags": "#GitHub #YılSonu #{year} #Gitscout",
   "season_share_x_text": "{intro}\n\n⭐ {ovr} · {rarity} · {role}\n📅 {active}/{weeks} hafta · 🔥 {contributions} katkı\n\nSenin {year} sezonun nasıldı?\n{url}"
 }

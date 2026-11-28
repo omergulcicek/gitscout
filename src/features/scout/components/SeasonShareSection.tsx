@@ -31,7 +31,13 @@ export function SeasonShareSection(props: SeasonShareInput) {
         <h2 id="season-share-heading" className="text-lg font-semibold">
           {m.season_share_heading()}
         </h2>
-        <p className="text-sm text-pretty text-muted-foreground">{m.season_share_hint()}</p>
+        <p className="text-sm text-pretty text-muted-foreground">
+          {m.season_share_hint()}{" "}
+          {/* A post without the card's image says little; this is the one thing not to skip. */}
+          <strong className="font-semibold text-foreground underline underline-offset-4">
+            {m.season_share_image_reminder()}
+          </strong>
+        </p>
       </div>
 
       <Tabs
