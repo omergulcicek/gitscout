@@ -6,7 +6,7 @@ import { getSitemapPlayers } from "@/features/scout/api/player-store"
 import { getCountryPageSlugs } from "@/features/scout/api/players.functions"
 import { locales } from "@/paraglide/runtime.js"
 
-const PATHS = ["/", "/leaderboard", "/top", "/vs", "/special-cards", "/about"]
+const PATHS = ["/", "/leaderboard", "/top", "/vs", "/season", "/special-cards", "/about"]
 
 type Entry = { path: string; lastmod: string; priority: string }
 

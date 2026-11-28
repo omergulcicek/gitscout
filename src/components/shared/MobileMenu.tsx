@@ -1,16 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import {
-  IdCard,
-  Info,
-  Languages,
-  LogIn,
-  LogOut,
-  Menu,
-  Settings,
-  Snowflake,
-  Star
-} from "lucide-react"
+import { IdCard, Info, Languages, LogIn, LogOut, Menu, Settings, Star } from "lucide-react"
 
 import { siteConfig } from "@/config/site.config"
 
@@ -62,10 +52,6 @@ export function MobileMenu() {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto min-w-48">
-        <DropdownMenuItem render={<Link to="/{-$lang}/season" params={{ lang }} />}>
-          <Snowflake aria-hidden />
-          {m.nav_season()}
-        </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/{-$lang}/about" params={{ lang }} />}>
           <Info aria-hidden />
           {m.nav_about()}
