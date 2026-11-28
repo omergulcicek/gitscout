@@ -151,7 +151,7 @@ function UnlockedCountry({ data, name }: { data: CountryTop; name: string }) {
                     mine && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                   )}
                 >
-                  <MiniPlayerCard player={player} />
+                  <MiniPlayerCard player={player} showFlag={false} />
                 </div>
               </li>
             )
@@ -203,7 +203,7 @@ function LockedCountry({ data }: { data: CountryTop }) {
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-8">
             {data.players.map((player) => (
               <li key={player.login}>
-                <MiniPlayerCard player={player} />
+                <MiniPlayerCard player={player} showFlag={false} />
               </li>
             ))}
           </ul>

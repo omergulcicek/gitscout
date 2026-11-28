@@ -7,6 +7,7 @@ import { OG_FONT_FAMILY, OG_SIZE } from "@/lib/og-image"
 import { OgLink } from "@/features/scout/components/OgLink"
 import { RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
 import type { CountryCode } from "@/features/scout/constants/player-country.constants"
+import { drawableName } from "@/features/scout/helpers/card-name"
 import { countryName } from "@/features/scout/helpers/player-country"
 import type { CountryTop, RankedPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -188,7 +189,7 @@ function Leader({ player, avatar }: { player: RankedPlayer; avatar: string | nul
             textOverflow: "ellipsis"
           }}
         >
-          {player.name}
+          {drawableName(player.name, player.login)}
         </div>
       </div>
     </div>

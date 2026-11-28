@@ -1,12 +1,23 @@
 import { ogStatColor, RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
 import { BADGE_CARD_SIZES, BADGE_SIGNATURE } from "@/features/scout/constants/badge.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
+import { drawableName, fitCardName } from "@/features/scout/helpers/card-name"
 import { statShort, titleText } from "@/features/scout/helpers/player-text"
+import { VERIFIED_ON_CARD, VerifiedMark } from "@/features/scout/icons/VerifiedMark"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import type { Locale } from "@/paraglide/runtime.js"
 
 /** Dış çerçevenin kalınlığı. */
 const FRAME = 6
+
+/** Inner padding of the card face. */
+const PADDING = 12
+
+/**
+ * Width left for the name and title. Satori sizes a no-wrap line to its text rather than its parent, so
+ * without a fixed width a long name pushes the rating and the right-hand stats out of the image.
+ */
+const TEXT_WIDTH = BADGE_CARD_SIZES.medium.width - FRAME * 2 - PADDING * 2
 
 type OgPlayerCardMediumProps = {
   player: ListPlayer
@@ -21,6 +32,7 @@ type OgPlayerCardMediumProps = {
  */
 export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediumProps) {
   const colors = RARITY_COLORS[player.rarity]
+  const name = fitCardName(drawableName(player.name, player.login), "medium")
 
   return (
     <div
@@ -41,7 +53,7 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
           flexDirection: "column",
           flex: 1,
           borderRadius: 13,
-          padding: "12px 12px 10px",
+          padding: `${PADDING}px ${PADDING}px 10px`,
           color: colors.ink,
           backgroundImage: `linear-gradient(135deg, ${colors.face[0]}, ${colors.face[1]})`
         }}
@@ -60,7 +72,15 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
             />
           )}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-            <div style={{ fontSize: 38, fontWeight: 800, lineHeight: 0.9, letterSpacing: -1.5 }}>
+            <div
+              style={{
+                fontSize: 38,
+                fontWeight: 800,
+                lineHeight: 0.9,
+                letterSpacing: -1.5,
+                color: colors.accent
+              }}
+            >
               {String(player.ovr)}
             </div>
             <div style={{ marginTop: 6, fontSize: 10, fontWeight: 700, letterSpacing: 1.5 }}>
@@ -71,20 +91,34 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
 
         <div
           style={{
-            display: "block",
-            marginTop: 10,
-            fontSize: 15,
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis"
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            width: TEXT_WIDTH,
+            marginTop: 10
           }}
         >
-          {player.name}
+          <div
+            style={{
+              display: "block",
+              maxWidth: player.verified ? TEXT_WIDTH - 19 : TEXT_WIDTH,
+              fontSize: 15,
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis"
+            }}
+          >
+            {name}
+          </div>
+          {player.verified ? (
+            <VerifiedMark size={14} color={VERIFIED_ON_CARD[player.rarity]} />
+          ) : null}
         </div>
         <div
           style={{
             display: "block",
+            width: TEXT_WIDTH,
             marginTop: 2,
             fontSize: 11,
             color: colors.muted,

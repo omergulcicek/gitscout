@@ -16,7 +16,7 @@ describe("readmeBadgeSnippet", () => {
       '<a href="https://gitscout.io/u/octocat"><img src="https://gitscout.io/badge/octocat.png?size=medium" alt="Gitscout" width="220"></a>'
     )
     expect(readmeBadgeSnippet("https://gitscout.io", "octocat", "full")).toContain(
-      'badge/octocat.png?size=full" alt="Gitscout" width="316"'
+      'badge/octocat.png?size=full" alt="Gitscout" width="320"'
     )
   })
 
