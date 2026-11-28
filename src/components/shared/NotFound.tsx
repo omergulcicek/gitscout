@@ -20,7 +20,7 @@ export function NotFound() {
         <h1 className="text-3xl font-bold tracking-tight text-balance md:text-4xl">
           {m.not_found_title()}
         </h1>
-        <p className="max-w-lg font-mono text-sm leading-relaxed text-muted-foreground">
+        <p className="max-w-lg font-mono text-sm leading-relaxed text-balance text-muted-foreground">
           {m.not_found_description()}
         </p>
         <div className="mt-2 flex flex-wrap gap-3">

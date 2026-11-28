@@ -41,7 +41,7 @@ export function PositionBreakdown({ position, breakdown }: PositionBreakdownProp
             {position}
           </Link>
         </h2>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-balance text-muted-foreground">
           {m.repo_count({ count: breakdown.repoCount })}
         </p>
       </div>

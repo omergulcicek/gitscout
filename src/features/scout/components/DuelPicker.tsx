@@ -166,7 +166,7 @@ export function DuelPicker() {
           <Dices aria-hidden />
           {m.duel_random()}
         </Button>
-        <p className="text-center text-sm text-muted-foreground" aria-live="polite">
+        <p className="text-center text-sm text-balance text-muted-foreground" aria-live="polite">
           {isOpening ? m.duel_preparing() : m.duel_missing()}
         </p>
       </div>

@@ -57,7 +57,7 @@ export function SettingsPage() {
               {viewer.eligible ? <VerifiedIcon /> : null}
             </p>
             {viewer.verifiedAt ? (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-balance text-muted-foreground">
                 {m.settings_verified_since({
                   date: new Intl.DateTimeFormat(getLocale(), { dateStyle: "long" }).format(
                     new Date(viewer.verifiedAt)
@@ -271,7 +271,7 @@ function SettingsContent({
             }
           />
         ) : (
-          <p className="surface p-4 text-sm text-muted-foreground">
+          <p className="surface p-4 text-sm text-balance text-muted-foreground">
             {m.owner_not_eligible({
               months: ACCOUNT_ELIGIBILITY.minAgeMonths
             })}

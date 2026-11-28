@@ -141,7 +141,7 @@ export function TeamCardShowcase({ sample, settingsLink }: TeamCardShowcaseProps
                 </div>
               </div>
             ) : (
-              <p className="py-6 text-sm text-muted-foreground">
+              <p className="py-6 text-sm text-balance text-muted-foreground">
                 {m.special_teams_no_results({ query: query.trim() })}
               </p>
             )

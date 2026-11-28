@@ -244,11 +244,11 @@ export function SignInPanel({
           </ul>
         </div>
 
-        {/* İki not aynı düzende: simge, sonra metin; satır sonunda tek kelime kalmasın diye `text-pretty`. */}
+        {/* Both notes share one layout: icon, then text, balanced so no line ends with a lone word. */}
         <ul className="flex flex-col gap-2.5 border-t pt-5 text-xs text-muted-foreground">
           <li className="flex items-start gap-2.5">
             <ShieldCheck aria-hidden className="mt-px size-3.5 shrink-0" />
-            <span className="text-pretty">
+            <span className="text-balance">
               {m.login_eligibility({
                 months: ACCOUNT_ELIGIBILITY.minAgeMonths
               })}
@@ -256,7 +256,7 @@ export function SignInPanel({
           </li>
           <li className="flex items-start gap-2.5">
             <Lock aria-hidden className="mt-px size-3.5 shrink-0" />
-            <span className="text-pretty">{m.login_privacy()}</span>
+            <span className="text-balance">{m.login_privacy()}</span>
           </li>
         </ul>
       </div>

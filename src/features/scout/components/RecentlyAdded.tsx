@@ -25,12 +25,12 @@ export function RecentlyAdded({ entries, lastDayCount, generatedAt }: RecentlyAd
         <h2 id="recent-heading" className="text-xl font-semibold">
           {m.recent_title()}
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-balance text-muted-foreground">
           {m.recent_last_day({ count: lastDayCount })}
         </p>
       </div>
       {/* Dar ekranda şerit kendi içinde kayar; geniş ekranda sekiz kart tek satıra sığar. */}
-      <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-8 lg:overflow-visible lg:px-0 lg:pb-0">
+      <ul className="relative -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-8 lg:overflow-visible lg:px-0 lg:pb-0">
         {entries.map(({ player, addedAt }) => (
           <li
             key={player.login}

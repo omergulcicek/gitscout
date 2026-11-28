@@ -43,7 +43,7 @@ export function DreamTeamSection({ owner, players }: DreamTeamSectionProps) {
       {players.length > 0 ? (
         // Phones: one row that scrolls sideways and snaps per card, like "Recently added"; the next card
         // peeks in so the swipe is obvious. Wide screens: all five side by side.
-        <ol className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0 lg:pb-0">
+        <ol className="relative -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0 lg:pb-0">
           {players.map((player) => (
             <li key={player.login} className="w-40 shrink-0 snap-start lg:w-auto">
               <Link

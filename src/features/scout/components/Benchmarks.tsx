@@ -24,7 +24,7 @@ export function Benchmarks({ benchmarks, total }: BenchmarksProps) {
         <h2 id="compare-heading" className="text-sm font-medium">
           {m.compare_title({ count: total - 1 })}
         </h2>
-        <p className="text-xs text-muted-foreground">{m.compare_caption()}</p>
+        <p className="text-xs text-balance text-muted-foreground">{m.compare_caption()}</p>
       </div>
       <ul className="grid gap-x-10 gap-y-3 sm:grid-flow-col sm:grid-cols-2 sm:grid-rows-3">
         {benchmarks.map((item) => (

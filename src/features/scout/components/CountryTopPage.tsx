@@ -80,7 +80,7 @@ export function CountryTopPage() {
 function CountryIntro({ data }: { data: CountryTop }) {
   const counts = data.rarityCounts
   return (
-    <p className="max-w-2xl font-mono text-pretty text-muted-foreground">
+    <p className="max-w-2xl font-mono text-balance text-muted-foreground">
       {m.top_country_intro({
         count: number(data.total),
         icon: number(counts.icon),

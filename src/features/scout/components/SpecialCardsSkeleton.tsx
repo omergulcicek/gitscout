@@ -13,7 +13,7 @@ export function SpecialCardsSkeleton() {
       id="main-content"
       tabIndex={-1}
       aria-busy="true"
-      className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-4 pt-6 pb-20 outline-none sm:px-6"
+      className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 overflow-x-clip px-4 pt-6 pb-20 outline-none sm:px-6"
     >
       <p role="status" className="sr-only">
         {m.page_loading()}

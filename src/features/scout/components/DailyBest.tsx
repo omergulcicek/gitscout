@@ -36,10 +36,10 @@ export function DailyBest({ slots }: DailyBestProps) {
           </h2>
           {canSwitch ? <TopViewSwitch view={view} label={m.daily_best_switch_label()} /> : null}
         </div>
-        <p className="text-sm text-muted-foreground">{m.daily_best_hint()}</p>
+        <p className="text-sm text-balance text-muted-foreground">{m.daily_best_hint()}</p>
       </div>
       {/* Scrolls on its own on narrow screens; the eight roles fit one row on wide ones. */}
-      <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-8 lg:overflow-visible lg:px-0 lg:pb-0">
+      <ul className="relative -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-8 lg:overflow-visible lg:px-0 lg:pb-0">
         {slots[view].map(({ position, player }) => (
           <li key={position} className="flex w-28 shrink-0 snap-start flex-col gap-1.5 lg:w-auto">
             <span className="text-center text-[11px] font-medium text-muted-foreground">
