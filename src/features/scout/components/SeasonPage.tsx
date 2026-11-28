@@ -15,6 +15,7 @@ import { SeasonCardPanel } from "@/features/scout/components/SeasonCardPanel"
 import { SeasonCeremony } from "@/features/scout/components/SeasonCeremony"
 import type { CeremonyFact } from "@/features/scout/components/SeasonCeremony"
 import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
+import { SeasonShareSection } from "@/features/scout/components/SeasonShareSection"
 import { SeasonSnow } from "@/features/scout/components/SeasonSnow"
 import { countryName } from "@/features/scout/helpers/player-country"
 import { number, titleText } from "@/features/scout/helpers/player-text"
@@ -22,7 +23,8 @@ import {
   CAREER_CHART_YEARS,
   careerRecord,
   careerYearLabel,
-  seasonGrowth
+  seasonGrowth,
+  standingTop
 } from "@/features/scout/helpers/season"
 import type { Season, SeasonStanding } from "@/features/scout/helpers/season"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
@@ -220,6 +222,13 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
           <Rival report={data} voice={voice} />
         </div>
       </div>
+
+      <SeasonShareSection
+        card={data.card}
+        season={season}
+        standing={data.standing}
+        final={data.final}
+      />
 
       {/* Off-screen copy that the download captures; the inner node has no position of its own. */}
       <div aria-hidden inert className="pointer-events-none fixed top-0 -left-[10000px]">
@@ -542,12 +551,6 @@ function ceremonyFacts(
           }
         ])
   ]
-}
-
-/** "Top N%": the share of the pool at or above the player, never shown as 0. Null for an empty pool. */
-function standingTop(standing: SeasonStanding): number | null {
-  if (standing.size === 0) return null
-  return Math.max(1, Math.round((1 - standing.aheadShare) * 100))
 }
 
 function Rival({ report, voice }: { report: SeasonReport; voice: Voice }) {

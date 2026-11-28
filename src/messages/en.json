@@ -779,5 +779,18 @@
   "season_download_portrait": "For mobile (9:16)",
   "season_pack_skip": "Skip",
   "season_pack_revealed": "Card revealed: {rarity}, {ovr} rating",
-  "season_pack_print": "1 card · {year} season · № {serial}"
+  "season_pack_print": "1 card · {year} season · № {serial}",
+  "season_share_heading": "Share your season card",
+  "season_share_hint": "A ready-made post for the year's end. Copy it and edit as you like; don't forget to add the season card as an image.",
+  "season_share_intro_live": "Opened my season card for {year} on GitHub before the year is out! ❄️",
+  "season_share_intro_final": "Closed my {year} season on GitHub, here is my year-end card! 🎆",
+  "season_share_line_card": "⭐ Season card: {ovr} · {rarity} · {role}",
+  "season_share_line_weeks": "📅 Weeks with contributions: {active}/{weeks}",
+  "season_share_line_contributions": "🔥 The year's total: {contributions} contributions",
+  "season_share_line_growth": "📈 Up {pct}% on last year",
+  "season_share_line_streak": "⚡ Longest streak: {days} days in a row",
+  "season_share_line_standing": "🏆 Top {pct}% in {pool}",
+  "season_share_outro": "How did your {year} season go? Open your pack and drop your card in the comments.",
+  "season_share_tags": "#GitHub #YearInReview #{year} #Gitscout",
+  "season_share_x_text": "{intro}\n\n⭐ {ovr} · {rarity} · {role}\n📅 {active}/{weeks} weeks · 🔥 {contributions} contributions\n\nHow was your {year} season?\n{url}"
 }

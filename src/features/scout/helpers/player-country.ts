@@ -5,6 +5,7 @@ import type {
 } from "@/features/scout/constants/player-country.constants"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
+import type { Locale } from "@/paraglide/runtime.js"
 
 type CountryHolder = { login: string; country?: string | null; claimedCountry?: string | null }
 
@@ -25,15 +26,18 @@ export function playerCountryFilter(player: CountryHolder): CountryFilter {
 }
 
 /** Uzun resmi adı menüyü taşıran ülkeler kısa adlarıyla yazılır ("Amerika Birleşik Devletleri" yerine "ABD"). */
-const SHORT_NAMES: Partial<Record<CountryCode, () => string>> = {
+const SHORT_NAMES: Partial<Record<CountryCode, typeof m.country_us>> = {
   US: m.country_us
 }
 
-/** Ülke adı geçerli dilde, tarayıcının ve Node'un kendi ülke adları listesinden ("Almanya" / "Germany"). */
-export function countryName(country: CountryCode): string {
+/**
+ * Ülke adı verilen dilde (varsayılan: geçerli dil), tarayıcının ve Node'un kendi ülke adları listesinden
+ * ("Almanya" / "Germany").
+ */
+export function countryName(country: CountryCode, locale: Locale = getLocale()): string {
   const short = SHORT_NAMES[country]
-  if (short) return short()
-  return new Intl.DisplayNames([getLocale()], { type: "region" }).of(country) ?? country
+  if (short) return short({}, { locale })
+  return new Intl.DisplayNames([locale], { type: "region" }).of(country) ?? country
 }
 
 type CountryCount = { country: CountryCode; count: number }

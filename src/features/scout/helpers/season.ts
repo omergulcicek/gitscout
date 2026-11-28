@@ -244,3 +244,9 @@ export function careerRecord(
 export function careerYearLabel(year: number, latest: number): string {
   return year === latest ? String(year) : `'${String(year).slice(2)}`
 }
+
+/** "Top N%": the share of the pool at or above the player, never shown as 0. Null for an empty pool. */
+export function standingTop(standing: SeasonStanding): number | null {
+  if (standing.size === 0) return null
+  return Math.max(1, Math.round((1 - standing.aheadShare) * 100))
+}
