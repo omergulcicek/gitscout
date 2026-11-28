@@ -7,22 +7,14 @@ import type { Team } from "@/constants/team.constants"
 
 import { avatarSrc } from "@/helpers/avatar-src"
 
-import { BadgeIcon } from "@/features/scout/components/BadgeIcon"
-import { StatPips } from "@/features/scout/components/StatPips"
+import { BADGE_SIGNATURE } from "@/features/scout/constants/badge.constants"
 import { CARD_OCCASIONS } from "@/features/scout/constants/card-occasion.constants"
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { TEAM_THEMES } from "@/features/scout/constants/team-theme.constants"
 import { fitCardName } from "@/features/scout/helpers/card-name"
 import { countryName, playerCountry } from "@/features/scout/helpers/player-country"
-import {
-  badgeName,
-  clubLabel,
-  rarityLabel,
-  statShort,
-  titleText
-} from "@/features/scout/helpers/player-text"
-import { statTier } from "@/features/scout/helpers/stat-tier"
+import { rarityLabel, statShort, titleText } from "@/features/scout/helpers/player-text"
 import { BirthdayDecorations } from "@/features/scout/icons/BirthdayDecorations"
 import { GithubStarDecorations } from "@/features/scout/icons/GithubStarDecorations"
 import { HalloweenDecorations } from "@/features/scout/icons/HalloweenDecorations"
@@ -160,8 +152,8 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           )}
         </div>
 
-        {/* The portrait keeps one size on every card (124px photo inside its ring); the name always has room for two lines. */}
-        <div className="relative mt-3 flex h-33.5 shrink-0 justify-center">
+        {/* One portrait size on every card (144px photo inside its ring): names stay on one line. */}
+        <div className="relative mt-3 flex h-38.5 shrink-0 justify-center">
           <img
             src={avatarSrc(player.avatarUrl, 152)}
             alt={m.avatar_alt({ name: player.name })}
@@ -173,10 +165,10 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
         </div>
 
         <div className="relative mt-4 flex flex-col items-center text-center">
-          <div className="flex min-h-[2lh] items-center justify-center gap-1.5 text-xl leading-tight">
+          <div className="flex items-center justify-center gap-1.5 text-xl leading-tight">
             <p
               lang={TURKISH_CHARS.test(player.name) ? "tr" : "en"}
-              className="line-clamp-2 font-semibold text-balance"
+              className="truncate font-semibold"
             >
               {fitCardName(player.name, "full")}
             </p>
@@ -184,14 +176,16 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
               <VerifiedMark size={18} color="var(--card-verified)" label={m.verified_label()} />
             ) : null}
           </div>
-          {/* Doğum günü kartında unvanın yerini kutlama alır: kartın ne olduğunu tek bakışta söyler. */}
+          {/* The username sits right under the name: it is what the verified seal vouches for. */}
+          <p className="scout-card-muted mt-1 max-w-52 truncate font-mono text-xs">
+            @{player.login}
+          </p>
+          {/* A celebration card says why it is special under the username; the title keeps its band. */}
           {special ? (
-            <p className="scout-card-accent mt-1 line-clamp-1 text-xs font-semibold">
+            <p className="scout-card-accent mt-1 truncate text-xs font-semibold">
               {special.wish()}
             </p>
-          ) : (
-            <p className="scout-card-muted mt-1 line-clamp-1 text-xs">{titleText(player.title)}</p>
-          )}
+          ) : null}
         </div>
 
         <div aria-hidden className="scout-card-rule relative mx-auto mt-4 w-full border-t" />
@@ -200,47 +194,28 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           {STAT_ORDER.map((key) => {
             const stat = player.stats[key]
             return (
-              <div key={key} className="flex flex-col items-center gap-1 py-0.5">
+              <div key={key} className="flex flex-col items-center gap-0.5 py-1">
                 <dt className="scout-card-muted text-[10px] font-semibold tracking-wider">
                   {statShort(key)}
                 </dt>
-                <dd
-                  className={cn(
-                    "font-mono text-xl leading-none font-bold tabular-nums",
-                    statTier(stat.value) === "elite" && "scout-card-accent"
-                  )}
-                >
+                <dd className="font-mono text-xl leading-none font-bold tabular-nums">
                   {stat.value}
                 </dd>
-                <StatPips value={stat.value} />
               </div>
             )
           })}
         </dl>
 
-        <div className="relative mt-auto flex items-center justify-between pt-3 text-[11px]">
-          <span
-            data-card-club
-            lang="en"
-            className="scout-card-muted truncate font-semibold tracking-wide uppercase"
-          >
-            {clubLabel(player.club)}
+        {/*
+         * Nameplate band, the same on the site, downloads, README and previews: the title (or the
+         * celebration's wish) on the left, the site's address on the right.
+         */}
+        {/* At 11px the longest title (27 characters in English) still fits next to the address. */}
+        <div className="relative mt-auto flex items-center justify-between gap-3 pt-3 text-[11px]">
+          <span className="truncate font-medium">{titleText(player.title)}</span>
+          <span className="scout-card-muted shrink-0 font-semibold tracking-wide">
+            {BADGE_SIGNATURE}
           </span>
-          {player.badges.length > 0 ? (
-            <ul data-card-badges className="flex shrink-0 gap-1" aria-label={m.badges_heading()}>
-              {player.badges.slice(0, 4).map((badge) => (
-                <li
-                  key={badge.id}
-                  title={badgeName(badge.id)}
-                  data-badge={badge.id}
-                  className="badge-tint grid size-6 place-items-center rounded-full"
-                >
-                  <BadgeIcon id={badge.id} className="size-3.5" />
-                  <span className="sr-only">{badgeName(badge.id)}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </div>
         {/* Light that follows the pointer on showcase cards; hidden at rest and in downloads. */}
         <div

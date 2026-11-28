@@ -1,8 +1,4 @@
-import {
-  OgStatPips,
-  ogStatValueColor,
-  RARITY_COLORS
-} from "@/features/scout/components/OgPlayerCard"
+import { RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
 import { BADGE_CARD_SIZES, BADGE_SIGNATURE } from "@/features/scout/constants/badge.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { drawableName, fitCardName } from "@/features/scout/helpers/card-name"
@@ -141,13 +137,11 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
             height: 1,
             flexShrink: 0,
             backgroundColor: colors.muted,
-            margin: "8px 0 6px",
+            margin: "10px 0 8px",
             opacity: 0.4
           }}
         />
-
-        {/* Tighter rows than before: the tier pips under each value need the room in the fixed 262px badge. */}
-        <div style={{ display: "flex", flexWrap: "wrap", rowGap: 4 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", rowGap: 8 }}>
           {STAT_ORDER.map((key) => {
             const value = player.stats[key].value
             return (
@@ -166,13 +160,11 @@ export function OgPlayerCardMedium({ player, avatar, locale }: OgPlayerCardMediu
                 <div
                   style={{
                     fontSize: 17,
-                    fontWeight: 700,
-                    color: ogStatValueColor(player.rarity, value)
+                    fontWeight: 700
                   }}
                 >
                   {String(value)}
                 </div>
-                <OgStatPips rarity={player.rarity} value={value} />
               </div>
             )
           })}

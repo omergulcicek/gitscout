@@ -2,11 +2,9 @@ import { cn } from "cn"
 
 import { avatarSrc } from "@/helpers/avatar-src"
 
-import { StatPips } from "@/features/scout/components/StatPips"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { fitCardName } from "@/features/scout/helpers/card-name"
 import { statShort, titleText } from "@/features/scout/helpers/player-text"
-import { statTier } from "@/features/scout/helpers/stat-tier"
 import { VerifiedMark } from "@/features/scout/icons/VerifiedMark"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -80,19 +78,11 @@ export function PlayerCardMedium({ player, className }: PlayerCardMediumProps) {
           {STAT_ORDER.map((key) => {
             const value = player.stats[key].value
             return (
-              <div key={key} className="flex flex-col items-center gap-1">
+              <div key={key} className="flex flex-col items-center gap-0.5">
                 <dt className="scout-card-muted text-[10px] font-semibold tracking-wider">
                   {statShort(key)}
                 </dt>
-                <dd
-                  className={cn(
-                    "font-mono text-base leading-none font-bold tabular-nums",
-                    statTier(value) === "elite" && "scout-card-accent"
-                  )}
-                >
-                  {value}
-                </dd>
-                <StatPips value={value} />
+                <dd className="font-mono text-base leading-none font-bold tabular-nums">{value}</dd>
               </div>
             )
           })}
