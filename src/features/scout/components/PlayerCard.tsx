@@ -112,15 +112,23 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
         <div className="relative flex items-start justify-between">
           {/* Kart sabit yükseklikte: bayrak akışa girerse alt satır taşar. Avatarın kavisli köşesindeki boşluğa yerleşir. */}
           <div className="relative flex flex-col">
-            <span className="scout-card-accent font-mono text-6xl leading-none font-bold tracking-tighter tabular-nums">
+            <span
+              data-card-part="ovr"
+              className="scout-card-accent font-mono text-6xl leading-none font-bold tracking-tighter tabular-nums"
+            >
               {player.ovr}
             </span>
-            <span lang="en" className="mt-1.5 text-xs font-semibold tracking-widest uppercase">
+            <span
+              data-card-part="position"
+              lang="en"
+              className="mt-1.5 text-xs font-semibold tracking-widest uppercase"
+            >
               {player.position}
             </span>
             {/* Cumhuriyet Bayramı kartı zaten bayrak renklerinde; ayrıca bayrak gösterilmez. */}
             {country && Flag && occasion !== "republic-day" ? (
               <Flag
+                data-card-part="flag"
                 role="img"
                 aria-label={countryName(country)}
                 title={countryName(country)}
@@ -136,7 +144,10 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
               className="card-float-in size-16 shrink-0 drop-shadow-[0_2px_6px_rgb(0_0_0/0.35)]"
             />
           ) : special ? (
-            <span className="scout-card-chip inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase">
+            <span
+              data-card-part="chip"
+              className="scout-card-chip inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase"
+            >
               <special.icon aria-hidden className="size-3.5" />
               {special.chip()}
             </span>
@@ -148,7 +159,10 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
         </div>
 
         {/* Kart sabit yükseklikte: ad iki satıra sarılınca alt satır taşmasın diye boşluğu avatar küçülerek verir. */}
-        <div className="relative mt-3 flex h-38 min-h-0 shrink justify-center">
+        <div
+          data-card-part="avatar"
+          className="relative mt-3 flex h-38 min-h-0 shrink justify-center"
+        >
           <img
             src={avatarSrc(player.avatarUrl, 152)}
             alt={m.avatar_alt({ name: player.name })}
@@ -159,7 +173,7 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           />
         </div>
 
-        <div className="relative mt-4 flex flex-col items-center text-center">
+        <div data-card-part="name" className="relative mt-4 flex flex-col items-center text-center">
           <p
             lang={TURKISH_CHARS.test(player.name) ? "tr" : "en"}
             className="line-clamp-2 text-xl leading-tight font-semibold text-balance"
@@ -178,7 +192,7 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
 
         <div aria-hidden className="scout-card-rule relative mx-auto mt-4 w-full border-t" />
 
-        <dl className="relative mt-3 grid grid-cols-6 gap-1">
+        <dl data-card-part="stats" className="relative mt-3 grid grid-cols-6 gap-1">
           {STAT_ORDER.map((key) => {
             const stat = player.stats[key]
             return (
@@ -199,7 +213,10 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           })}
         </dl>
 
-        <div className="relative mt-auto flex items-center justify-between pt-3 text-[11px]">
+        <div
+          data-card-part="footer"
+          className="relative mt-auto flex items-center justify-between pt-3 text-[11px]"
+        >
           <span
             data-card-club
             lang="en"
