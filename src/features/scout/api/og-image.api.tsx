@@ -1,6 +1,12 @@
 import { OG_SIZE, renderOgPng } from "@/lib/og-image"
 
 import { getScoredPlayer } from "@/features/scout/api/player-store"
+import { findCountryTop } from "@/features/scout/api/players.functions"
+import {
+  OG_COUNTRY_FACES,
+  ogCountryAvatarSize,
+  OgCountryImage
+} from "@/features/scout/components/OgCountryImage"
 import { OgDuelImage } from "@/features/scout/components/OgDuelImage"
 import { OgImage } from "@/features/scout/components/OgImage"
 import { canonicalUrl } from "@/features/scout/helpers/canonical-url"
@@ -10,10 +16,10 @@ import { usernameSchema } from "@/features/scout/schemas/player.schema"
 const MAX_AVATAR_BYTES = 1024 * 1024
 
 /** Avatar küçük boyutta çekilip görsele gömülür; alınamazsa yer tutucu çizilir. */
-export async function loadAvatar(avatarUrl: string): Promise<string | null> {
+export async function loadAvatar(avatarUrl: string, size = 280): Promise<string | null> {
   try {
     const url = new URL(avatarUrl)
-    url.searchParams.set("s", "280")
+    url.searchParams.set("s", String(size))
     const response = await fetch(url, { signal: AbortSignal.timeout(5000) })
     if (!response.ok) return null
     if (Number(response.headers.get("content-length") ?? 0) > MAX_AVATAR_BYTES) return null
@@ -120,5 +126,26 @@ export async function duelOgResponse(
   const png = await renderOgPng(
     <OgDuelImage left={left} right={right} leftAvatar={leftAvatar} rightAvatar={rightAvatar} />
   )
+  return pngResponse(png)
+}
+
+/**
+ * A country page's link preview. The address carries the country's headcount (`v`): a new developer
+ * changes the picture, so platforms fetch the new image.
+ */
+export async function countryOgResponse(slug: string, url: URL): Promise<Response> {
+  const top = await findCountryTop(slug)
+  if (!top) return notFound()
+  const segments = url.pathname.split("/")
+  const path = [...segments.slice(0, -1), top.slug].join("/")
+  const canonical = canonicalUrl(url, { v: String(top.total) }, path)
+  if (canonical) return redirectTo(canonical)
+
+  const shown = top.players.slice(0, OG_COUNTRY_FACES)
+  // Small faces are fetched small: sixty full-size avatars would slow the render for nothing.
+  const avatars = await Promise.all(
+    shown.map((player, index) => loadAvatar(player.avatarUrl, ogCountryAvatarSize(index)))
+  )
+  const png = await renderOgPng(<OgCountryImage top={top} avatars={avatars} />)
   return pngResponse(png)
 }

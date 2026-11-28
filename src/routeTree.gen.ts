@@ -29,6 +29,7 @@ import { Route as Char123LangChar125TopIndexRouteImport } from './routes/{-$lang
 import { Route as Char123LangChar125TopCountryRouteImport } from './routes/{-$lang}/top/$country'
 import { Route as Char123LangChar125UUsernameRouteImport } from './routes/{-$lang}/u/$username'
 import { Route as Char123LangChar125VsIndexRouteImport } from './routes/{-$lang}/vs/index'
+import { Route as Char123LangChar125OgTopCountryRouteImport } from './routes/{-$lang}/og/top/$country'
 import { Route as Char123LangChar125VsLeftRightRouteImport } from './routes/{-$lang}/vs/$left.$right'
 import { Route as Char123LangChar125OgVsLeftRightRouteImport } from './routes/{-$lang}/og/vs/$left.$right'
 
@@ -142,6 +143,12 @@ const Char123LangChar125VsIndexRoute =
     path: '/vs/',
     getParentRoute: () => Char123LangChar125Route,
   } as any)
+const Char123LangChar125OgTopCountryRoute =
+  Char123LangChar125OgTopCountryRouteImport.update({
+    id: '/og/top/$country',
+    path: '/og/top/$country',
+    getParentRoute: () => Char123LangChar125Route,
+  } as any)
 const Char123LangChar125VsLeftRightRoute =
   Char123LangChar125VsLeftRightRouteImport.update({
     id: '/vs/$left/$right',
@@ -176,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
   '/{-$lang}/top/': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
+  '/{-$lang}/og/top/$country': typeof Char123LangChar125OgTopCountryRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
   '/{-$lang}/top': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs': typeof Char123LangChar125VsIndexRoute
+  '/{-$lang}/og/top/$country': typeof Char123LangChar125OgTopCountryRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -224,6 +233,7 @@ export interface FileRoutesById {
   '/{-$lang}/u/$username': typeof Char123LangChar125UUsernameRoute
   '/{-$lang}/top/': typeof Char123LangChar125TopIndexRoute
   '/{-$lang}/vs/': typeof Char123LangChar125VsIndexRoute
+  '/{-$lang}/og/top/$country': typeof Char123LangChar125OgTopCountryRoute
   '/{-$lang}/vs/$left/$right': typeof Char123LangChar125VsLeftRightRoute
   '/{-$lang}/og/vs/$left/$right': typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/u/$username'
     | '/{-$lang}/top/'
     | '/{-$lang}/vs/'
+    | '/{-$lang}/og/top/$country'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   fileRoutesByTo: FileRoutesByTo
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/u/$username'
     | '/{-$lang}/top'
     | '/{-$lang}/vs'
+    | '/{-$lang}/og/top/$country'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   id:
@@ -297,6 +309,7 @@ export interface FileRouteTypes {
     | '/{-$lang}/u/$username'
     | '/{-$lang}/top/'
     | '/{-$lang}/vs/'
+    | '/{-$lang}/og/top/$country'
     | '/{-$lang}/vs/$left/$right'
     | '/{-$lang}/og/vs/$left/$right'
   fileRoutesById: FileRoutesById
@@ -455,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LangChar125VsIndexRouteImport
       parentRoute: typeof Char123LangChar125Route
     }
+    '/{-$lang}/og/top/$country': {
+      id: '/{-$lang}/og/top/$country'
+      path: '/og/top/$country'
+      fullPath: '/{-$lang}/og/top/$country'
+      preLoaderRoute: typeof Char123LangChar125OgTopCountryRouteImport
+      parentRoute: typeof Char123LangChar125Route
+    }
     '/{-$lang}/vs/$left/$right': {
       id: '/{-$lang}/vs/$left/$right'
       path: '/vs/$left/$right'
@@ -484,6 +504,7 @@ interface Char123LangChar125RouteChildren {
   Char123LangChar125UUsernameRoute: typeof Char123LangChar125UUsernameRoute
   Char123LangChar125TopIndexRoute: typeof Char123LangChar125TopIndexRoute
   Char123LangChar125VsIndexRoute: typeof Char123LangChar125VsIndexRoute
+  Char123LangChar125OgTopCountryRoute: typeof Char123LangChar125OgTopCountryRoute
   Char123LangChar125VsLeftRightRoute: typeof Char123LangChar125VsLeftRightRoute
   Char123LangChar125OgVsLeftRightRoute: typeof Char123LangChar125OgVsLeftRightRoute
 }
@@ -500,6 +521,7 @@ const Char123LangChar125RouteChildren: Char123LangChar125RouteChildren = {
   Char123LangChar125UUsernameRoute: Char123LangChar125UUsernameRoute,
   Char123LangChar125TopIndexRoute: Char123LangChar125TopIndexRoute,
   Char123LangChar125VsIndexRoute: Char123LangChar125VsIndexRoute,
+  Char123LangChar125OgTopCountryRoute: Char123LangChar125OgTopCountryRoute,
   Char123LangChar125VsLeftRightRoute: Char123LangChar125VsLeftRightRoute,
   Char123LangChar125OgVsLeftRightRoute: Char123LangChar125OgVsLeftRightRoute,
 }
