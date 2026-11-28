@@ -1495,10 +1495,10 @@
     animation: season-card-draw 900ms cubic-bezier(0.3, 0, 0.2, 1) both;
   }
 
-  /* Like an egg about to hatch: it rocks on its base in short bursts, a little harder each time. */
+  /* Like an egg about to hatch: it rocks on its base, steadily for a second, then faster and faster. */
   .season-ceremony[data-stage="charge"] .season-card-flipper {
     transform-origin: 50% 100%;
-    animation: season-card-hatch 2000ms ease-in-out both;
+    animation: season-card-hatch 2000ms linear both;
   }
 
   .season-ceremony[data-stage="flip"] .season-card-flipper {
@@ -1604,49 +1604,89 @@
 }
 
 @keyframes season-card-hatch {
-  0%,
-  24%,
-  40%,
-  64%,
-  76%,
-  100% {
+  0.0% {
     transform: none;
   }
-  6% {
+  6.25% {
     transform: rotate(-1.2deg);
   }
-  12% {
+  12.5% {
     transform: rotate(1.2deg);
   }
-  18% {
-    transform: rotate(-0.8deg);
-  }
-  44% {
-    transform: rotate(-1.8deg);
-  }
-  49% {
-    transform: rotate(1.8deg);
-  }
-  54% {
-    transform: rotate(-1.4deg);
-  }
-  59% {
-    transform: rotate(1deg);
-  }
-  79% {
-    transform: rotate(-2.4deg);
-  }
-  83% {
-    transform: rotate(2.4deg);
-  }
-  87% {
-    transform: rotate(-2.4deg);
-  }
-  91% {
-    transform: rotate(2deg);
-  }
-  95% {
+  18.75% {
     transform: rotate(-1.2deg);
+  }
+  25.0% {
+    transform: rotate(1.2deg);
+  }
+  31.25% {
+    transform: rotate(-1.2deg);
+  }
+  37.5% {
+    transform: rotate(1.2deg);
+  }
+  43.75% {
+    transform: rotate(-1.2deg);
+  }
+  50.0% {
+    transform: rotate(1.2deg);
+  }
+  55.5% {
+    transform: rotate(-1.31deg);
+  }
+  60.17% {
+    transform: rotate(1.4deg);
+  }
+  64.15% {
+    transform: rotate(-1.48deg);
+  }
+  67.53% {
+    transform: rotate(1.55deg);
+  }
+  70.4% {
+    transform: rotate(-1.61deg);
+  }
+  72.84% {
+    transform: rotate(1.66deg);
+  }
+  74.91% {
+    transform: rotate(-1.7deg);
+  }
+  76.91% {
+    transform: rotate(1.74deg);
+  }
+  78.91% {
+    transform: rotate(-1.78deg);
+  }
+  80.91% {
+    transform: rotate(1.82deg);
+  }
+  82.91% {
+    transform: rotate(-1.86deg);
+  }
+  84.91% {
+    transform: rotate(1.9deg);
+  }
+  86.91% {
+    transform: rotate(-1.94deg);
+  }
+  88.91% {
+    transform: rotate(1.98deg);
+  }
+  90.91% {
+    transform: rotate(-2.02deg);
+  }
+  92.91% {
+    transform: rotate(2.06deg);
+  }
+  94.91% {
+    transform: rotate(-2.1deg);
+  }
+  96.91% {
+    transform: rotate(2.14deg);
+  }
+  100.0% {
+    transform: none;
   }
 }
 
