@@ -243,6 +243,27 @@ export function SeasonPack({ login, year, voice, state, onOpen }: SeasonPackProp
 const FALL_MS = 3000
 const FALL_FRAME_MS = 32
 
+/** How far in from the screen's edge a dropped piece lands, at least, in the pack's px. */
+const SIDE_MARGIN = 30
+
+/**
+ * The sideways speed that lands a dropped piece near its own edge of the screen, whatever the screen's
+ * width: the numbers under the card stay clear. From the time the piece takes to reach the floor.
+ */
+function sideThrow(
+  piece: (typeof SHATTER.pieces)[number],
+  bounds: { floor: number; left: number; right: number },
+  index: number
+): number {
+  const gravity = piece.gravity
+  const height = Math.max(0, bounds.floor - piece.center[1])
+  const time = (-piece.vy + Math.sqrt(piece.vy ** 2 + 2 * gravity * height)) / gravity
+  const toRight = piece.vx >= 0
+  const spread = SIDE_MARGIN + Math.abs(wobble(index + 1000)) * 90
+  const target = toRight ? bounds.right - spread : bounds.left + spread
+  return (target - piece.center[0]) / time
+}
+
 /**
  * The broken pack: each piece is the whole pack cut to its shape. Most are flung off the screen in every
  * direction; a few drop to the bottom of the screen, where they bounce, slide and stay. The paths come from `simulateShard`, played as Web
@@ -263,11 +284,16 @@ function Shards({ login, year, voice }: { login: string; year: number; voice: "o
       right: (window.innerWidth - rect.left) / scale
     }
     const free = { floor: Infinity, left: -Infinity, right: Infinity }
+    // On a narrow screen the numbers fill the whole width, so nothing is left lying under them.
+    const keepDrops = window.innerWidth >= 640
     const animations = Array.from(root.children).map((element, index) => {
       const piece = SHATTER.pieces[index]
       if (!piece) return undefined
+      const drops = piece.drops && keepDrops
       const frames = simulateShard(
-        { ...piece, ...(piece.drops ? bounds : free) },
+        drops
+          ? { ...piece, ...bounds, vx: sideThrow(piece, bounds, index) }
+          : { ...piece, ...free },
         FALL_MS,
         FALL_FRAME_MS
       )
@@ -275,7 +301,7 @@ function Shards({ login, year, voice }: { login: string; year: number; voice: "o
         frames.map((frame, at) => ({
           transform: `translate(${frame.x}px, ${frame.y}px) rotate(${frame.angle}deg)`,
           // A flung piece fades as it goes, in case it ends up still on screen.
-          opacity: piece.drops ? 1 : Math.max(0, 1 - Math.max(0, at / frames.length - 0.3) * 2)
+          opacity: drops ? 1 : Math.max(0, 1 - Math.max(0, at / frames.length - 0.3) * 2)
         })),
         { duration: FALL_MS, delay: piece.delay, fill: "forwards" }
       )
