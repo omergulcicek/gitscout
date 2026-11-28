@@ -186,10 +186,12 @@ export function TeamCardShowcase({ sample, settingsLink }: TeamCardShowcaseProps
               className={LINK_CLASS}
             >
               football-logos.cc
+              <span className="sr-only"> {m.new_tab()}</span>
             </a>
             . {m.special_teams_missing()}{" "}
             <a href={teamRequestUrl()} target="_blank" rel="noreferrer" className={LINK_CLASS}>
               {m.special_teams_request()}
+              <span className="sr-only"> {m.new_tab()}</span>
             </a>
           </p>
         </div>
