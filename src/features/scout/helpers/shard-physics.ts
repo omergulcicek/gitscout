@@ -15,6 +15,8 @@ export type ShardLaunch = {
   right: number
   /** Downward pull in px/ms²; lighter for pieces flung far. */
   gravity?: number
+  /** Air drag per ms: a burst piece shoots out, then slows down and drifts. */
+  drag?: number
 }
 
 /** The usual downward pull in px/ms², and how much speed a bounce keeps off the floor and off a wall. */
@@ -44,6 +46,12 @@ export function simulateShard(launch: ShardLaunch, duration: number, every: numb
 
   for (let time = STEP_MS; time <= duration; time += STEP_MS) {
     if (!resting) vy += (launch.gravity ?? GRAVITY) * STEP_MS
+    if (launch.drag) {
+      const keep = 1 - launch.drag * STEP_MS
+      vx *= keep
+      vy *= keep
+      spin *= keep
+    }
     x += vx * STEP_MS
     y += vy * STEP_MS
     angle += spin * STEP_MS

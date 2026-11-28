@@ -121,18 +121,20 @@ const SHATTER = (() => {
       const dy = center[1] - impact[1]
       const length = Math.hypot(dx, dy) || 1
       const drops = size >= 150 && wobble(index + 600) > 0.35
+      // Everything bursts out first; the pieces that drop are thrown up and out, then fall.
       const speed = drops
-        ? 0.18 + Math.abs(wobble(index + 500)) * 0.15
-        : 1.1 + Math.abs(wobble(index + 500)) * 0.9
+        ? 0.55 + Math.abs(wobble(index + 500)) * 0.35
+        : 0.9 + Math.abs(wobble(index + 500)) * 0.8
       return {
         clip: polygon(points.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`)),
         center,
         radius,
         drops,
         vx: (dx / length) * speed,
-        vy: (dy / length) * speed - (drops ? 0.35 : 0),
-        spin: wobble(index + 200) * (drops ? 0.3 : 0.9),
-        gravity: drops ? 0.0034 : 0.0009,
+        vy: (dy / length) * speed - (drops ? 1.1 : 0.2),
+        spin: wobble(index + 200) * (drops ? 0.5 : 1.2),
+        gravity: drops ? 0.0034 : 0.0006,
+        drag: drops ? 0 : 0.0024,
         delay: Math.round(Math.abs(wobble(index + 900)) * 60)
       }
     }),
@@ -269,7 +271,7 @@ function Shards({ login, year, voice }: { login: string; year: number; voice: "o
         frames.map((frame, at) => ({
           transform: `translate(${frame.x}px, ${frame.y}px) rotate(${frame.angle}deg)`,
           // A flung piece fades as it goes, in case it ends up still on screen.
-          opacity: piece.drops ? 1 : Math.max(0, 1 - Math.max(0, at / frames.length - 0.35) * 2.5)
+          opacity: piece.drops ? 1 : Math.max(0, 1 - Math.max(0, at / frames.length - 0.3) * 2)
         })),
         { duration: FALL_MS, delay: piece.delay, fill: "forwards" }
       )

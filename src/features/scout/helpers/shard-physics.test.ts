@@ -42,6 +42,13 @@ describe("simulateShard", () => {
     expect(last?.x).toBeCloseTo(free.vx * 3000)
   })
 
+  it("slows down with drag", () => {
+    const free = { ...launch, floor: Infinity, left: -Infinity, right: Infinity, gravity: 0 }
+    const dragged = simulateShard({ ...free, drag: 0.003 }, 2000, 40).at(-1)
+    const plain = simulateShard(free, 2000, 40).at(-1)
+    expect(Math.abs(dragged?.x ?? 0)).toBeLessThan(Math.abs(plain?.x ?? 0) / 2)
+  })
+
   it("gives the same path for the same launch", () => {
     expect(simulateShard(launch, 2000, 40)).toEqual(simulateShard(launch, 2000, 40))
   })

@@ -1337,12 +1337,13 @@
 .season-pack-crack {
   fill: none;
   stroke: var(--frame-1);
-  stroke-width: 1.8;
+  stroke-width: 0.9;
+  stroke-opacity: 0.8;
   stroke-linejoin: round;
   stroke-linecap: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  filter: drop-shadow(0 0 4px var(--frame-1)) drop-shadow(0 0 10px var(--frame-2));
+  filter: drop-shadow(0 0 3px var(--frame-2));
 }
 
 /* The ceremony's own light: free to spread, the overlay covers the whole screen. */
@@ -1408,6 +1409,11 @@
     animation: season-card-emerge 700ms var(--ease-out) both;
   }
 
+  /* The blast jolts the whole scene for a moment. */
+  .season-ceremony[data-stage="shatter"] .season-ceremony-stage {
+    animation: season-ceremony-jolt 380ms var(--ease-out);
+  }
+
   .season-ceremony[data-stage="shatter"] .season-ceremony-burst {
     animation: season-ceremony-burst 1100ms var(--ease-out) both;
   }
@@ -1460,6 +1466,24 @@
   100% {
     transform: none;
     filter: none;
+  }
+}
+
+@keyframes season-ceremony-jolt {
+  0% {
+    transform: scale(1.04);
+  }
+  20% {
+    transform: translate(-6px, 4px) scale(1.02);
+  }
+  45% {
+    transform: translate(5px, -3px);
+  }
+  70% {
+    transform: translate(-2px, 1px);
+  }
+  100% {
+    transform: none;
   }
 }
 
