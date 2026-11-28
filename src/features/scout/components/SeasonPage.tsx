@@ -9,7 +9,7 @@ import { getLangParam } from "@/helpers/localized-url"
 
 import { useViewer } from "@/hooks/use-viewer"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { RarityChip } from "@/features/scout/components/RarityChip"
 import { SeasonCardPanel } from "@/features/scout/components/SeasonCardPanel"
 import { SeasonCeremony } from "@/features/scout/components/SeasonCeremony"
@@ -35,7 +35,7 @@ import { getLocale } from "@/paraglide/runtime.js"
 /** Below this many quiet days in a row, a break isn't worth a line in the report. */
 const MIN_BREAK_DAYS = 3
 
-/** Flakes on screen normally and during the pack's reveal, and how long the flurry lasts. */
+/** Flakes on screen normally and once the card has landed, and how long that flurry lasts. */
 const LIGHT_FLAKES = 160
 const FLURRY_FLAKES = 650
 const FLURRY_MS = 6000
@@ -123,6 +123,8 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
       markOpened(packKey)
       setLanded(how === "landed")
       setFocusDownload(true)
+      // The card is home: the snow picks up at once to celebrate it.
+      if (how === "landed") setFlurry(true)
       setCeremony("off")
     },
     [markOpened, packKey]
@@ -143,7 +145,7 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
       tabIndex={-1}
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-clip px-4 pt-2 pb-20 outline-none sm:px-6"
     >
-      <SeasonSnow count={flurry ? FLURRY_FLAKES : LIGHT_FLAKES} />
+      <SeasonSnow count={flurry ? FLURRY_FLAKES : LIGHT_FLAKES} flurry={flurry} />
       {ceremony === "on" ? (
         <SeasonCeremony
           player={data.card}
@@ -151,7 +153,6 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
           voice={voice}
           facts={ceremonyFacts(season, top, data.standing)}
           target={slotRef}
-          onFlip={() => setFlurry(true)}
           onClose={closeCeremony}
         />
       ) : null}
@@ -174,28 +175,20 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
             focusDownload={focusDownload}
             slotRef={slotRef}
             onReopen={reopen}
-            actions={
-              <>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={downloadLandscape}
-                  disabled={landscapeDownloading}
-                >
-                  <Monitor aria-hidden />
-                  {landscapeDownloading ? m.download_preparing() : m.season_poster_landscape()}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={downloadPortrait}
-                  disabled={portraitDownloading}
-                >
-                  <Smartphone aria-hidden />
-                  {portraitDownloading ? m.download_preparing() : m.season_poster_portrait()}
-                </Button>
-              </>
-            }
+            downloads={[
+              {
+                label: m.season_download_landscape(),
+                icon: Monitor,
+                onSelect: downloadLandscape,
+                busy: landscapeDownloading
+              },
+              {
+                label: m.season_download_portrait(),
+                icon: Smartphone,
+                onSelect: downloadPortrait,
+                busy: portraitDownloading
+              }
+            ]}
           />
         </aside>
 

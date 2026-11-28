@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import type { CSSProperties, KeyboardEvent, MouseEvent, RefObject } from "react"
+import type { KeyboardEvent, RefObject } from "react"
 
 import { X } from "lucide-react"
 
@@ -10,20 +10,22 @@ import { rarityLabel } from "@/features/scout/helpers/player-text"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
-type Stage = "sealed" | "tear" | "draw" | "hold" | "flip" | "facts" | "fly"
+type Stage = "sealed" | "tear" | "draw" | "charge" | "flip" | "facts" | "fly"
 
 /** Card size in px; the ceremony scales it to the screen. */
 const CARD_W = 320
 const CARD_H = 480
 const MAX_SCALE = 1.4
-/** Room kept for the bar on top and the hints, numbers and button under the card, on wide and narrow screens. */
-const CHROME_WIDE = 56 + 176
-const CHROME_NARROW = 56 + 240
+/** Room kept for the bar on top and the numbers and button under the card, on wide and narrow screens. */
+const CHROME_WIDE = 56 + 150
+const CHROME_NARROW = 56 + 200
 
 const TEAR_MS = 650
 const DRAW_MS = 900
-const HOLD_MS = 1100
+const CHARGE_MS = 900
 const FLIP_MS = 700
+/** How long the numbers stay before the card flies home on its own. */
+const FACTS_MS = 3200
 const FLY_MS = 700
 const COUNT_MS = 700
 
@@ -41,8 +43,6 @@ type SeasonCeremonyProps = {
   facts: CeremonyFact[]
   /** Where the card lands on the page; measured when it flies there. */
   target: RefObject<HTMLElement | null>
-  /** The card has turned over; the page turns the snow up. */
-  onFlip: () => void
   /** "landed" after the card flew to its place, "skipped" when the ceremony was cut short. */
   onClose: (how: "landed" | "skipped") => void
 }
@@ -59,11 +59,11 @@ function fitScale(): number {
 }
 
 /**
- * The season pack, opened full screen over the report. Drag the strip (or tap) to tear the top off; the card
- * comes out face down; press and hold it to turn it over while its frame heats up in the tier's colour. The
- * season's headline numbers count up under it, then the card flies to its place on the page and the report
- * shows. "Skip" and Esc end it at any point; the page itself skips it for reduced motion and for packs
- * already opened in this browser.
+ * The season pack, opened full screen over the report, with one action: drag the strip (or tap) to tear the
+ * top off. The rest plays by itself: the card comes out face down, its frame heats up in the tier's colour,
+ * it turns over, the season's headline numbers count up under it, and it flies to its place on the page as
+ * the report shows. "Skip" and Esc end it at any point; the page itself skips it for reduced motion and for
+ * packs already opened in this browser.
  */
 export function SeasonCeremony({
   player,
@@ -71,18 +71,14 @@ export function SeasonCeremony({
   voice,
   facts,
   target,
-  onFlip,
   onClose
 }: SeasonCeremonyProps) {
   const [stage, setStage] = useState<Stage>("sealed")
   // Unknown on the server; the stage fades in once the browser has measured the screen.
   const [scale, setScale] = useState<number | null>(null)
-  const [holding, setHolding] = useState(false)
   const [tornAt, setTornAt] = useState(0)
-  const [flight, setFlight] = useState<CSSProperties | undefined>(undefined)
   const rootRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
-  const holdTimer = useRef<number | undefined>(undefined)
   const continueRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -92,72 +88,54 @@ export function SeasonCeremony({
     return () => window.removeEventListener("resize", resize)
   }, [])
 
-  // The timed steps; a stage change (a skip included) clears the running timer.
+  // The flight home: measured when it starts, so it lands wherever the card's place is now.
   useEffect(() => {
-    const steps: Partial<Record<Stage, [Stage, number]>> = {
-      tear: ["draw", TEAR_MS * (1 - tornAt)],
-      draw: ["hold", DRAW_MS],
-      flip: ["facts", FLIP_MS],
-      fly: ["fly", FLY_MS]
+    if (stage !== "fly") return
+    const element = cardRef.current
+    const card = element?.getBoundingClientRect()
+    const slot = target.current?.getBoundingClientRect()
+    if (element && card && slot && scale) {
+      // The card sits inside the scaled stage, so the move is in its own, unscaled pixels.
+      const x = (slot.left + slot.width / 2 - (card.left + card.width / 2)) / scale
+      const y = (slot.top + slot.height / 2 - (card.top + card.height / 2)) / scale
+      element.style.transition = `transform ${FLY_MS}ms cubic-bezier(0.5, 0, 0.2, 1)`
+      element.style.transform = `translate(${x}px, ${y}px) scale(${slot.width / card.width})`
+    }
+    const timer = window.setTimeout(() => onClose("landed"), FLY_MS)
+    return () => window.clearTimeout(timer)
+  }, [stage, scale, target, onClose])
+
+  const fly = () => setStage("fly")
+
+  // Everything after the tear plays on timers; a stage change (a skip included) clears the running one.
+  useEffect(() => {
+    const steps: Partial<Record<Stage, [() => void, number]>> = {
+      tear: [() => setStage("draw"), TEAR_MS * (1 - tornAt)],
+      draw: [() => setStage("charge"), DRAW_MS],
+      charge: [
+        () => {
+          setStage("flip")
+          // A short buzz on phones that have one.
+          if ("vibrate" in navigator) navigator.vibrate(20)
+        },
+        CHARGE_MS
+      ],
+      flip: [() => setStage("facts"), FLIP_MS],
+      facts: [() => setStage("fly"), FACTS_MS]
     }
     const step = steps[stage]
     if (!step) return
-    const timer = window.setTimeout(() => {
-      if (stage === "fly") onClose("landed")
-      else setStage(step[0])
-    }, step[1])
+    const timer = window.setTimeout(step[0], step[1])
     return () => window.clearTimeout(timer)
-  }, [stage, tornAt, onClose])
+  }, [stage, tornAt])
 
   useEffect(() => {
     if (stage === "facts") continueRef.current?.focus()
   }, [stage])
 
-  useEffect(() => () => window.clearTimeout(holdTimer.current), [])
-
   const open = (torn: number) => {
     setTornAt(torn)
     setStage("tear")
-  }
-
-  const flip = () => {
-    window.clearTimeout(holdTimer.current)
-    setHolding(false)
-    setStage("flip")
-    // A short buzz on phones that have one.
-    if ("vibrate" in navigator) navigator.vibrate(20)
-    onFlip()
-  }
-
-  const startHold = () => {
-    if (stage !== "hold") return
-    setHolding(true)
-    holdTimer.current = window.setTimeout(flip, HOLD_MS)
-  }
-  const stopHold = () => {
-    window.clearTimeout(holdTimer.current)
-    setHolding(false)
-  }
-  // The keyboard (and assistive tech) turns the card with a single press.
-  const pressCard = (event: MouseEvent<HTMLButtonElement>) => {
-    if (stage === "hold" && event.detail === 0) flip()
-  }
-
-  const fly = () => {
-    const card = cardRef.current?.getBoundingClientRect()
-    const slot = target.current?.getBoundingClientRect()
-    if (!card || !slot || !scale) {
-      onClose("landed")
-      return
-    }
-    // The card sits inside the scaled stage, so the move is in its own, unscaled pixels.
-    const x = (slot.left + slot.width / 2 - (card.left + card.width / 2)) / scale
-    const y = (slot.top + slot.height / 2 - (card.top + card.height / 2)) / scale
-    setFlight({
-      transform: `translate(${x}px, ${y}px) scale(${slot.width / card.width})`,
-      transition: `transform ${FLY_MS}ms cubic-bezier(0.5, 0, 0.2, 1)`
-    })
-    setStage("fly")
   }
 
   // A modal: Esc skips, and Tab stays inside.
@@ -194,7 +172,6 @@ export function SeasonCeremony({
       aria-modal="true"
       aria-label={m.season_ceremony_label({ year })}
       data-stage={stage}
-      data-holding={holding ? "" : undefined}
       data-rarity={player.rarity}
       onKeyDown={keyDown}
       className="season-ceremony fixed inset-0 z-30 flex flex-col items-center overflow-hidden bg-background"
@@ -222,7 +199,7 @@ export function SeasonCeremony({
             />
 
             {stage === "sealed" || stage === "tear" ? null : (
-              <div ref={cardRef} className="season-card-draw absolute inset-0" style={flight}>
+              <div ref={cardRef} className="season-card-draw absolute inset-0">
                 <div className="relative size-full [perspective:1400px]">
                   <div className="season-card-flipper relative size-full">
                     <div
@@ -235,36 +212,21 @@ export function SeasonCeremony({
                         className="season-card-shine pointer-events-none absolute inset-0"
                       />
                     </div>
-                    <button
-                      type="button"
-                      aria-label={m.season_ceremony_flip_label()}
-                      disabled={stage !== "hold"}
-                      onPointerDown={startHold}
-                      onPointerUp={stopHold}
-                      onPointerLeave={stopHold}
-                      onPointerCancel={stopHold}
-                      onClick={pressCard}
-                      onContextMenu={(event) => event.preventDefault()}
-                      className="season-card-face season-card-back absolute inset-0 flex touch-none flex-col items-center justify-center gap-4 rounded-[28px] text-white outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-4 focus-visible:ring-ring"
+                    <div
+                      aria-hidden
+                      className="season-card-face season-card-back absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-[28px] text-white"
                     >
-                      <span aria-hidden className="relative grid size-28 place-items-center">
-                        <HoldRing />
-                        <SnowSeal className="size-14 text-white/75" />
-                      </span>
+                      <SnowSeal className="size-16 text-white/75" />
                       <span
-                        aria-hidden
                         lang="en"
                         className="font-mono text-xs tracking-[0.45em] text-white/70 uppercase"
                       >
                         Gitscout
                       </span>
-                      <span
-                        aria-hidden
-                        className="season-pack-year font-mono text-5xl font-bold tabular-nums"
-                      >
+                      <span className="season-pack-year font-mono text-5xl font-bold tabular-nums">
                         {year}
                       </span>
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -285,7 +247,7 @@ export function SeasonCeremony({
         </div>
       </div>
 
-      <div className="season-ceremony-chrome flex min-h-44 w-full max-w-2xl shrink-0 flex-col items-center justify-start gap-3 px-4 pt-4 pb-6 text-center max-sm:min-h-60">
+      <div className="season-ceremony-chrome flex min-h-36 w-full max-w-2xl shrink-0 flex-col items-center justify-start gap-4 px-4 pt-4 pb-6 text-center max-sm:min-h-48">
         {stage === "sealed" ? (
           <>
             <p className="text-sm text-muted-foreground">{m.season_ceremony_tear_hint()}</p>
@@ -293,15 +255,8 @@ export function SeasonCeremony({
               {m.season_pack_open()}
             </Button>
           </>
-        ) : stage === "hold" ? (
-          <p className="season-ceremony-hint text-sm font-medium text-foreground">
-            {m.season_ceremony_hold_hint()}
-          </p>
         ) : turned ? (
           <>
-            <p data-rarity={player.rarity} className="season-tier-label season-fact">
-              {rarityLabel(player.rarity)}
-            </p>
             <p role="status" className="sr-only">
               {m.season_pack_revealed({ rarity: rarityLabel(player.rarity), ovr: player.ovr })}
             </p>
@@ -310,45 +265,29 @@ export function SeasonCeremony({
                 <div
                   key={fact.label}
                   className="season-fact flex flex-col items-center gap-0.5"
-                  style={{ "--i": index + 1 }}
+                  style={{ "--i": index }}
                 >
                   <dt className="text-xs text-muted-foreground">{fact.label}</dt>
                   <dd className="font-mono text-2xl leading-tight font-semibold tabular-nums">
-                    <CountUp
-                      value={fact.value}
-                      format={fact.format}
-                      delay={200 + (index + 1) * 180}
-                    />
+                    <CountUp value={fact.value} format={fact.format} delay={150 + index * 180} />
                   </dd>
                 </div>
               ))}
             </dl>
-            <Button ref={continueRef} onClick={fly} disabled={stage === "fly"}>
+            {/* The card flies home on its own; this only goes sooner. */}
+            <Button
+              ref={continueRef}
+              variant="ghost"
+              size="sm"
+              onClick={fly}
+              disabled={stage === "fly"}
+            >
               {m.season_ceremony_continue()}
             </Button>
           </>
         ) : null}
       </div>
     </div>
-  )
-}
-
-/** The ring around the seal on the card's back that fills while the card is held. */
-function HoldRing() {
-  return (
-    <svg viewBox="0 0 112 112" className="absolute inset-0 size-full -rotate-90">
-      <circle cx="56" cy="56" r="52" fill="none" stroke="rgb(255 255 255 / 0.15)" strokeWidth="3" />
-      <circle
-        className="season-hold-ring"
-        cx="56"
-        cy="56"
-        r="52"
-        fill="none"
-        strokeWidth="4"
-        strokeLinecap="round"
-        pathLength={100}
-      />
-    </svg>
   )
 }
 
