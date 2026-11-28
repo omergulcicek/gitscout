@@ -74,7 +74,7 @@ export function ScoutHome() {
             <h2 id="leaderboard-heading" className="text-xl font-semibold">
               {m.home_top({ count: HOME_LIMIT })}
             </h2>
-            {canSwitch ? <TopViewSwitch view={view} /> : null}
+            {canSwitch ? <TopViewSwitch view={view} label={m.home_top_switch_label()} /> : null}
           </div>
           {poolSize > HOME_LIMIT ? (
             <Link
