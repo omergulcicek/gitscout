@@ -1248,8 +1248,16 @@
  * Season pack: a sealed foil bag. Layers from the bottom: foil, a faint holographic film that shifts with
  * the pointer, a glare under the pointer and a slow light sweep; crimped seals top and bottom; a tear strip.
  * Pointer position arrives as --mx/--my/--px/--rx/--ry from the component. Only opacity and transform
- * animate.
+ * animate. The tier's colour (--frame-1/--frame-2) appears only once the stage carries data-rarity.
  */
+.season-pack-stage {
+  --pack-light: #bfe3ff;
+}
+
+.season-pack-stage[data-rarity] {
+  --pack-light: var(--frame-1);
+}
+
 .season-pack-shadow {
   filter: drop-shadow(0 24px 32px rgb(0 0 0 / 0.45));
 }
@@ -1333,10 +1341,32 @@
   -webkit-text-stroke: 1px rgb(255 255 255 / 0.55);
 }
 
+.season-pack-tier {
+  color: var(--frame-1);
+  text-shadow: 0 2px 16px rgb(0 0 0 / 0.45);
+}
+
 .season-pack-leak {
   background: radial-gradient(closest-side, #e8f4ff, transparent);
   filter: blur(12px);
   opacity: 0;
+}
+
+.season-pack-burst {
+  background: radial-gradient(closest-side, var(--pack-light), transparent 70%);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 300ms var(--ease-out),
+    transform 300ms var(--ease-out);
+}
+
+.season-pack-stage[data-stage="tear"] .season-pack-burst,
+.season-pack-stage[data-stage="flag"] .season-pack-burst,
+.season-pack-stage[data-stage="position"] .season-pack-burst,
+.season-pack-stage[data-stage="rarity"] .season-pack-burst {
+  opacity: 0.35;
+  transform: scale(0.8);
 }
 
 .season-pack-stage:not([data-stage="sealed"]) .season-pack-strip {
@@ -1369,9 +1399,29 @@
   }
 
   .season-pack-stage[data-stage="tear"] .season-pack-leak,
-  .season-pack-stage[data-stage="rise"] .season-pack-leak {
+  .season-pack-stage[data-stage="flag"] .season-pack-leak,
+  .season-pack-stage[data-stage="position"] .season-pack-leak,
+  .season-pack-stage[data-stage="rarity"] .season-pack-leak {
     opacity: 0.8;
     transition: opacity 400ms var(--ease-out);
+  }
+
+  .season-pack-stage[data-stage="flag"] .season-pack,
+  .season-pack-stage[data-stage="position"] .season-pack,
+  .season-pack-stage[data-stage="rarity"] .season-pack {
+    animation: season-pack-shake 1.4s ease-in-out infinite;
+  }
+
+  .season-pack-stage[data-stage="burst"] .season-pack-shadow {
+    animation: season-pack-open 450ms var(--ease-out) both;
+  }
+
+  .season-pack-stage[data-stage="burst"] .season-pack-burst {
+    animation: season-pack-burst 450ms var(--ease-out) both;
+  }
+
+  .season-pack-clue {
+    animation: season-pack-clue 550ms var(--ease-out) both;
   }
 }
 
@@ -1417,156 +1467,54 @@
   }
 }
 
-/*
- * Season card build: while a pack opens the real card arrives blank and its parts land in turn, keyed by
- * data-build (rise → flag → position → count → tier → done). The glow stays dark until the rating starts
- * climbing, then follows the tier the count has reached; the face is a dark silhouette until the tier
- * lights up. Glows stay narrow sideways: the page clips anything past its gutter.
- */
-.season-tier-label {
-  border-radius: 9999px;
-  padding: 0.25rem 0.875rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--foreground);
-  background: color-mix(in oklab, var(--frame-2) 22%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--frame-2) 60%, transparent);
-}
-
-.season-card-flash {
-  background: radial-gradient(closest-side, var(--frame-1), transparent 75%);
-  opacity: 0;
-}
-
-.season-build [data-card-part] {
-  transition:
-    opacity 280ms var(--ease-out),
-    transform 380ms var(--ease-out),
-    filter 500ms var(--ease-out);
-}
-
-.season-build[data-build="rise"] [data-card-part="flag"],
-.season-build:is([data-build="rise"], [data-build="flag"]) [data-card-part="position"],
-.season-build:is([data-build="rise"], [data-build="flag"], [data-build="position"])
-  :is([data-card-part="ovr"], [data-card-part="stats"] > div) {
-  opacity: 0;
-  transform: scale(0.6);
-}
-
-.season-build:not([data-build="tier"], [data-build="done"])
-  :is([data-card-part="chip"], [data-card-part="name"], [data-card-part="footer"]) {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.season-build:not([data-build="tier"], [data-build="done"]) [data-card-part="avatar"] img {
-  filter: brightness(0) opacity(0.18);
-}
-
-/* The stats pop in one after another while the rating climbs. */
-.season-build[data-build="count"] [data-card-part="stats"] > div:nth-child(2) {
-  transition-delay: 70ms;
-}
-.season-build[data-build="count"] [data-card-part="stats"] > div:nth-child(3) {
-  transition-delay: 140ms;
-}
-.season-build[data-build="count"] [data-card-part="stats"] > div:nth-child(4) {
-  transition-delay: 210ms;
-}
-.season-build[data-build="count"] [data-card-part="stats"] > div:nth-child(5) {
-  transition-delay: 280ms;
-}
-.season-build[data-build="count"] [data-card-part="stats"] > div:nth-child(6) {
-  transition-delay: 350ms;
-}
-
-.season-build .season-card-glow {
-  transition:
-    opacity 500ms var(--ease-out),
-    background 400ms var(--ease-out);
-}
-
-.season-build:is([data-build="rise"], [data-build="flag"], [data-build="position"])
-  .season-card-glow {
-  opacity: 0;
-}
-
-.season-build[data-build="count"] .season-card-glow {
-  opacity: 0.6;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .season-pack-stage[data-stage="rise"] .season-pack-shadow {
-    animation: season-pack-drop 650ms cubic-bezier(0.5, 0, 0.75, 0) both;
+@keyframes season-pack-shake {
+  0%,
+  100% {
+    transform: perspective(900px) rotate(0deg);
   }
-
-  .season-pack-stage[data-stage="rise"] .season-card-rise {
-    animation: season-card-rise 650ms var(--ease-out) both;
+  25% {
+    transform: perspective(900px) rotate(-0.8deg) scale(1.005);
   }
-
-  .season-build[data-build="tier"] .season-card-flash {
-    animation: season-card-flash 900ms var(--ease-out) both;
-  }
-
-  .season-build[data-build="tier"] [data-card-part="ovr"] {
-    animation: season-card-ovr-pop 450ms var(--ease-out);
-  }
-
-  .season-tier-label-in {
-    animation: season-tier-label-in 400ms var(--ease-out) both;
+  75% {
+    transform: perspective(900px) rotate(0.8deg) scale(1.005);
   }
 }
 
-/* The pack slides down and away as the card leaves it. */
-@keyframes season-pack-drop {
+@keyframes season-pack-open {
   0% {
     transform: none;
     opacity: 1;
   }
-  45% {
+  100% {
+    transform: perspective(900px) translateY(-8%) scale(1.08);
+    opacity: 0;
+  }
+}
+
+@keyframes season-pack-burst {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  60% {
     opacity: 1;
   }
   100% {
-    transform: translateY(45%);
     opacity: 0;
+    transform: scale(1.8);
   }
 }
 
-@keyframes season-card-rise {
+@keyframes season-pack-clue {
   0% {
-    transform: translateY(22%) scale(0.92);
+    opacity: 0;
+    transform: translateY(12px) scale(0.85);
+    filter: blur(6px);
   }
   100% {
+    opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes season-card-flash {
-  0% {
-    opacity: 0;
-    transform: scaleY(0.7);
-  }
-  35% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: scaleY(1.1);
-  }
-}
-
-@keyframes season-card-ovr-pop {
-  40% {
-    transform: scale(1.18);
-  }
-}
-
-@keyframes season-tier-label-in {
-  0% {
-    opacity: 0;
-    transform: translateY(6px) scale(0.9);
+    filter: none;
   }
 }
 
@@ -1600,7 +1548,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .season-snow-cap {
-    animation: season-snow-cap 700ms var(--ease-out) 250ms both;
+    animation: season-snow-cap 700ms var(--ease-out) 850ms both;
   }
 }
 

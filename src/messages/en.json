@@ -772,9 +772,10 @@
   "season_pack_hint_own": "Your season card is inside this pack.",
   "season_pack_hint_other": "Their season card is inside this pack.",
   "season_standing_basis": "by active days in the last 12 months",
+  "season_pack_clue_flag": "Country: {country}",
+  "season_pack_clue_position": "Field: {position}",
+  "season_pack_clue_rarity": "Tier: {rarity}",
   "season_pack_open_label": "Open the {year} season pack",
-  "season_pack_skip": "Skip",
-  "season_pack_revealed": "Card revealed: {rarity}, {ovr} rating",
   "season_pack_tear": "tear here",
   "season_pack_print": "1 card · {year} season · № {serial}"
 }
