@@ -1347,12 +1347,27 @@
   opacity: 0;
 }
 
-.season-pack-stage:not([data-stage="sealed"]) :is(.season-pack-mouth, .season-pack-leak) {
+.season-pack-root:is([data-peeling], [data-pack="tear"], [data-pack="open"])
+  :is(.season-pack-mouth, .season-pack-leak) {
   opacity: 0.8;
-  transition: opacity 300ms var(--ease-out) 200ms;
+  transition: opacity 300ms var(--ease-out);
 }
 
-/* The card's back, as it comes out of the pack. */
+/*
+ * The torn-off top follows the drag: its animation stays paused at --tear (0–1) of the way through, then
+ * runs on from there once the tear goes through. Lifts from the right, hangs on its last fibres, flies off.
+ */
+.season-pack-flap {
+  transform-origin: 0 50px;
+  animation: season-pack-flap 650ms cubic-bezier(0.5, 0, 0.75, 0.2) both paused;
+  animation-delay: calc(var(--tear, 0) * -650ms);
+}
+
+.season-pack-root[data-pack="tear"] .season-pack-flap {
+  animation-play-state: running;
+}
+
+/* The card's back, as it comes out of the pack. Held down, its frame heats up in the tier's colour. */
 .season-card-back {
   --back-light: #bfe3ff;
   background:
@@ -1361,18 +1376,34 @@
   box-shadow:
     inset 0 0 0 2px color-mix(in oklab, var(--back-light) 55%, transparent),
     inset 0 0 0 8px #161a35,
-    inset 0 0 0 9px color-mix(in oklab, var(--back-light) 25%, transparent);
-  transition: box-shadow 400ms var(--ease-out);
+    inset 0 0 0 9px color-mix(in oklab, var(--back-light) 25%, transparent),
+    0 24px 48px -16px rgb(0 0 0 / 0.6);
+  transition: box-shadow 300ms var(--ease-out);
 }
 
-/* The tier's colour shows on the back's frame just before it turns over. */
-.season-pack-stage:is([data-stage="charge"], [data-stage="flip"]) .season-card-back {
+.season-ceremony[data-holding] .season-card-back,
+.season-ceremony[data-stage="flip"] .season-card-back {
   --back-light: var(--frame-1);
   box-shadow:
-    inset 0 0 0 2px var(--back-light),
+    inset 0 0 0 3px var(--back-light),
     inset 0 0 0 8px #161a35,
-    inset 0 0 0 9px color-mix(in oklab, var(--back-light) 60%, transparent),
-    inset 0 0 40px -6px color-mix(in oklab, var(--back-light) 55%, transparent);
+    inset 0 0 0 10px color-mix(in oklab, var(--back-light) 70%, transparent),
+    inset 0 0 60px -4px color-mix(in oklab, var(--back-light) 60%, transparent),
+    0 0 60px -6px color-mix(in oklab, var(--frame-2) 80%, transparent);
+  transition: box-shadow 1100ms linear;
+}
+
+.season-hold-ring {
+  stroke: var(--frame-1);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 300ms var(--ease-out);
+}
+
+.season-ceremony[data-holding] .season-hold-ring,
+.season-ceremony[data-stage="flip"] .season-hold-ring {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1100ms linear;
 }
 
 .season-card-flipper {
@@ -1387,7 +1418,7 @@
   transform: rotateY(180deg);
 }
 
-.season-pack-stage[data-stage="card"] .season-card-flipper {
+.season-ceremony:is([data-stage="facts"], [data-stage="fly"]) .season-card-flipper {
   transform: rotateY(180deg);
 }
 
@@ -1403,6 +1434,35 @@
   opacity: 0;
 }
 
+/* The ceremony's own light: free to spread, the overlay covers the whole screen. */
+.season-ceremony-burst {
+  background: radial-gradient(closest-side, var(--frame-1), transparent 72%);
+  opacity: 0;
+}
+
+.season-ceremony-stage {
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.season-ceremony-stage[data-ready] {
+  opacity: 1;
+}
+
+.season-ceremony {
+  transition: background-color 600ms var(--ease-out);
+}
+
+/* The card flies home over the report as the curtain lifts. */
+.season-ceremony[data-stage="fly"] {
+  background-color: transparent;
+}
+
+.season-ceremony[data-stage="fly"] :is(.season-ceremony-chrome, .season-ceremony-burst) {
+  opacity: 0;
+  transition: opacity 250ms var(--ease-out);
+}
+
 .season-tier-label {
   border-radius: 9999px;
   padding: 0.25rem 0.875rem;
@@ -1415,10 +1475,6 @@
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--frame-2) 60%, transparent);
 }
 
-.season-pack-stage:not([data-stage="sealed"]) .season-pack-strip {
-  opacity: 0;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .season-pack {
     transition: transform 200ms var(--ease-out);
@@ -1428,46 +1484,54 @@
     transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(0.98);
   }
 
-  .season-pack-stage[data-stage="sealed"] .season-pack-shadow {
+  .season-pack-root[data-pack="sealed"]:not([data-peeling]) .season-pack-shadow {
     animation: season-pack-breathe 4s ease-in-out infinite;
   }
 
-  .season-pack-stage[data-stage="sealed"] .season-pack-sweep {
+  .season-pack-root[data-pack="sealed"] .season-pack-sweep {
     animation: season-pack-sweep 6s ease-in-out 1.2s infinite;
   }
 
-  .season-pack:hover:enabled .season-pack-notch {
-    animation: season-pack-notch 600ms ease-in-out 2;
+  /* The notch keeps nudging towards the tear while the pack waits. */
+  .season-pack-root[data-pack="sealed"]:not([data-peeling]) .season-pack-notch {
+    animation: season-pack-notch 1.4s ease-in-out infinite;
   }
 
-  /* The flap peels up from the right, hangs a moment on its last fibres, then flies off. */
-  .season-pack-flap {
-    transform-origin: 0 50px;
-    animation: season-pack-flap 650ms cubic-bezier(0.5, 0, 0.75, 0.2) both;
-  }
-
-  .season-pack-stage[data-stage="tear"] .season-pack {
+  .season-pack-root[data-pack="tear"] .season-pack {
     animation: season-pack-jolt 260ms var(--ease-out);
   }
 
-  .season-pack-stage[data-stage="draw"] .season-pack-shadow {
+  .season-ceremony[data-stage="draw"] .season-ceremony-pack {
     animation: season-pack-drop 900ms cubic-bezier(0.5, 0, 0.75, 0) both;
   }
 
-  .season-pack-stage[data-stage="draw"] .season-card-draw {
+  .season-ceremony[data-stage="draw"] .season-card-draw {
     animation: season-card-draw 900ms cubic-bezier(0.3, 0, 0.2, 1) both;
   }
 
-  .season-pack-stage[data-stage="charge"] .season-card-draw {
-    animation: season-card-charge 600ms ease-in-out;
+  .season-ceremony[data-holding] .season-card-flipper {
+    animation: season-card-rumble 140ms linear infinite;
   }
 
-  .season-pack-stage[data-stage="flip"] .season-card-flipper {
+  .season-ceremony[data-stage="hold"] .season-ceremony-hint {
+    animation: season-hint-pulse 1.6s ease-in-out infinite;
+  }
+
+  .season-ceremony[data-stage="flip"] .season-card-flipper {
     animation: season-card-flip 700ms cubic-bezier(0.45, 0, 0.2, 1) both;
   }
 
-  .season-pack-stage[data-stage="flip"] .season-card-shine {
+  .season-ceremony[data-stage="flip"] .season-card-shine {
     animation: season-card-shine 700ms var(--ease-out) 350ms both;
+  }
+
+  .season-ceremony[data-stage="flip"] .season-ceremony-burst {
+    animation: season-ceremony-burst 1100ms var(--ease-out) 250ms both;
+  }
+
+  .season-fact {
+    animation: season-fact-in 450ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 180ms + 150ms);
   }
 
   .season-card-glow-in {
@@ -1502,7 +1566,7 @@
     transform: translateX(0);
   }
   50% {
-    transform: translateX(-2px);
+    transform: translateX(-4px);
   }
 }
 
@@ -1512,15 +1576,15 @@
     opacity: 1;
   }
   40% {
-    transform: translateY(-3px) rotate(-9deg);
+    transform: translateY(-4px) rotate(-10deg);
     opacity: 1;
   }
   55% {
-    transform: translateY(-5px) rotate(-11deg);
+    transform: translateY(-6px) rotate(-12deg);
     opacity: 1;
   }
   100% {
-    transform: translate(70px, -140px) rotate(-38deg);
+    transform: translate(90px, -180px) rotate(-40deg);
     opacity: 0;
   }
 }
@@ -1555,9 +1619,22 @@
   }
 }
 
-@keyframes season-card-charge {
+@keyframes season-card-rumble {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translate(1px, -1px) rotate(0.4deg);
+  }
+  75% {
+    transform: translate(-1px, 1px) rotate(-0.4deg);
+  }
+}
+
+@keyframes season-hint-pulse {
   50% {
-    transform: scale(1.03);
+    opacity: 0.55;
   }
 }
 
@@ -1578,6 +1655,27 @@
   100% {
     opacity: 0;
     transform: translateX(70%);
+  }
+}
+
+@keyframes season-ceremony-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  35% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes season-fact-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft, Check, Monitor, Smartphone, Swords } from "lucide-react"
@@ -11,7 +11,9 @@ import { useViewer } from "@/hooks/use-viewer"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { RarityChip } from "@/features/scout/components/RarityChip"
-import { SeasonPack } from "@/features/scout/components/SeasonPack"
+import { SeasonCardPanel } from "@/features/scout/components/SeasonCardPanel"
+import { SeasonCeremony } from "@/features/scout/components/SeasonCeremony"
+import type { CeremonyFact } from "@/features/scout/components/SeasonCeremony"
 import { SeasonPoster } from "@/features/scout/components/SeasonPoster"
 import { SeasonSnow } from "@/features/scout/components/SeasonSnow"
 import { countryName } from "@/features/scout/helpers/player-country"
@@ -25,6 +27,7 @@ import {
 import type { Season, SeasonStanding } from "@/features/scout/helpers/season"
 import { useCardDownload } from "@/features/scout/hooks/use-card-download"
 import { useSeason } from "@/features/scout/hooks/use-season"
+import { seasonPackKey, useSeasonOpenedStore } from "@/features/scout/stores/season-opened.store"
 import type { SeasonReport } from "@/features/scout/types/season.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
@@ -86,6 +89,51 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
     const timer = window.setTimeout(() => setFlurry(false), FLURRY_MS)
     return () => window.clearTimeout(timer)
   }, [flurry])
+  // The pack ceremony covers the page until the card has landed. The server always renders it, so a first
+  // visit never shows the report before the pack; it lifts at once for reduced motion and for a pack
+  // already opened in this browser.
+  const packKey = seasonPackKey(player.login, season.year)
+  const [ceremony, setCeremony] = useState<"on" | "off">("on")
+  const [landed, setLanded] = useState(false)
+  const [focusDownload, setFocusDownload] = useState(false)
+  const slotRef = useRef<HTMLDivElement>(null)
+  const markOpened = useSeasonOpenedStore((state) => state.markOpened)
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    void Promise.resolve(useSeasonOpenedStore.persist.rehydrate()).then(() => {
+      if (reduced || useSeasonOpenedStore.getState().opened[packKey]) setCeremony("off")
+    })
+  }, [packKey])
+
+  // The page stays still under the ceremony, from the top, so the card's place is where it lands.
+  useEffect(() => {
+    if (ceremony !== "on") return
+    window.scrollTo(0, 0)
+    const root = document.documentElement
+    const previous = root.style.overflow
+    root.style.overflow = "hidden"
+    return () => {
+      root.style.overflow = previous
+    }
+  }, [ceremony])
+
+  const closeCeremony = useCallback(
+    (how: "landed" | "skipped") => {
+      markOpened(packKey)
+      setLanded(how === "landed")
+      setFocusDownload(true)
+      setCeremony("off")
+    },
+    [markOpened, packKey]
+  )
+
+  const reopen = () => {
+    setLanded(false)
+    setFocusDownload(false)
+    setCeremony("on")
+  }
+
   const standingText =
     top === null ? null : `${m.season_standing_value({ pct: top })} · ${poolName(data.standing)}`
 
@@ -96,6 +144,17 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
       className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 overflow-x-clip px-4 pt-2 pb-20 outline-none sm:px-6"
     >
       <SeasonSnow count={flurry ? FLURRY_FLAKES : LIGHT_FLAKES} />
+      {ceremony === "on" ? (
+        <SeasonCeremony
+          player={data.card}
+          year={season.year}
+          voice={voice}
+          facts={ceremonyFacts(season, top, data.standing)}
+          target={slotRef}
+          onFlip={() => setFlurry(true)}
+          onClose={closeCeremony}
+        />
+      ) : null}
       <Link
         to="/{-$lang}/u/$username"
         params={{ lang, username: player.login }}
@@ -105,13 +164,16 @@ export function SeasonPage({ username, year }: SeasonPageProps) {
         {m.season_back()}
       </Link>
 
-      <div className="grid gap-8 md:grid-cols-[20rem_1fr] md:items-start">
+      <div inert={ceremony === "on"} className="grid gap-8 md:grid-cols-[20rem_1fr] md:items-start">
         <aside className="flex flex-col items-center gap-4 md:sticky md:top-6">
-          <SeasonPack
+          <SeasonCardPanel
             player={data.card}
             year={season.year}
-            voice={voice}
-            onOpen={() => setFlurry(true)}
+            waiting={ceremony === "on"}
+            arrived={landed}
+            focusDownload={focusDownload}
+            slotRef={slotRef}
+            onReopen={reopen}
             actions={
               <>
                 <Button
@@ -460,6 +522,33 @@ function poolName(standing: SeasonStanding): string {
     case "all":
       return m.season_pool_all()
   }
+}
+
+/** The season's headline numbers, counted up under the card once it turns over. */
+function ceremonyFacts(
+  season: Season,
+  top: number | null,
+  standing: SeasonStanding
+): CeremonyFact[] {
+  const plain = (value: number) => number(value)
+  return [
+    {
+      label: m.season_weeks(),
+      value: season.activeWeeks,
+      format: (value) => `${value}/${season.weeks.length}`
+    },
+    { label: m.season_contributions(), value: season.contributions, format: plain },
+    { label: m.season_streak(), value: season.longestStreak, format: plain },
+    ...(top === null
+      ? []
+      : [
+          {
+            label: poolName(standing),
+            value: top,
+            format: (value: number) => m.season_standing_value({ pct: Math.max(1, value) })
+          }
+        ])
+  ]
 }
 
 /** "Top N%": the share of the pool at or above the player, never shown as 0. Null for an empty pool. */
