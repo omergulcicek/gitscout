@@ -46,6 +46,13 @@ type SeasonCeremonyProps = {
   onClose: (how: "landed" | "skipped") => void
 }
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+}
+
 /** The card's scale for this screen: as large as fits, up to 1.4×. */
 function fitScale(): number {
   const chrome = window.innerWidth >= 640 ? CHROME_WIDE : CHROME_NARROW
@@ -78,6 +85,8 @@ export function SeasonCeremony({
   const [scale, setScale] = useState<number | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
+  const skipRef = useRef<HTMLButtonElement>(null)
+  const openRef = useRef<HTMLButtonElement>(null)
   const continueRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -127,18 +136,39 @@ export function SeasonCeremony({
   }, [stage])
 
   useEffect(() => {
-    if (stage === "facts") continueRef.current?.focus()
+    if (stage === "sealed") {
+      openRef.current?.focus()
+      return
+    }
+    if (stage === "facts") {
+      continueRef.current?.focus()
+      return
+    }
+    // Opening the pack disables/unmounts the trigger buttons, so move lost focus to Skip.
+    const active = document.activeElement
+    if (
+      !rootRef.current?.contains(active) ||
+      (active instanceof HTMLButtonElement && active.disabled)
+    ) {
+      skipRef.current?.focus()
+    }
   }, [stage])
+
+  // Escape always dismisses the modal even before focus settles inside the dialog.
+  useEffect(() => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape") return
+      event.preventDefault()
+      onClose("skipped")
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [onClose])
 
   const open = () => setStage("charge")
 
-  // A modal: Esc skips, and Tab stays inside.
+  // A modal: Tab stays inside.
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape") {
-      event.preventDefault()
-      onClose("skipped")
-      return
-    }
     if (event.key !== "Tab") return
     const focusable = Array.from(
       rootRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled)") ?? []
@@ -169,7 +199,7 @@ export function SeasonCeremony({
       className="season-ceremony fixed inset-0 z-30 flex flex-col items-center overflow-hidden bg-background"
     >
       <div className="season-ceremony-chrome relative z-10 flex h-14 w-full shrink-0 items-center justify-end px-4">
-        <Button variant="ghost" size="sm" onClick={() => onClose("skipped")}>
+        <Button ref={skipRef} variant="ghost" size="sm" onClick={() => onClose("skipped")}>
           <X aria-hidden />
           {m.season_pack_skip()}
         </Button>
@@ -218,7 +248,7 @@ export function SeasonCeremony({
         {stage === "sealed" ? (
           <>
             <p className="text-sm text-muted-foreground">{m.season_ceremony_open_hint()}</p>
-            <Button variant="outline" onClick={open}>
+            <Button ref={openRef} variant="outline" onClick={open}>
               {m.season_pack_open()}
             </Button>
           </>
@@ -272,15 +302,23 @@ function CountUp({
 
   useEffect(() => {
     let frame = 0
-    const timer = window.setTimeout(() => {
-      const started = performance.now()
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - started) / COUNT_MS)
-        setShown(Math.round(value * (1 - (1 - t) ** 3)))
-        if (t < 1) frame = window.requestAnimationFrame(tick)
-      }
-      frame = window.requestAnimationFrame(tick)
-    }, delay)
+    const reduce = prefersReducedMotion()
+    const timer = window.setTimeout(
+      () => {
+        if (reduce) {
+          setShown(value)
+          return
+        }
+        const started = performance.now()
+        const tick = (now: number) => {
+          const t = Math.min(1, (now - started) / COUNT_MS)
+          setShown(Math.round(value * (1 - (1 - t) ** 3)))
+          if (t < 1) frame = window.requestAnimationFrame(tick)
+        }
+        frame = window.requestAnimationFrame(tick)
+      },
+      reduce ? 0 : delay
+    )
     return () => {
       window.clearTimeout(timer)
       window.cancelAnimationFrame(frame)

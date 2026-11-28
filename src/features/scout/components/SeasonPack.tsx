@@ -275,6 +275,12 @@ function Shards({ login, year, voice }: { login: string; year: number; voice: "o
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
+    if (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return
+    }
     // The pack is scaled to the screen: the floor and walls are measured in its own, unscaled pixels.
     const rect = root.getBoundingClientRect()
     const scale = rect.width / PACK_W || 1
