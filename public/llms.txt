@@ -29,7 +29,7 @@ Medium:
 Full:
 
 ```html
-<a href="https://gitscout.io/u/<username>"><img src="https://gitscout.io/badge/<username>.png?size=full" alt="Gitscout" width="316"></a>
+<a href="https://gitscout.io/u/<username>"><img src="https://gitscout.io/badge/<username>.png?size=full" alt="Gitscout" width="320"></a>
 ```
 
 ### Language

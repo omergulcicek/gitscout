@@ -105,8 +105,8 @@ export function rarityLabel(rarity: Rarity, locale?: Locale): string {
   return RARITY_LABELS[rarity]({}, { locale })
 }
 
-export function clubLabel(club: string | null): string {
-  return club ?? m.club_free_agent()
+export function clubLabel(club: string | null, locale?: Locale): string {
+  return club ?? m.club_free_agent({}, { locale })
 }
 
 const BADGE_NAMES = {

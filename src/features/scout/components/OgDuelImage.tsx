@@ -4,6 +4,7 @@ import { OG_FONT_FAMILY } from "@/lib/og-image"
 
 import { OgLink } from "@/features/scout/components/OgLink"
 import { OgPlayerCard } from "@/features/scout/components/OgPlayerCard"
+import { drawableName } from "@/features/scout/helpers/card-name"
 import { computeDuel } from "@/features/scout/helpers/duel"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -29,7 +30,8 @@ type OgDuelImageProps = {
 
 export function OgDuelImage({ left, right, leftAvatar, rightAvatar }: OgDuelImageProps) {
   const { score, winner, decidedBy } = computeDuel(left, right)
-  const winnerName = winner === "left" ? left.name : winner === "right" ? right.name : null
+  const winnerPlayer = winner === "left" ? left : winner === "right" ? right : null
+  const winnerName = winnerPlayer ? drawableName(winnerPlayer.name, winnerPlayer.login) : null
 
   return (
     <div

@@ -2,6 +2,7 @@ import { OG_FONT_FAMILY } from "@/lib/og-image"
 
 import { OgLink } from "@/features/scout/components/OgLink"
 import { OgPlayerCard, RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
+import { drawableName, fitCardName } from "@/features/scout/helpers/card-name"
 import { rarityLabel } from "@/features/scout/helpers/player-text"
 import type { ScoredPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -15,6 +16,7 @@ type OgImageProps = { player: ScoredPlayer; avatar: string | null }
 
 export function OgImage({ player, avatar }: OgImageProps) {
   const colors = RARITY_COLORS[player.rarity]
+  const name = fitCardName(drawableName(player.name, player.login), "full")
 
   return (
     <div
@@ -49,22 +51,19 @@ export function OgImage({ player, avatar }: OgImageProps) {
         <div
           style={{
             display: "flex",
-            fontSize: nameSize(player.name),
+            fontSize: nameSize(name),
             fontWeight: 800,
             lineHeight: 1.1,
             letterSpacing: -0.5,
             maxWidth: 620
           }}
         >
-          {player.name}
+          {name}
         </div>
         <div style={{ display: "flex", fontSize: 24, color: "#a3a3a3" }}>
           {m.og_meta({ rarity: rarityLabel(player.rarity), position: player.position })}
         </div>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22, marginTop: 18 }}
-        >
-          <span>{m.cta_title()}</span>
+        <div style={{ display: "flex", marginTop: 18 }}>
           <OgLink />
         </div>
       </div>

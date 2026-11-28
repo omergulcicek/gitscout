@@ -8,6 +8,7 @@ import { GithubMark } from "@/components/shared/GithubMark"
 import { PlayerCard } from "@/features/scout/components/PlayerCard"
 import { PlayerCombobox } from "@/features/scout/components/PlayerCombobox"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
+import { fitCardName } from "@/features/scout/helpers/card-name"
 import type { DuelSide } from "@/features/scout/helpers/duel"
 import { statShort } from "@/features/scout/helpers/player-text"
 import type { ListPlayer } from "@/features/scout/types/player.types"
@@ -229,8 +230,8 @@ function MiniCard({ player }: { player: ListPlayer }) {
           height={64}
           className="scout-card-avatar size-16 rounded-full bg-muted"
         />
-        <span className="line-clamp-2 w-full text-center font-sans text-sm font-semibold break-words">
-          {player.name}
+        <span className="line-clamp-2 w-full text-center text-sm font-semibold break-words">
+          {fitCardName(player.name, "full")}
         </span>
       </div>
     </div>

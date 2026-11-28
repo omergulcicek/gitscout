@@ -4,8 +4,10 @@ import { avatarSrc } from "@/helpers/avatar-src"
 
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { STAT_TIER_TEXT } from "@/features/scout/constants/stat-tier.constants"
+import { fitCardName } from "@/features/scout/helpers/card-name"
 import { statShort, titleText } from "@/features/scout/helpers/player-text"
 import { statTier } from "@/features/scout/helpers/stat-tier"
+import { VerifiedMark } from "@/features/scout/icons/VerifiedMark"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 
@@ -61,7 +63,12 @@ export function PlayerCardMedium({ player, className }: PlayerCardMediumProps) {
         </div>
 
         <div aria-hidden className="relative mt-2.5 flex min-w-0 flex-col">
-          <span className="truncate text-sm leading-tight font-semibold">{player.name}</span>
+          <span className="flex min-w-0 items-center gap-1">
+            <span className="truncate text-sm leading-tight font-semibold">
+              {fitCardName(player.name, "medium")}
+            </span>
+            {player.verified ? <VerifiedMark size={14} color="var(--card-verified)" /> : null}
+          </span>
           <span className="scout-card-muted mt-0.5 truncate text-[11px]">
             {titleText(player.title)}
           </span>

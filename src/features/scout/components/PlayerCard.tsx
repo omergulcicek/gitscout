@@ -13,6 +13,7 @@ import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-fl
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
 import { STAT_TIER_TEXT } from "@/features/scout/constants/stat-tier.constants"
 import { TEAM_THEMES } from "@/features/scout/constants/team-theme.constants"
+import { fitCardName } from "@/features/scout/helpers/card-name"
 import { countryName, playerCountry } from "@/features/scout/helpers/player-country"
 import {
   badgeName,
@@ -30,6 +31,7 @@ import { ProgrammersDayDecorations } from "@/features/scout/icons/ProgrammersDay
 import { RepublicDayDecorations } from "@/features/scout/icons/RepublicDayDecorations"
 import { TeamCrest } from "@/features/scout/icons/TeamCrest"
 import { TeamDecorations } from "@/features/scout/icons/TeamDecorations"
+import { VerifiedMark } from "@/features/scout/icons/VerifiedMark"
 import { WomensDayDecorations } from "@/features/scout/icons/WomensDayDecorations"
 import type { CardOccasion } from "@/features/scout/types/card-preview.types"
 import type { ListPlayer } from "@/features/scout/types/player.types"
@@ -147,8 +149,8 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
           )}
         </div>
 
-        {/* Kart sabit yükseklikte: ad iki satıra sarılınca alt satır taşmasın diye boşluğu avatar küçülerek verir. */}
-        <div className="relative mt-3 flex h-38 min-h-0 shrink justify-center">
+        {/* The avatar keeps one size on every card; the name below always has room for two lines. */}
+        <div className="relative mt-3 flex h-31 shrink-0 justify-center">
           <img
             src={avatarSrc(player.avatarUrl, 152)}
             alt={m.avatar_alt({ name: player.name })}
@@ -160,12 +162,17 @@ export function PlayerCard({ player, ref, occasion }: PlayerCardProps) {
         </div>
 
         <div className="relative mt-4 flex flex-col items-center text-center">
-          <p
-            lang={TURKISH_CHARS.test(player.name) ? "tr" : "en"}
-            className="line-clamp-2 text-xl leading-tight font-semibold text-balance"
-          >
-            {player.name}
-          </p>
+          <div className="flex min-h-[2lh] items-center justify-center gap-1.5 text-xl leading-tight">
+            <p
+              lang={TURKISH_CHARS.test(player.name) ? "tr" : "en"}
+              className="line-clamp-2 font-semibold text-balance"
+            >
+              {fitCardName(player.name, "full")}
+            </p>
+            {player.verified ? (
+              <VerifiedMark size={18} color="var(--card-verified)" label={m.verified_label()} />
+            ) : null}
+          </div>
           {/* Doğum günü kartında unvanın yerini kutlama alır: kartın ne olduğunu tek bakışta söyler. */}
           {special ? (
             <p className="scout-card-accent mt-1 line-clamp-1 text-xs font-semibold">

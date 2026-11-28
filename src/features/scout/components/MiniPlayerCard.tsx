@@ -6,6 +6,7 @@ import { avatarSrc } from "@/helpers/avatar-src"
 import { getLangParam } from "@/helpers/localized-url"
 
 import { COUNTRY_FLAGS, FLAG_CLASS } from "@/features/scout/constants/country-flag.constants"
+import { fitCardName } from "@/features/scout/helpers/card-name"
 import { isGithubStar } from "@/features/scout/helpers/github-star"
 import { countryName, playerCountry } from "@/features/scout/helpers/player-country"
 import type { ListPlayer } from "@/features/scout/types/player.types"
@@ -13,11 +14,13 @@ import * as m from "@/paraglide/messages.js"
 
 type MiniPlayerCardProps = {
   player: ListPlayer
+  /** Off where every card shares a country, such as a country page: the same flag on each adds nothing. */
+  showFlag?: boolean
 }
 
 /** A small card linking to a profile, used by the card strips. */
-export function MiniPlayerCard({ player }: MiniPlayerCardProps) {
-  const country = playerCountry(player)
+export function MiniPlayerCard({ player, showFlag = true }: MiniPlayerCardProps) {
+  const country = showFlag ? playerCountry(player) : undefined
   const Flag = country ? COUNTRY_FLAGS[country] : undefined
   return (
     <Link
@@ -55,7 +58,9 @@ export function MiniPlayerCard({ player }: MiniPlayerCardProps) {
           loading="lazy"
           className="size-12 rounded-full bg-muted"
         />
-        <span className="w-full truncate text-center text-xs font-semibold">{player.name}</span>
+        <span className="w-full truncate text-center text-xs font-semibold">
+          {fitCardName(player.name, "mini")}
+        </span>
         <span className="font-mono text-lg leading-none font-bold tabular-nums">{player.ovr}</span>
       </span>
     </Link>

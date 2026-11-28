@@ -548,6 +548,15 @@
     color: var(--card-muted);
   }
 
+  /* The verified seal on the card: the site's verified blue, lighter on the dark Icon face. */
+  .scout-card {
+    --card-verified: #0089d0;
+  }
+
+  .scout-card[data-rarity="icon"] {
+    --card-verified: #3cbbf9;
+  }
+
   .scout-card-chip {
     color: var(--card-ink);
     background-color: color-mix(in oklab, var(--card-line) 16%, transparent);

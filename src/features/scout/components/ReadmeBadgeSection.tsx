@@ -27,7 +27,7 @@ const SIZE_LABELS = {
   full: m.readme_size_full
 } as const satisfies Record<BadgeSize, () => string>
 
-/** Tam kart önizlemesinin genişliği: README'deki 316 px, iki sütunlu düzende önizleme sütununa sığmaz. */
+/** Tam kart önizlemesinin genişliği: README'deki 320 px, iki sütunlu düzende önizleme sütununa sığmaz. */
 const FULL_PREVIEW_WIDTH = 240
 
 /** Kopyalandı işaretinin ekranda kalma süresi. */
