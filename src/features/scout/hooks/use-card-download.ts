@@ -3,13 +3,6 @@ import { useRef, useState } from "react"
 import { toCanvas } from "html-to-image"
 
 const PIXEL_RATIO = 2
-const SITE = "gitscout.io"
-
-/**
- * Rozetler sayfada açıklamalarıyla anlamlı, indirilen görselde ise ne oldukları anlaşılmıyor.
- * Bu yüzden görselde rozetler çıkarılır, yerlerine kulüp adıyla aynı satıra site adresi yazılır;
- * paylaşılan kart ek bir çerçeveye gerek kalmadan nereden geldiğini söyler.
- */
 /** SVG parçalarının rengini veren özellikler; görselde çözülmüş değerleriyle yazılır. */
 const SVG_PAINT = ["fill", "stroke"] as const
 
@@ -40,38 +33,10 @@ function freezeForCapture(node: HTMLElement): () => void {
   }
 }
 
+/** The card already prints its address in the nameplate band, so the capture is the card as shown. */
 async function renderShareCanvas(node: HTMLElement): Promise<HTMLCanvasElement> {
   const restore = freezeForCapture(node)
-  const canvas = await toCanvas(node, {
-    pixelRatio: PIXEL_RATIO,
-    cacheBust: true,
-    filter: (child) => !(child instanceof HTMLElement && child.hasAttribute("data-card-badges"))
-  }).finally(restore)
-  const context = canvas.getContext("2d")
-  if (!context) throw new Error("Tuval açılamadı")
-
-  const club = node.querySelector<HTMLElement>("[data-card-club]")
-  const row = club?.parentElement
-  if (club && row) {
-    // Ölçüler ekrandaki karttan alınır ve tuvale oranlanır; küçük ekranlardaki `zoom` da böylece hesaba katılır.
-    const cardRect = node.getBoundingClientRect()
-    const rowRect = row.getBoundingClientRect()
-    const clubRect = club.getBoundingClientRect()
-    const scale = canvas.width / cardRect.width
-    const style = getComputedStyle(club)
-
-    context.font = `${style.fontWeight} ${parseFloat(style.fontSize) * scale}px ${style.fontFamily}`
-    context.fillStyle = style.color
-    context.textAlign = "right"
-    context.textBaseline = "middle"
-    context.fillText(
-      SITE,
-      (rowRect.right - cardRect.left) * scale,
-      (clubRect.top + clubRect.height / 2 - cardRect.top) * scale
-    )
-  }
-
-  return canvas
+  return toCanvas(node, { pixelRatio: PIXEL_RATIO, cacheBust: true }).finally(restore)
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {

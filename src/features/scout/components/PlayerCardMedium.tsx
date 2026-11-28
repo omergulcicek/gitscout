@@ -3,10 +3,8 @@ import { cn } from "cn"
 import { avatarSrc } from "@/helpers/avatar-src"
 
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
-import { STAT_TIER_TEXT } from "@/features/scout/constants/stat-tier.constants"
 import { fitCardName } from "@/features/scout/helpers/card-name"
 import { statShort, titleText } from "@/features/scout/helpers/player-text"
-import { statTier } from "@/features/scout/helpers/stat-tier"
 import { VerifiedMark } from "@/features/scout/icons/VerifiedMark"
 import type { ListPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
@@ -84,14 +82,7 @@ export function PlayerCardMedium({ player, className }: PlayerCardMediumProps) {
                 <dt className="scout-card-muted text-[10px] font-semibold tracking-wider">
                   {statShort(key)}
                 </dt>
-                <dd
-                  className={cn(
-                    "font-mono text-base leading-none font-bold tabular-nums",
-                    STAT_TIER_TEXT[statTier(value)]
-                  )}
-                >
-                  {value}
-                </dd>
+                <dd className="font-mono text-base leading-none font-bold tabular-nums">{value}</dd>
               </div>
             )
           })}

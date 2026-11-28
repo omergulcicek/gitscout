@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import { CardTilt } from "@/features/scout/components/CardTilt"
 import { DuelRadar } from "@/features/scout/components/DuelRadar"
 import { GetYourCard } from "@/features/scout/components/GetYourCard"
 import { PageHeader } from "@/features/scout/components/PageHeader"
@@ -279,7 +280,9 @@ function DuelCorner({ player, isWinner, side, picker, animateIn }: DuelCornerPro
           !isWinner && "opacity-90"
         )}
       >
-        <PlayerCard player={player} />
+        <CardTilt>
+          <PlayerCard player={player} />
+        </CardTilt>
       </Link>
       <p className="text-sm text-muted-foreground">@{player.login}</p>
     </div>

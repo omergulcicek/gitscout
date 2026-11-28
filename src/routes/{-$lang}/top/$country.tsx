@@ -8,6 +8,7 @@ import { hreflangLinks } from "@/helpers/localized-url"
 import { countryTopQueryOptions } from "@/features/scout/api/players.queries"
 import { CountryTopPage } from "@/features/scout/components/CountryTopPage"
 import { LeaderboardSkeleton } from "@/features/scout/components/LeaderboardSkeleton"
+import { ogVersion } from "@/features/scout/helpers/og-version"
 import { countryName } from "@/features/scout/helpers/player-country"
 import * as m from "@/paraglide/messages.js"
 
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/{-$lang}/top/$country")({
     // The image address carries the headcount, so a new developer means a fresh preview on every platform.
     const prefix = params.lang ? `/${params.lang}` : ""
     const image = ogImageMeta(
-      `${siteConfig.url}${prefix}/og/top/${loaderData.slug}?v=${loaderData.total}`
+      `${siteConfig.url}${prefix}/og/top/${loaderData.slug}?v=${ogVersion(loaderData.total)}`
     )
     if (!loaderData.unlocked) {
       // A page still waiting for its developers stays out of search results until it opens.

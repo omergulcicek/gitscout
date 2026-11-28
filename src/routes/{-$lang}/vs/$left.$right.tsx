@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { playerQueryOptions } from "@/features/scout/api/players.queries"
 import { DuelSkeleton } from "@/features/scout/components/DuelSkeleton"
 import { DuelView } from "@/features/scout/components/DuelView"
+import { ogVersion } from "@/features/scout/helpers/og-version"
 import * as m from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/{-$lang}/vs/$left/$right")({
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/{-$lang}/vs/$left/$right")({
     // Görsel adresi iki kartın en son yenilenme tarihini taşır: biri yenilenince platformlar yeni görseli çeker.
     const [left, right] = loaderData
     const prefix = params.lang ? `/${params.lang}` : ""
-    const version = Math.max(Date.parse(left.fetchedAt), Date.parse(right.fetchedAt))
+    const version = ogVersion(Date.parse(left.fetchedAt), Date.parse(right.fetchedAt))
     const path = `${left.login}/${right.login}`
     const image = `${siteConfig.url}${prefix}/og/vs/${path}?v=${version}`
     return {

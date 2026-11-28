@@ -1,9 +1,10 @@
 /**
  * Character budgets for a name on each card size. The cards use a monospace font, so a character count
- * stands in for the width: two lines on the full card, one on the medium card, a short one on the mini card.
+ * stands in for the width. Every size keeps the name on one line, so all cards share one layout; on the
+ * full card that leaves room for the verified seal.
  */
 export const CARD_NAME_BUDGET = {
-  full: 32,
+  full: 19,
   medium: 18,
   mini: 12
 } as const
@@ -27,16 +28,18 @@ export function fitCardName(name: string, size: CardNameSize): string {
   const words = clean.split(" ")
   const first = words[0]
   const last = words.at(-1)
+  let base = clean
   if (first && last && words.length >= 3 && words.every((word) => WORD.test(word))) {
     const initials = words.slice(1, -1).map((word) => `${word.charAt(0)}.`)
     const shortened = [first, ...initials, last].join(" ")
     if (shortened.length <= budget) return shortened
-    const firstAndLast = `${first} ${last}`
-    if (firstAndLast.length <= budget) return firstAndLast
+    base = `${first} ${last}`
+    if (base.length <= budget) return base
   }
 
-  // A cut that lands right after a separator ("Serdar Dogruyol -…") drops it too.
-  return `${clean.slice(0, budget - 1).replace(/[\s\-–—|·•,:;/]+$/, "")}…`
+  // The cut keeps the start of the surname when the middle names were dropped. A cut that lands right
+  // after a separator ("Serdar Dogruyol -…") drops it too.
+  return `${base.slice(0, budget - 1).replace(/[\s\-–—|·•,:;/]+$/, "")}…`
 }
 
 /**

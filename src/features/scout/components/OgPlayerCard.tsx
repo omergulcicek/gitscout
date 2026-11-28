@@ -1,8 +1,7 @@
-import { BADGE_CARD_SIZES } from "@/features/scout/constants/badge.constants"
+import { BADGE_CARD_SIZES, BADGE_SIGNATURE } from "@/features/scout/constants/badge.constants"
 import { STAT_ORDER } from "@/features/scout/constants/scoring.constants"
-import { drawableName, drawableText, fitCardName } from "@/features/scout/helpers/card-name"
-import { clubLabel, rarityLabel, statShort, titleText } from "@/features/scout/helpers/player-text"
-import { statTier } from "@/features/scout/helpers/stat-tier"
+import { drawableName, fitCardName } from "@/features/scout/helpers/card-name"
+import { rarityLabel, statShort, titleText } from "@/features/scout/helpers/player-text"
 import { VERIFIED_ON_CARD, VerifiedMark } from "@/features/scout/icons/VerifiedMark"
 import type { ListPlayer, Rarity } from "@/features/scout/types/player.types"
 import type { Locale } from "@/paraglide/runtime.js"
@@ -55,31 +54,10 @@ export const RARITY_COLORS: Record<
   }
 }
 
-/** Kart üzerindeki istatistik renkleri: koyu (ikon) ve metal zemin için ayrı tonlar. */
-const TIER_ON_DARK = {
-  elite: "#4ade80",
-  great: "#a3e635",
-  good: "#facc15",
-  fair: "#fb923c",
-  poor: "#f87171"
-}
-const TIER_ON_METAL = {
-  elite: "#14532d",
-  great: "#365314",
-  good: "#713f12",
-  fair: "#7c2d12",
-  poor: "#7f1d1d"
-}
-
-/** Stat değerinin kart zeminine göre rengi; orta boy README kartı da aynı tonları kullanır. */
-export function ogStatColor(rarity: Rarity, value: number): string {
-  return (rarity === "icon" ? TIER_ON_DARK : TIER_ON_METAL)[statTier(value)]
-}
-
 type OgPlayerCardProps = {
   player: ListPlayer
   avatar: string | null
-  /** Sağ alt köşede kullanıcı adı yerine yazılır; README kartı site adresini taşır. */
+  /** Written in the bottom-right corner; defaults to the site's address, as on every card. */
   signature?: string
   /** Kart metinlerinin dili; verilmezse isteğin dili. Tarayıcıdaki README önizlemesi rozet dilini verir. */
   locale?: Locale
@@ -151,20 +129,34 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
           </div>
         </div>
 
-        {/* Same 124px avatar as the site card, ring included. */}
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+        {/* Same portrait as the site card: a 144px photo inside a 154px ring. */}
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
           {avatar ? (
-            <img
-              src={avatar}
-              width={114}
-              height={114}
-              style={{ borderRadius: 999, border: `5px solid ${colors.frame[1]}` }}
-            />
+            // A gap in the face colour, then a ring in the frame's metal, like the site's portrait.
+            <div
+              style={{
+                display: "flex",
+                padding: 2,
+                borderRadius: 999,
+                backgroundImage: `linear-gradient(145deg, ${colors.frame[0]}, ${colors.frame[1]})`
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  padding: 3,
+                  borderRadius: 999,
+                  backgroundColor: colors.face[0]
+                }}
+              >
+                <img src={avatar} width={144} height={144} style={{ borderRadius: 999 }} />
+              </div>
+            </div>
           ) : (
             <div
               style={{
-                width: 124,
-                height: 124,
+                width: 154,
+                height: 154,
                 borderRadius: 999,
                 backgroundColor: colors.muted
               }}
@@ -179,8 +171,7 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
             justifyContent: "center",
             alignItems: "center",
             gap: 6,
-            minHeight: 50,
-            marginTop: 16,
+            marginTop: 20,
             fontSize: 20,
             fontWeight: 700,
             lineHeight: 1.25,
@@ -201,7 +192,7 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
             color: colors.muted
           }}
         >
-          {titleText(player.title, locale)}
+          @{player.login}
         </div>
 
         <div
@@ -231,8 +222,7 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
               <div
                 style={{
                   fontSize: 19,
-                  fontWeight: 700,
-                  color: ogStatColor(player.rarity, player.stats[key].value)
+                  fontWeight: 700
                 }}
               >
                 {String(player.stats[key].value)}
@@ -246,7 +236,7 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
             display: "flex",
             marginTop: "auto",
             justifyContent: "space-between",
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 700,
             letterSpacing: 1
           }}
@@ -254,15 +244,15 @@ export function OgPlayerCard({ player, avatar, signature, locale }: OgPlayerCard
           <div
             style={{
               display: "block",
-              maxWidth: 150,
+              maxWidth: 200,
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis"
             }}
           >
-            {drawableText(clubLabel(player.club, locale)).toUpperCase()}
+            {titleText(player.title, locale)}
           </div>
-          <div style={{ display: "flex" }}>{signature ?? `@${player.login}`}</div>
+          <div style={{ display: "flex" }}>{signature ?? BADGE_SIGNATURE}</div>
         </div>
       </div>
     </div>

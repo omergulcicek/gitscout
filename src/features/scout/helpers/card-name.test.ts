@@ -13,9 +13,8 @@ describe("fitCardName", () => {
   })
 
   it("keeps the surname when two long names share a first name", () => {
-    expect(fitCardName("Maximilian Alexander von Hohenzollern", "full")).toBe(
-      "Maximilian A. v. Hohenzollern"
-    )
+    expect(fitCardName("Maximilian Alexander von Hohenzollern", "full")).toBe("Maximilian Hohenzo…")
+    expect(fitCardName("David Heinemeier Hansson", "full")).toBe("David H. Hansson")
   })
 
   it("cuts names with separators instead of shortening their parts", () => {

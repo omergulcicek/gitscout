@@ -10,6 +10,7 @@ import { playerQueryOptions } from "@/features/scout/api/players.queries"
 import { AddPlayerForm } from "@/features/scout/components/AddPlayerForm"
 import { PlayerDetail } from "@/features/scout/components/PlayerDetail"
 import { PlayerDetailSkeleton } from "@/features/scout/components/PlayerDetailSkeleton"
+import { ogVersion } from "@/features/scout/helpers/og-version"
 import * as m from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/{-$lang}/u/$username")({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/{-$lang}/u/$username")({
 
     // Görsel adresi kartın yenilenme tarihini taşır: kart yenilenince platformlar yeni görseli çeker.
     const prefix = params.lang ? `/${params.lang}` : ""
-    const version = Date.parse(loaderData.fetchedAt)
+    const version = ogVersion(Date.parse(loaderData.fetchedAt))
     const image = `${siteConfig.url}${prefix}/og/${loaderData.login}?v=${version}`
     const description = m.og_description({ name: loaderData.name, ovr: loaderData.ovr })
     return {
