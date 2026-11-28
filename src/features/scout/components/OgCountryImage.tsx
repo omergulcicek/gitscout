@@ -3,34 +3,55 @@ import * as FLAG_SVGS from "country-flag-icons/string/3x2"
 import { OG_FONT_FAMILY } from "@/lib/og-image"
 
 import { OgLink } from "@/features/scout/components/OgLink"
-import { OgPlayerCardMedium } from "@/features/scout/components/OgPlayerCardMedium"
+import { RARITY_COLORS } from "@/features/scout/components/OgPlayerCard"
 import type { CountryCode } from "@/features/scout/constants/player-country.constants"
 import { countryName } from "@/features/scout/helpers/player-country"
-import type { CountryTop } from "@/features/scout/types/player.types"
+import type { CountryTop, RankedPlayer } from "@/features/scout/types/player.types"
 import * as m from "@/paraglide/messages.js"
 import { getLocale } from "@/paraglide/runtime.js"
 
 /**
- * Link preview for a country page (1200×630). An open page shows its top four as cards; a page still
- * short of developers shows how close it is and who is there so far, so an invite link explains itself.
- * Drawn with Satori: flex layout and inline styles only.
+ * Link preview for a country page (1200×630): the country's developers as faces, biggest at the top of
+ * the ranking and smaller further down, so "top 100" reads as a crowd rather than four cards. The same
+ * layout serves open and locked countries. Drawn with Satori: flex layout and inline styles only.
  */
 
 const GOLD = "#f6d77c"
 const MUTED = "#a3a3a3"
-/** How many of the open page's top players get a card. */
-export const OG_COUNTRY_CARDS = 4
-/** How many avatars a locked page shows. */
-export const OG_COUNTRY_AVATARS = 10
+
+/**
+ * Rows of faces from the top of the ranking down: how many fit in each row and how big they are.
+ * The first row also shows ratings and names. Satori adds the ring to the size, so the counts are
+ * worked out with it to stay inside the 1056px between the safe margins.
+ */
+const TIERS = [
+  { count: 4, size: 112, gap: 12 },
+  { count: 14, size: 60, gap: 10 },
+  { count: 17, size: 48, gap: 10 },
+  { count: 21, size: 38, gap: 8 }
+] as const
+
+/** Width of one of the top four: the face, its ring and room for a name next to it. */
+const LEADER_WIDTH = 255
+
+/** How many faces the preview draws. */
+export const OG_COUNTRY_FACES = TIERS.reduce((sum, tier) => sum + tier.count, 0)
+
+/** Avatar size to fetch for the face at `index`: the top four are drawn big, the rest small. */
+export const ogCountryAvatarSize = (index: number) => (index < TIERS[0].count ? 224 : 120)
 
 type OgCountryImageProps = {
   top: CountryTop
-  /** Avatars of `top.players` in order, as many as the layout shows. */
+  /** Avatars of `top.players` in order, up to `OG_COUNTRY_FACES`. */
   avatars: (string | null)[]
 }
 
 export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
   const name = countryName(top.country)
+  const title = top.unlocked
+    ? m.top_country_title({ country: name, count: top.players.length })
+    : m.top_locked_title({ country: name })
+  const rows = splitIntoTiers(top.players)
 
   return (
     <div
@@ -40,131 +61,144 @@ export function OgCountryImage({ top, avatars }: OgCountryImageProps) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        gap: 28,
+        gap: 22,
         padding: "0 72px",
         backgroundColor: "#0b0b0c",
-        backgroundImage: "radial-gradient(circle at 600px 360px, #1c1c22, #0b0b0c 560px)",
+        backgroundImage: "radial-gradient(circle at 600px 330px, #1c1c22, #0b0b0c 560px)",
         color: "#fafafa",
         fontFamily: OG_FONT_FAMILY
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <Brand />
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <Flag country={top.country} />
           <div
             style={{
               display: "flex",
-              fontSize: 36,
+              fontSize: titleSize(title),
               fontWeight: 800,
-              lineHeight: 1.15,
-              letterSpacing: -0.5,
-              maxWidth: 960
+              letterSpacing: -0.5
             }}
           >
-            {top.unlocked
-              ? m.top_country_title({ country: name, count: top.players.length })
-              : m.top_locked_title({ country: name })}
+            {title}
           </div>
         </div>
       </div>
 
-      {top.unlocked ? (
-        <Podium top={top} avatars={avatars} />
-      ) : (
-        <Progress top={top} avatars={avatars} />
-      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {rows.map(({ players, size, gap, offset }, tier) => (
+          <div key={offset} style={{ display: "flex", gap, marginBottom: tier === 0 ? 8 : 0 }}>
+            {players.map((player, index) =>
+              tier === 0 ? (
+                <Leader key={player.login} player={player} avatar={avatars[index] ?? null} />
+              ) : (
+                <Face
+                  key={player.login}
+                  player={player}
+                  avatar={avatars[offset + index] ?? null}
+                  size={size}
+                />
+              )
+            )}
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 22 }}>
-        <span>{top.unlocked ? m.cta_title() : m.top_make_card()}</span>
+        <span>{m.cta_title()}</span>
         <OgLink />
       </div>
     </div>
   )
 }
 
-function Podium({ top, avatars }: OgCountryImageProps) {
-  // Left-aligned with the title; the four cards fit between the safe margins.
+/** Long country names step the title down so it stays on one line next to the flag. */
+function titleSize(title: string): number {
+  if (title.length <= 40) return 36
+  if (title.length <= 48) return 32
+  return 28
+}
+
+type TierRow = { players: RankedPlayer[]; size: number; gap: number; offset: number }
+
+function splitIntoTiers(players: RankedPlayer[]): TierRow[] {
+  const rows: TierRow[] = []
+  let offset = 0
+  for (const tier of TIERS) {
+    const row = players.slice(offset, offset + tier.count)
+    if (row.length === 0) break
+    rows.push({ players: row, size: tier.size, gap: tier.gap, offset })
+    offset += tier.count
+  }
+  return rows
+}
+
+/** One of the top four: a big face with its rating on a chip in the card's colors, the rank and name. */
+function Leader({ player, avatar }: { player: RankedPlayer; avatar: string | null }) {
+  const colors = RARITY_COLORS[player.rarity]
   return (
-    <div style={{ display: "flex", gap: 24 }}>
-      {top.players.slice(0, OG_COUNTRY_CARDS).map((player, index) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, width: LEADER_WIDTH }}>
+      <Face player={player} avatar={avatar} size={TIERS[0].size} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 123 }}>
         <div
-          key={player.login}
-          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
+          style={{
+            display: "flex",
+            alignSelf: "flex-start",
+            padding: "3px 8px",
+            borderRadius: 8,
+            fontSize: 18,
+            fontWeight: 800,
+            color: colors.ink,
+            backgroundImage: `linear-gradient(135deg, ${colors.frame[0]}, ${colors.frame[1]})`
+          }}
         >
-          <div style={{ display: "flex", fontSize: 18, fontWeight: 800, color: MUTED }}>
-            #{player.rank}
-          </div>
-          <OgPlayerCardMedium player={player} avatar={avatars[index] ?? null} signature={false} />
+          {String(player.ovr)}
         </div>
-      ))}
+        <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: MUTED }}>
+          #{player.rank}
+        </div>
+        <div
+          style={{
+            display: "block",
+            fontSize: 13,
+            fontWeight: 700,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
+          }}
+        >
+          {player.name}
+        </div>
+      </div>
     </div>
   )
 }
 
-function Progress({ top, avatars }: OgCountryImageProps) {
-  const name = countryName(top.country)
-  const missing = Math.max(0, top.min - top.total)
-  const percent = Math.min(100, Math.round((top.total / top.min) * 100))
+type FaceProps = { player: RankedPlayer; avatar: string | null; size: number }
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 26 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-        <div style={{ display: "flex", fontSize: 72, fontWeight: 800, color: GOLD }}>
-          {top.total}/{top.min}
-        </div>
-        {/* A fixed width: Satori lets a flexible bar run past the safe margin. */}
-        <div style={{ display: "flex", flexDirection: "column", width: 740, gap: 14 }}>
-          <div
-            style={{
-              display: "flex",
-              height: 14,
-              borderRadius: 999,
-              backgroundColor: "#262626"
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                width: `${percent}%`,
-                height: 14,
-                borderRadius: 999,
-                backgroundColor: GOLD
-              }}
-            />
-          </div>
-          <div style={{ display: "flex", fontSize: 22, color: "#d8d8d8" }}>
-            {m.top_missing({ missing, country: name })}
-          </div>
-        </div>
-      </div>
-      {/* Faces of the developers already there make the invite feel like joining people, not a counter. */}
-      <div style={{ display: "flex", gap: 12 }}>
-        {top.players.slice(0, OG_COUNTRY_AVATARS).map((player, index) => {
-          const avatar = avatars[index]
-          return avatar ? (
-            <img
-              key={player.login}
-              src={avatar}
-              width={72}
-              height={72}
-              style={{ borderRadius: 999, border: "3px solid #2a2a2a" }}
-            />
-          ) : (
-            <div
-              key={player.login}
-              style={{
-                display: "flex",
-                width: 72,
-                height: 72,
-                borderRadius: 999,
-                backgroundColor: "#262626"
-              }}
-            />
-          )
-        })}
-      </div>
-    </div>
+/** A round face ringed in the card's color, so the crowd still shows Icon, Gold, Silver and Bronze. */
+function Face({ player, avatar, size }: FaceProps) {
+  const ring = RARITY_COLORS[player.rarity].frame[0]
+  const border = size >= 100 ? 4 : size >= 50 ? 3 : 2
+  return avatar ? (
+    <img
+      src={avatar}
+      width={size}
+      height={size}
+      style={{ borderRadius: 999, border: `${border}px solid ${ring}` }}
+    />
+  ) : (
+    <div
+      style={{
+        display: "flex",
+        width: size,
+        height: size,
+        borderRadius: 999,
+        border: `${border}px solid ${ring}`,
+        backgroundColor: "#262626"
+      }}
+    />
   )
 }
 
@@ -185,5 +219,5 @@ function Flag({ country }: { country: CountryCode }) {
   const svg = (FLAG_SVGS as Record<string, string>)[country]
   if (!svg) return null
   const src = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`
-  return <img src={src} width={60} height={40} style={{ borderRadius: 6 }} />
+  return <img src={src} width={54} height={36} style={{ borderRadius: 6 }} />
 }
